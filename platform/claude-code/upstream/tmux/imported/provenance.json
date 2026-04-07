@@ -1,0 +1,9 @@
+{
+  "upstream_repo": "oh-my-claudecode",
+  "source_commit": "2487d3878f8d25e60802940b020d5ee8774d135e",
+  "source_file": "src/team/tmux-session.ts",
+  "imported_symbols": [
+    "sanitizeName",
+    "sessionName"
+  ]
+}

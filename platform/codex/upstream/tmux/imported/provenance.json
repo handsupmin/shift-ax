@@ -1,0 +1,8 @@
+{
+  "upstream_repo": "oh-my-codex",
+  "source_commit": "fabb3ce0b96e42c20feb2940c74f2aa5addb8cee",
+  "source_file": "src/team/tmux-session.ts",
+  "imported_symbols": [
+    "sanitizeTeamName"
+  ]
+}

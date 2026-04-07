@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shift-ax.dev/schemas/pr-artifact.schema.json",
+  "title": "Shift AX PR Artifact",
+  "type": "object",
+  "required": ["version", "title", "summary", "test_evidence", "review_evidence"],
+  "properties": {
+    "version": { "type": "integer", "const": 1 },
+    "title": { "type": "string" },
+    "summary": { "type": "string" },
+    "test_evidence": { "type": "array", "items": { "type": "string" } },
+    "review_evidence": { "type": "array", "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "followups": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

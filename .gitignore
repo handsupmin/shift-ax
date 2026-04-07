@@ -1,0 +1,4 @@
+.ax/
+node_modules/
+dist/
+.omx/

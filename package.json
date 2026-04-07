@@ -1,0 +1,35 @@
+{
+  "name": "shift-ax",
+  "version": "0.1.0",
+  "description": "Agentic software delivery platform for teams that are not AX experts yet",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "ax": "./dist/scripts/ax.js",
+    "ax-bootstrap-topic": "./dist/scripts/ax-bootstrap-topic.js",
+    "ax-resolve-context": "./dist/scripts/ax-resolve-context.js",
+    "ax-review": "./dist/scripts/ax-review.js",
+    "ax-worktree-plan": "./dist/scripts/ax-worktree-plan.js",
+    "ax-platform-manifest": "./dist/scripts/ax-platform-manifest.js",
+    "ax-bootstrap-assets": "./dist/scripts/ax-bootstrap-assets.js",
+    "ax-scaffold-build": "./dist/scripts/ax-scaffold-build.js",
+    "ax-onboard-context": "./dist/scripts/ax-onboard-context.js",
+    "ax-run-request": "./dist/scripts/ax-run-request.js",
+    "ax-approve-plan": "./dist/scripts/ax-approve-plan.js",
+    "ax-finalize-commit": "./dist/scripts/ax-finalize-commit.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "ax": "node --import tsx scripts/ax.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "license": "MIT"
+}
