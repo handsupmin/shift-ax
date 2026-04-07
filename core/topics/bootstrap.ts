@@ -18,6 +18,7 @@ export interface TopicBootstrapArtifacts {
   spec: string;
   plan_review: string;
   implementation_plan: string;
+  execution_handoff: string;
   workflow_state: string;
   review_dir: string;
   final_dir: string;
@@ -102,6 +103,15 @@ export async function bootstrapTopic({
   const specContent = '# Topic Spec\n\n## Goal\n\nTBD\n';
   const planReviewContent = `${JSON.stringify({ version: 1, status: 'pending' }, null, 2)}\n`;
   const implementationPlanContent = '# Implementation Plan\n\nPending.\n';
+  const executionHandoffContent = `${JSON.stringify(
+    {
+      version: 1,
+      status: 'pending',
+      tasks: [],
+    },
+    null,
+    2,
+  )}\n`;
   const workflowStateContent = `${JSON.stringify(
     {
       version: 1,
@@ -149,6 +159,7 @@ export async function bootstrapTopic({
       implementationPlanContent,
       'utf8',
     ),
+    writeFile(join(topicDir, artifacts.execution_handoff), executionHandoffContent, 'utf8'),
     writeFile(join(topicDir, artifacts.workflow_state), workflowStateContent, 'utf8'),
     writeFile(join(topicDir, artifacts.commit_message), commitMessageContent, 'utf8'),
     writeFile(join(topicDir, artifacts.commit_state), commitStateContent, 'utf8'),

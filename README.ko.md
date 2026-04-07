@@ -70,9 +70,9 @@ npm run ax -- run-request --request "Build safer auth refresh flow"
 
 - `.ax/topics/<topic-slug>/`
 - `.ax/worktrees/<topic-slug>/`
-- request / summary / brainstorm / spec / workflow-state / review / finalization 아티팩트
+- request / summary / brainstorm / spec / `execution-handoff.json` / workflow-state / review / finalization 아티팩트
 
-이후 사람의 계획 리뷰 게이트에서 멈춥니다.
+기본적으로 이 단계에서 planning interview를 먼저 수행한 뒤 planning 아티팩트를 쓰고, 이후 사람의 계획 리뷰 게이트에서 멈춥니다.
 
 ### 4. 계획 승인 기록
 
@@ -93,14 +93,18 @@ npm run ax -- run-request \
   --verify-command "npm run build"
 ```
 
-리뷰 게이트가 통과되면 Shift AX가 아래 위치에 Lore 형식 커밋 메시지를 자동 생성합니다.
+리뷰 게이트가 통과되면 Shift AX가 Lore 형식 커밋 메시지를 자동 생성하고, 기본적으로 로컬 커밋까지 자동으로 생성합니다.
 
 - `.ax/topics/<topic-slug>/final/commit-message.md`
+- `.ax/topics/<topic-slug>/execution-handoff.json`
 
-### 6. 로컬 커밋 finalization
+사람이 마지막 커밋 단계를 일부러 붙잡고 싶을 때만 `--no-auto-commit`을 사용합니다.
 
 ```bash
-npm run ax -- finalize-commit --topic .ax/topics/<topic-slug>
+npm run ax -- run-request \
+  --topic .ax/topics/<topic-slug> \
+  --resume \
+  --no-auto-commit
 ```
 
 ## 필수 사람 검토 중단 트리거

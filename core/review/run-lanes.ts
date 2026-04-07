@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -36,6 +37,80 @@ function verdictBase(
     summary,
     ...(issues.length > 0 ? { issues } : {}),
   };
+}
+
+function tokenizeReviewWords(value: string): string[] {
+  return String(value || '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 4)
+    .filter((token) => !['that', 'this', 'with', 'from', 'into', 'when', 'then', 'keep'].includes(token));
+}
+
+function parseMarkdownSections(content: string): Map<string, string> {
+  const lines = String(content || '').split(/\r?\n/);
+  const sections = new Map<string, string>();
+  let current: string | null = null;
+  const buffer: string[] = [];
+
+  const flush = () => {
+    if (current) {
+      sections.set(current, buffer.join('\n').trim());
+      buffer.length = 0;
+    }
+  };
+
+  for (const line of lines) {
+    const match = line.match(/^##\s+(.+)$/);
+    if (match) {
+      flush();
+      current = match[1]!.trim();
+      continue;
+    }
+    if (current) {
+      buffer.push(line);
+    }
+  }
+
+  flush();
+  return sections;
+}
+
+function hasTokenOverlap(content: string, reference: string): boolean {
+  const haystack = String(content || '').toLowerCase();
+  return tokenizeReviewWords(reference).some((token) => haystack.includes(token));
+}
+
+async function readWorkflowStateMaybe(topicDir: string): Promise<{
+  verification?: Array<{ command: string; exit_code: number }>;
+  worktree?: { worktree_path?: string };
+} | null> {
+  const raw = await readMaybe(join(topicDir, 'workflow-state.json'));
+  if (!raw) return null;
+  return JSON.parse(raw) as {
+    verification?: Array<{ command: string; exit_code: number }>;
+    worktree?: { worktree_path?: string };
+  };
+}
+
+function listChangedFiles(worktreePath: string): string[] {
+  const output = execFileSync('git', ['status', '--porcelain'], {
+    cwd: worktreePath,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+
+  return output
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.replace(/^[A-Z?]{1,2}\s+/, ''))
+    .filter(Boolean);
+}
+
+function isTestFile(path: string): boolean {
+  return /(^|\/)(tests?|__tests__)\//i.test(path) || /\.(test|spec)\.[cm]?[jt]sx?$/i.test(path);
 }
 
 function strategyPattern(value: string): RegExp {
@@ -157,6 +232,82 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
 
 async function runTestAdequacyLane(topicDir: string): Promise<ReviewVerdict> {
   const plan = await readMaybe(join(topicDir, 'implementation-plan.md'));
+  const workflow = await readWorkflowStateMaybe(topicDir);
+  const worktreePath = workflow?.worktree?.worktree_path;
+
+  if (worktreePath) {
+    const successfulTestCommand = (workflow?.verification ?? []).some(
+      (item) => item.exit_code === 0 && /\b(test|jest|vitest|pytest|go test|cargo test|phpunit|rspec)\b/i.test(item.command),
+    );
+    if (!successfulTestCommand) {
+      return verdictBase(
+        'test-adequacy',
+        'changes_requested',
+        'Verification evidence does not include a successful test command.',
+        [
+          {
+            severity: 'high',
+            message: 'Run a passing automated test command before review can approve test adequacy.',
+          },
+        ],
+      );
+    }
+
+    const changedFiles = listChangedFiles(worktreePath);
+    const changedCodeFiles = changedFiles.filter((file) => !isTestFile(file));
+    const changedTestFiles = changedFiles.filter((file) => isTestFile(file));
+
+    if (changedCodeFiles.length > 0 && changedTestFiles.length === 0) {
+      return verdictBase(
+        'test-adequacy',
+        'changes_requested',
+        'Code changed in the worktree, but no corresponding test file changes were found.',
+        [
+          {
+            severity: 'high',
+            message: 'Add or update tests for changed implementation files before review can pass.',
+          },
+        ],
+      );
+    }
+
+    if (changedTestFiles.length > 0) {
+      const [spec, brainstorm, resolvedContext] = await Promise.all([
+        readMaybe(join(topicDir, 'spec.md')),
+        readMaybe(join(topicDir, 'brainstorm.md')),
+        readMaybe(join(topicDir, 'resolved-context.json')),
+      ]);
+      const contextLabels = (() => {
+        try {
+          const parsed = JSON.parse(resolvedContext) as { matches?: Array<{ label?: string }> };
+          return (parsed.matches ?? []).map((item) => item.label).filter(Boolean).join('\n');
+        } catch {
+          return '';
+        }
+      })();
+      const desiredCoverage = [spec, brainstorm, contextLabels].join('\n');
+      const testContents = await Promise.all(
+        changedTestFiles.map((file) => readMaybe(join(worktreePath, file))),
+      );
+      const hasRelevantCoverage = testContents.some((content) =>
+        hasTokenOverlap(content, desiredCoverage),
+      );
+
+      if (!hasRelevantCoverage) {
+        return verdictBase(
+          'test-adequacy',
+          'changes_requested',
+          'Changed tests do not clearly reflect the spec, brainstorm, or domain-policy language yet.',
+          [
+            {
+              severity: 'medium',
+              message: 'Make the changed tests reference the agreed outcome, constraints, or domain-policy terms more explicitly.',
+            },
+          ],
+        );
+      }
+    }
+  }
 
   if (!/\b(test|tdd)\b/i.test(plan) || containsPlaceholder(plan)) {
     return verdictBase(
@@ -213,6 +364,7 @@ async function runConversationTraceLane(topicDir: string): Promise<ReviewVerdict
   const summary = await readMaybe(join(topicDir, 'request-summary.md'));
   const spec = await readMaybe(join(topicDir, 'spec.md'));
   const brainstorm = await readMaybe(join(topicDir, 'brainstorm.md'));
+  const plan = await readMaybe(join(topicDir, 'implementation-plan.md'));
 
   if (!request.trim() || !summary.trim() || !brainstorm.trim() || containsPlaceholder(spec)) {
     return verdictBase(
@@ -224,6 +376,38 @@ async function runConversationTraceLane(topicDir: string): Promise<ReviewVerdict
           severity: 'medium',
           message: 'A reviewable brainstorm + spec must exist before conversation trace can pass.',
         },
+      ],
+    );
+  }
+
+  const brainstormSections = parseMarkdownSections(brainstorm);
+  const missingSpecSections = ['Clarified Outcome', 'Constraints', 'Out of Scope'].filter(
+    (section) => {
+      const content = brainstormSections.get(section);
+      return content && !hasTokenOverlap(spec, content);
+    },
+  );
+  const missingPlanSections = ['Verification Expectations', 'Implementation Areas', 'Long-running Work'].filter(
+    (section) => {
+      const content = brainstormSections.get(section);
+      return content && !hasTokenOverlap(plan, content);
+    },
+  );
+
+  if (missingSpecSections.length > 0 || missingPlanSections.length > 0) {
+    return verdictBase(
+      'conversation-trace',
+      'changes_requested',
+      'The spec or implementation plan does not yet reflect all of the clarified brainstorming details.',
+      [
+        ...missingSpecSections.map((section) => ({
+          severity: 'medium' as const,
+          message: `Spec is missing clarified brainstorming details from section: ${section}.`,
+        })),
+        ...missingPlanSections.map((section) => ({
+          severity: 'medium' as const,
+          message: `Implementation plan is missing clarified brainstorming details from section: ${section}.`,
+        })),
       ],
     );
   }

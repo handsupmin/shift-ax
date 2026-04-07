@@ -61,8 +61,21 @@ test('finalizeTopicCommit creates a local git commit and records the sha', async
       'auth refresh done\n',
       'utf8',
     );
+    await writeFile(
+      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
 
-    await resumeRequestPipeline({ topicDir: started.topicDir });
+    await resumeRequestPipeline({
+      topicDir: started.topicDir,
+      verificationCommands: ['echo test'],
+    });
 
     const result = await finalizeTopicCommit({ topicDir: started.topicDir });
     const head = execFileSync('git', ['rev-parse', 'HEAD'], {
@@ -131,8 +144,21 @@ test('finalizeTopicCommit persists explicit commit messages before committing', 
       'auth refresh done\n',
       'utf8',
     );
+    await writeFile(
+      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
 
-    await resumeRequestPipeline({ topicDir: started.topicDir });
+    await resumeRequestPipeline({
+      topicDir: started.topicDir,
+      verificationCommands: ['echo test'],
+    });
 
     const explicitMessage = buildLoreCommitMessage({
       intent: 'Keep explicit finalization messages authoritative',

@@ -121,9 +121,20 @@ test('resumeRequestPipeline round-trips from approval to commit_ready when artif
       notes: 'Approved for implementation.',
     });
     await writeFile(join(started.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+    await writeFile(
+      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
 
     const resumed = await resumeRequestPipeline({
       topicDir: started.topicDir,
+      verificationCommands: ['echo test'],
     });
     const workflow = await readWorkflowState(started.topicDir);
     const commitMessage = await readFile(
@@ -190,11 +201,22 @@ test('resumeRequestPipeline records mandatory escalation triggers and blocks unt
     assert.equal(blocked.escalation?.triggers[0]?.kind, 'policy-conflict');
 
     await writeFile(join(started.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+    await writeFile(
+      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
 
     const resumed = await resumeRequestPipeline({
       topicDir: started.topicDir,
       clearEscalations: true,
       escalationResolution: 'Human reviewer accepted the policy change after follow-up.',
+      verificationCommands: ['echo test'],
     });
     const workflow = await readWorkflowState(started.topicDir);
 

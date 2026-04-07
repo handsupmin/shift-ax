@@ -22,9 +22,9 @@ Currently implemented:
 Current request-to-commit behavior:
 
 - `ax onboard-context` now supports a guided interactive interview by default and still accepts `--input <file>` for scripted onboarding. It writes tracked domain/policy docs, regenerates `docs/base-context/index.md`, and persists the shared engineering profile.
-- `ax run-request --request <text>` bootstraps a topic/worktree, resolves base context, writes brainstorming/spec/plan artifacts, and pauses at the human planning-review gate.
+- `ax run-request --request <text>` bootstraps a topic/worktree, resolves base context, runs an interactive planning interview by default, writes brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pauses at the human planning-review gate.
 - `ax approve-plan --topic <dir> --reviewer <name> --decision approve|reject` records the human planning-review decision and an approved-plan fingerprint.
-- `ax run-request --topic <dir> --resume` resumes after approval, reruns review aggregation, auto-generates a Lore-compatible commit message artifact when the topic becomes commit-ready, and accepts `--escalation <kind>:<summary>` / `--clear-escalations` to pause or resume around the three mandatory human-escalation triggers.
+- `ax run-request --topic <dir> --resume` resumes after approval, reruns review aggregation, auto-generates a Lore-compatible commit message artifact, and auto-commits by default once review passes. Use `--no-auto-commit` to stop at commit-ready for manual inspection. It also accepts `--escalation <kind>:<summary>` / `--clear-escalations` to pause or resume around the three mandatory human-escalation triggers.
 - `ax finalize-commit --topic <dir>` validates or auto-generates the Lore commit message, verifies the aggregate review gate allows commit, and writes the local commit state artifact.
 
 Current review behavior:

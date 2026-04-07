@@ -79,9 +79,9 @@ This creates:
 
 - `.ax/topics/<topic-slug>/`
 - `.ax/worktrees/<topic-slug>/`
-- request, summary, brainstorm, spec, plan-review, workflow-state, review, and finalization artifacts
+- request, summary, brainstorm, spec, plan-review, `execution-handoff.json`, workflow-state, review, and finalization artifacts
 
-The pipeline pauses at the human plan-review gate.
+By default, Shift AX now interviews for planning details before it writes the planning artifacts. The pipeline then pauses at the human plan-review gate.
 
 ### 4. Record plan approval
 
@@ -102,14 +102,20 @@ npm run ax -- run-request \
   --verify-command "npm run build"
 ```
 
-When the review gates pass, Shift AX now auto-generates a Lore-compatible commit message at:
+When the review gates pass, Shift AX now auto-generates a Lore-compatible commit message and creates the local commit automatically by default.
+
+Artifacts include:
 
 - `.ax/topics/<topic-slug>/final/commit-message.md`
+- `.ax/topics/<topic-slug>/execution-handoff.json`
 
-### 6. Finalize the local commit
+Use `--no-auto-commit` only if a human explicitly wants to hold the final commit step:
 
 ```bash
-npm run ax -- finalize-commit --topic .ax/topics/<topic-slug>
+npm run ax -- run-request \
+  --topic .ax/topics/<topic-slug> \
+  --resume \
+  --no-auto-commit
 ```
 
 ## Mandatory human-escalation triggers

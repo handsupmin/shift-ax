@@ -19,7 +19,7 @@ async function createGitRepo(): Promise<string> {
   return root;
 }
 
-async function runAx(args: string[]): Promise<{
+async function runAx(args: string[], input = ''): Promise<{
   code: number;
   stdout: string;
   stderr: string;
@@ -30,7 +30,7 @@ async function runAx(args: string[]): Promise<{
       ['--import', 'tsx', 'scripts/ax.ts', ...args],
       {
         cwd: '/Users/sangmin/sources/shift-ax',
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: ['pipe', 'pipe', 'pipe'],
       },
     );
 
@@ -50,10 +50,11 @@ async function runAx(args: string[]): Promise<{
         stderr,
       });
     });
+    child.stdin.end(input);
   });
 }
 
-test('CLI happy path covers onboard -> run-request -> approve-plan -> resume -> finalize', async () => {
+test('CLI happy path covers onboard -> run-request -> approve-plan -> resume with automatic commit', async () => {
   const root = await createGitRepo();
 
   try {
@@ -78,13 +79,24 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume -> 
     const onboarded = await runAx(['onboard-context', '--root', root, '--input', onboardingPath]);
     assert.equal(onboarded.code, 0, onboarded.stderr);
 
-    const started = await runAx([
-      'run-request',
-      '--root',
-      root,
-      '--request',
-      'Build safer auth refresh flow',
-    ]);
+    const started = await runAx(
+      [
+        'run-request',
+        '--root',
+        root,
+        '--request',
+        'Build safer auth refresh flow',
+      ],
+      [
+        'Users should stay signed in during refresh token rotation.',
+        'Auth policy applies and no schema changes are allowed.',
+        'Do not change billing or the session UI.',
+        'Verification needs auth refresh tests plus a clean build.',
+        'Auth refresh service, token store, and session middleware.',
+        'Token store migration analysis is the only long-running slice.',
+        '',
+      ].join('\n'),
+    );
     assert.equal(started.code, 0, started.stderr);
 
     const startResult = JSON.parse(started.stdout) as {
@@ -106,6 +118,16 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume -> 
     assert.equal(approved.code, 0, approved.stderr);
 
     await writeFile(join(startResult.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+    await writeFile(
+      join(startResult.worktree.worktree_path, 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
 
     const resumed = await runAx([
       'run-request',
@@ -113,16 +135,18 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume -> 
       startResult.topicDir,
       '--resume',
       '--verify-command',
-      'git status --short',
+      'echo test',
     ]);
     assert.equal(resumed.code, 0, resumed.stderr);
 
     const resumedResult = JSON.parse(resumed.stdout) as {
       workflow: { phase: string };
       aggregate: { commit_allowed: boolean };
+      finalization?: { commit_sha: string };
     };
-    assert.equal(resumedResult.workflow.phase, 'commit_ready');
+    assert.equal(resumedResult.workflow.phase, 'committed');
     assert.equal(resumedResult.aggregate.commit_allowed, true);
+    assert.ok(resumedResult.finalization?.commit_sha);
 
     const commitMessage = await readFile(
       topicArtifactPath(startResult.topicDir, 'commit_message'),
@@ -131,16 +155,6 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume -> 
     assert.match(commitMessage, /Constraint:/);
     assert.match(commitMessage, /Tested:/);
 
-    const finalized = await runAx([
-      'finalize-commit',
-      '--topic',
-      startResult.topicDir,
-    ]);
-    assert.equal(finalized.code, 0, finalized.stderr);
-
-    const finalizeResult = JSON.parse(finalized.stdout) as {
-      commit_sha: string;
-    };
     const head = execFileSync('git', ['rev-parse', 'HEAD'], {
       cwd: startResult.worktree.worktree_path,
       encoding: 'utf8',
@@ -150,7 +164,7 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume -> 
       await readFile(topicArtifactPath(startResult.topicDir, 'workflow_state'), 'utf8'),
     ) as { phase: string };
 
-    assert.equal(finalizeResult.commit_sha, head);
+    assert.equal(resumedResult.finalization?.commit_sha, head);
     assert.equal(workflowState.phase, 'committed');
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -184,13 +198,24 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
       0,
     );
 
-    const started = await runAx([
-      'run-request',
-      '--root',
-      root,
-      '--request',
-      'Build safer auth refresh flow',
-    ]);
+    const started = await runAx(
+      [
+        'run-request',
+        '--root',
+        root,
+        '--request',
+        'Build safer auth refresh flow',
+      ],
+      [
+        'Users should stay signed in during refresh token rotation.',
+        'Auth policy applies and no schema changes are allowed.',
+        'Do not change billing or the session UI.',
+        'Verification needs auth refresh tests plus a clean build.',
+        'Auth refresh service, token store, and session middleware.',
+        'Token store migration analysis is the only long-running slice.',
+        '',
+      ].join('\n'),
+    );
     assert.equal(started.code, 0, started.stderr);
     const startResult = JSON.parse(started.stdout) as {
       topicDir: string;
@@ -229,6 +254,16 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
     assert.match(blockedResume.stderr, /active escalation triggers/i);
 
     await writeFile(join(startResult.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+    await writeFile(
+      join(startResult.worktree.worktree_path, 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
 
     const cleared = await runAx([
       'run-request',
@@ -239,7 +274,7 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
       '--escalation-resolution',
       'Reviewer approved the updated approach',
       '--verify-command',
-      'git status --short',
+      'echo test',
     ]);
     assert.equal(cleared.code, 0, cleared.stderr);
 
@@ -255,7 +290,7 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
     };
 
     assert.equal(clearedResult.aggregate.commit_allowed, true);
-    assert.equal(clearedResult.workflow.phase, 'commit_ready');
+    assert.equal(clearedResult.workflow.phase, 'committed');
     assert.equal(clearedResult.workflow.escalation?.status, 'clear');
     assert.ok(clearedResult.workflow.escalation?.triggers[0]?.resolved_at);
   } finally {

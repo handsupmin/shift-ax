@@ -52,6 +52,7 @@ test('bootstrapTopic creates topic artifacts from the initial request', async ()
     assert.equal(metadata.artifacts.spec, 'spec.md');
     assert.equal(metadata.artifacts.plan_review, 'plan-review.json');
     assert.equal(metadata.artifacts.implementation_plan, 'implementation-plan.md');
+    assert.equal(metadata.artifacts.execution_handoff, 'execution-handoff.json');
     assert.equal(metadata.artifacts.workflow_state, 'workflow-state.json');
     assert.equal(metadata.artifacts.review_dir, 'review');
     assert.equal(metadata.artifacts.final_dir, 'final');
@@ -66,6 +67,9 @@ test('bootstrapTopic creates topic artifacts from the initial request', async ()
       join(result.topicDir, 'implementation-plan.md'),
       'utf8',
     );
+    const executionHandoff = JSON.parse(
+      await readFile(join(result.topicDir, 'execution-handoff.json'), 'utf8'),
+    ) as { status: string };
     const planReview = JSON.parse(
       await readFile(join(result.topicDir, 'plan-review.json'), 'utf8'),
     ) as { status: string };
@@ -82,6 +86,7 @@ test('bootstrapTopic creates topic artifacts from the initial request', async ()
     assert.match(brainstorm, /# Brainstorm/);
     assert.match(spec, /# Topic Spec/);
     assert.match(implementationPlan, /# Implementation Plan/);
+    assert.equal(executionHandoff.status, 'pending');
     assert.equal(planReview.status, 'pending');
     assert.equal(workflowState.phase, 'bootstrapped');
     assert.match(commitMessage, /# Commit Message/);

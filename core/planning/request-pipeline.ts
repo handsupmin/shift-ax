@@ -6,6 +6,7 @@ import { promisify } from 'node:util';
 
 import { resolveContextFromIndex } from '../context/index-resolver.js';
 import { ensureTopicCommitMessageArtifact } from '../finalization/commit-workflow.js';
+import { finalizeTopicCommit, type FinalizeTopicCommitResult } from '../finalization/commit-workflow.js';
 import { readProjectProfile } from '../policies/project-profile.js';
 import {
   aggregateReviewVerdicts,
@@ -31,6 +32,7 @@ import {
   recordWorkflowEscalations,
   type ShiftAxWorkflowEscalationInput,
 } from './escalation.js';
+import { writeExecutionHandoff } from './execution-handoff.js';
 import {
   hasActiveWorkflowEscalations,
   readWorkflowState,
@@ -66,6 +68,7 @@ export interface ResumeRequestPipelineInput {
   escalationTriggers?: ShiftAxWorkflowEscalationInput[];
   clearEscalations?: boolean;
   escalationResolution?: string;
+  autoCommit?: boolean;
   now?: Date;
 }
 
@@ -73,6 +76,7 @@ export interface ResumeRequestPipelineResult {
   workflow: ShiftAxWorkflowState;
   aggregate: AggregateReviewsResult;
   verification: ShiftAxWorkflowVerification[];
+  finalization?: FinalizeTopicCommitResult;
 }
 
 async function resolveRequestContext({
@@ -273,6 +277,7 @@ export async function startRequestPipeline({
     )}\n`,
     'utf8',
   );
+  await writeExecutionHandoff(topic.topicDir, now);
 
   const worktree = await createTopicWorktree({
     topicDir: topic.topicDir,
@@ -316,6 +321,7 @@ export async function resumeRequestPipeline({
   escalationTriggers = [],
   clearEscalations = false,
   escalationResolution,
+  autoCommit = false,
   now = new Date(),
 }: ResumeRequestPipelineInput): Promise<ResumeRequestPipelineResult> {
   if (clearEscalations) {
@@ -389,10 +395,22 @@ export async function resumeRequestPipeline({
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
 
+  let finalization: FinalizeTopicCommitResult | undefined;
+  if (aggregate.commit_allowed && autoCommit) {
+    finalization = await finalizeTopicCommit({
+      topicDir,
+      now,
+    });
+    workflow.phase = 'committed';
+    workflow.updated_at = now.toISOString();
+    await writeWorkflowState(topicDir, workflow);
+  }
+
   return {
     workflow,
     aggregate,
     verification,
+    ...(finalization ? { finalization } : {}),
   };
 }
 
