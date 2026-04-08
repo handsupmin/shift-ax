@@ -115,7 +115,7 @@ async function promptInteractivePlanning(
 
 async function resolveMatchedContextLabels(
   rootDir: string,
-  request: string,
+  query: string,
   indexPath?: string,
 ): Promise<string[]> {
   const effectiveIndexPath = indexPath || join(rootDir, 'docs', 'base-context', 'index.md');
@@ -126,9 +126,30 @@ async function resolveMatchedContextLabels(
   const resolved = await resolveContextFromIndex({
     rootDir,
     indexPath: effectiveIndexPath,
-    query: request,
+    query,
   });
   return resolved.matches.map((match) => match.label);
+}
+
+function buildContextResolutionQuery({
+  request,
+  brainstormContent,
+  specContent,
+  implementationPlanContent,
+}: {
+  request: string;
+  brainstormContent?: string;
+  specContent?: string;
+  implementationPlanContent?: string;
+}): string {
+  return [
+    request.trim(),
+    brainstormContent?.trim() ?? '',
+    specContent?.trim() ?? '',
+    implementationPlanContent?.trim() ?? '',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 async function main(): Promise<void> {
@@ -202,11 +223,19 @@ async function main(): Promise<void> {
     implementationPlanContent = generated.implementationPlanContent;
   }
 
+  const contextQuery = buildContextResolutionQuery({
+    request,
+    brainstormContent,
+    specContent,
+    implementationPlanContent,
+  });
+
   const result = await startRequestPipeline({
     rootDir,
     request,
     summary: readArg('--summary'),
     indexPath,
+    contextQuery,
     brainstormContent,
     specContent,
     implementationPlanContent,

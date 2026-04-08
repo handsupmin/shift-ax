@@ -55,6 +55,7 @@ export interface StartRequestPipelineInput {
   request: string;
   summary?: string;
   indexPath?: string;
+  contextQuery?: string;
   maxMatches?: number;
   brainstormContent?: string;
   specContent?: string;
@@ -93,19 +94,23 @@ export interface ResumeRequestPipelineResult {
 async function resolveRequestContext({
   rootDir,
   request,
+  contextQuery,
   indexPath = join(rootDir, 'docs', 'base-context', 'index.md'),
   maxMatches = 5,
 }: {
   rootDir: string;
   request: string;
+  contextQuery?: string;
   indexPath?: string;
   maxMatches?: number;
 }) {
+  const effectiveQuery = contextQuery?.trim() || request.trim();
+
   if (existsSync(indexPath)) {
     return resolveContextFromIndex({
       rootDir,
       indexPath,
-      query: request,
+      query: effectiveQuery,
       maxMatches,
     });
   }
@@ -113,7 +118,7 @@ async function resolveRequestContext({
   return {
     version: 1 as const,
     index_path: indexPath,
-    query: request.trim(),
+    query: effectiveQuery,
     matches: [],
     unresolved_paths: [relative(rootDir, indexPath) || indexPath],
   };
@@ -267,6 +272,7 @@ export async function startRequestPipeline({
   request,
   summary,
   indexPath,
+  contextQuery,
   maxMatches,
   brainstormContent,
   specContent,
@@ -284,6 +290,7 @@ export async function startRequestPipeline({
   const resolvedContext = await resolveRequestContext({
     rootDir,
     request,
+    contextQuery,
     indexPath,
     maxMatches,
   });

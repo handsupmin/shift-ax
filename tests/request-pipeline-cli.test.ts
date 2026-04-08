@@ -1,11 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 import { topicArtifactPath } from '../core/topics/topic-artifacts.js';
+
+const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
 async function createGitRepo(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-cli-flow-'));
@@ -29,7 +32,7 @@ async function runAx(args: string[], input = ''): Promise<{
       process.execPath,
       ['--import', 'tsx', 'scripts/ax.ts', ...args],
       {
-        cwd: '/Users/sangmin/sources/shift-ax',
+        cwd: REPO_ROOT,
         stdio: ['pipe', 'pipe', 'pipe'],
       },
     );
@@ -52,6 +55,53 @@ async function runAx(args: string[], input = ''): Promise<{
     });
     child.stdin.end(input);
   });
+}
+
+async function writeExecutionArtifacts({
+  topicDir,
+  changedFiles,
+  summary,
+}: {
+  topicDir: string;
+  changedFiles: string[];
+  summary: string;
+}): Promise<void> {
+  await mkdir(join(topicDir, 'execution-results'), { recursive: true });
+  const outputPath = join(topicDir, 'execution-results', 'task-1.json');
+  await writeFile(
+    outputPath,
+    JSON.stringify(
+      {
+        changed_files: changedFiles,
+        summary,
+      },
+      null,
+      2,
+    ),
+    'utf8',
+  );
+  await writeFile(
+    join(topicDir, 'execution-state.json'),
+    JSON.stringify(
+      {
+        version: 1,
+        overall_status: 'completed',
+        tasks: [
+          {
+            task_id: 'task-1',
+            execution_mode: 'subagent',
+            status: 'completed',
+            output_path: outputPath,
+            started_at: new Date().toISOString(),
+            completed_at: new Date().toISOString(),
+          },
+        ],
+      },
+      null,
+      2,
+    ),
+    'utf8',
+  );
 }
 
 test('CLI happy path covers onboard -> run-request -> approve-plan -> resume with automatic commit', async () => {
@@ -128,6 +178,12 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume wit
       ].join('\n'),
       'utf8',
     );
+    await writeExecutionArtifacts({
+      topicDir: startResult.topicDir,
+      changedFiles: ['feature.txt', 'auth-refresh.test.ts'],
+      summary:
+        'Updated feature.txt and auth-refresh.test.ts for the auth policy token rotation flow.',
+    });
 
     const resumed = await runAx([
       'run-request',
@@ -264,6 +320,12 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
       ].join('\n'),
       'utf8',
     );
+    await writeExecutionArtifacts({
+      topicDir: startResult.topicDir,
+      changedFiles: ['feature.txt', 'auth-refresh.test.ts'],
+      summary:
+        'Updated feature.txt and auth-refresh.test.ts for the auth policy token rotation flow.',
+    });
 
     const cleared = await runAx([
       'run-request',

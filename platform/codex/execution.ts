@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 
 import type {
   ShiftAxExecutionLaunchInput,
@@ -14,11 +15,50 @@ function shellQuote(value: string): string {
 }
 
 function buildCodexTmuxSessionName(topicSlug: string, taskId: string): string {
-  return `axexec-${sanitizeCodexTeamName(`${topicSlug}-${taskId}`)}`;
+  const topicPart = sanitizeCodexTeamName(topicSlug).slice(0, 18).replace(/-$/, '');
+  const taskPart = sanitizeCodexTeamName(taskId).slice(0, 8).replace(/-$/, '');
+  return `axexec-${topicPart}-${taskPart}`;
 }
 
 function buildCodexExecShellCommand(plan: ShiftAxExecutionTaskPlan): string {
-  return `cat ${shellQuote(plan.prompt_path)} | codex exec --full-auto -C ${shellQuote(plan.working_directory)} -o ${shellQuote(plan.output_path)} -`;
+  return `codex exec --full-auto -C ${shellQuote(plan.working_directory)} -o ${shellQuote(plan.output_path)} \"$(cat ${shellQuote(plan.prompt_path)})\"`;
+}
+
+function formatProcessError(error: unknown): string {
+  const failure = error as { message?: string; stdout?: string | Buffer; stderr?: string | Buffer };
+  const stdout =
+    typeof failure.stdout === 'string'
+      ? failure.stdout
+      : failure.stdout instanceof Buffer
+        ? failure.stdout.toString('utf8')
+        : '';
+  const stderr =
+    typeof failure.stderr === 'string'
+      ? failure.stderr
+      : failure.stderr instanceof Buffer
+        ? failure.stderr.toString('utf8')
+        : '';
+  return [failure.message ?? 'process failed', stdout.trim(), stderr.trim()]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function codexExecutionTimeoutMs(): number {
+  const parsed = Number(process.env.SHIFT_AX_CODEX_EXEC_TIMEOUT_MS || '180000');
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 180_000;
+}
+
+function clearExistingTmuxSession(sessionName: string): void {
+  try {
+    execFileSync('tmux', ['has-session', '-t', sessionName], {
+      stdio: 'pipe',
+    });
+    execFileSync('tmux', ['kill-session', '-t', sessionName], {
+      stdio: 'pipe',
+    });
+  } catch {
+    // no existing session to clear
+  }
 }
 
 export function getCodexExecutionRuntime(): ShiftAxPlatformExecutionRuntime {
@@ -120,15 +160,35 @@ export async function launchCodexExecution({
 
   for (const task of plan.tasks) {
     if (task.execution_mode === 'tmux') {
+      if (task.session_name) {
+        clearExistingTmuxSession(task.session_name);
+      }
       execFileSync(task.command[0]!, task.command.slice(1), {
         stdio: 'pipe',
       });
       continue;
     }
 
-    execFileSync('/bin/sh', ['-lc', task.shell_command], {
-      stdio: 'pipe',
-    });
+    try {
+      execFileSync(
+        'codex',
+        [
+          'exec',
+          '--full-auto',
+          '-C',
+          task.working_directory,
+          '-o',
+          task.output_path,
+          readFileSync(task.prompt_path, 'utf8'),
+        ],
+        {
+          stdio: ['ignore', 'pipe', 'pipe'],
+          timeout: codexExecutionTimeoutMs(),
+        },
+      );
+    } catch (error) {
+      throw new Error(`Codex execution failed for ${task.task_id}: ${formatProcessError(error)}`);
+    }
   }
 
   return {

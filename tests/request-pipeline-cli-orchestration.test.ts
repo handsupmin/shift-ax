@@ -68,8 +68,12 @@ test('ax run-request --resume --platform codex orchestrates execution before ver
 set -eu
 WORKDIR=""
 OUTPUT=""
+PROMPT=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    exec|--full-auto)
+      shift 1
+      ;;
     -C)
       WORKDIR="$2"
       shift 2
@@ -79,13 +83,14 @@ while [ "$#" -gt 0 ]; do
       shift 2
       ;;
     *)
+      PROMPT="$1"
       shift 1
       ;;
   esac
 done
-cat >/dev/null
+printf '%s\\n' "$PROMPT" > "$WORKDIR/prompt-captured.txt"
 printf 'codex orchestrator smoke complete.\\n' > "$WORKDIR/smoke-marker.txt"
-printf '{"status":"ok"}\\n' > "$OUTPUT"
+printf '{\"changed_files\":[\"smoke-marker.txt\",\"smoke-marker.test.js\"],\"summary\":\"Updated smoke-marker.txt and smoke-marker.test.js for the auth policy flow.\"}\\n' > "$OUTPUT"
 `,
       'utf8',
     );
