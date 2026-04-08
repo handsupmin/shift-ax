@@ -130,7 +130,7 @@ test('platform adapters expose execution launch plans for codex and claude-code'
     assert.match(claudePlan.tasks[1]!.command.join(' '), /tmux new-session/);
 
     const prompt = await readFile(codexPlan.tasks[0]!.prompt_path, 'utf8');
-    assert.match(prompt, /Shift AX Execution Task/);
+    assert.match(prompt, /You are executing Shift AX task/);
     assert.match(prompt, /Update auth refresh service/);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -283,6 +283,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 printf '%s\\n' "$PROMPT" > "$WORKDIR/prompt-captured.txt"
+pwd > "$WORKDIR/cwd-captured.txt"
 printf 'codex marker\\n' > "$WORKDIR/codex-marker.txt"
 printf 'Implemented codex task.' > "$OUTPUT"
 `,
@@ -296,6 +297,10 @@ printf 'Implemented codex task.' > "$OUTPUT"
 
     assert.equal(result.launched, true);
     assert.match(await readFile(join(worktreePath, 'prompt-captured.txt'), 'utf8'), /Update auth refresh service/);
+    assert.match(
+      (await readFile(join(worktreePath, 'cwd-captured.txt'), 'utf8')).trim(),
+      /2026-04-08-auth-refresh$/,
+    );
     assert.equal(await readFile(join(worktreePath, 'codex-marker.txt'), 'utf8'), 'codex marker\n');
     assert.equal(
       await readFile(join(topicDir, 'execution-results', 'task-1.json'), 'utf8'),
@@ -320,15 +325,10 @@ test('claude-code adapter launchExecution runs in print mode with no session per
       fakeClaude,
       `#!/bin/sh
 set -eu
-WORKDIR=""
 PROMPT=""
 NOPERSIST="0"
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --add-dir)
-      WORKDIR="$2"
-      shift 2
-      ;;
     --no-session-persistence)
       NOPERSIST="1"
       shift 1
@@ -343,8 +343,9 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 test "$NOPERSIST" = "1"
-printf '%s\\n' "$PROMPT" > "$WORKDIR/prompt-captured.txt"
-printf 'claude marker\\n' > "$WORKDIR/claude-marker.txt"
+printf '%s\\n' "$PROMPT" > "./prompt-captured.txt"
+pwd > "./cwd-captured.txt"
+printf 'claude marker\\n' > "./claude-marker.txt"
 printf 'Implemented claude task.'
 `,
       'utf8',
@@ -357,6 +358,10 @@ printf 'Implemented claude task.'
 
     assert.equal(result.launched, true);
     assert.match(await readFile(join(worktreePath, 'prompt-captured.txt'), 'utf8'), /Update auth refresh service/);
+    assert.match(
+      (await readFile(join(worktreePath, 'cwd-captured.txt'), 'utf8')).trim(),
+      /2026-04-08-auth-refresh$/,
+    );
     assert.equal(await readFile(join(worktreePath, 'claude-marker.txt'), 'utf8'), 'claude marker\n');
     assert.equal(
       await readFile(join(topicDir, 'execution-results', 'task-1.json'), 'utf8'),

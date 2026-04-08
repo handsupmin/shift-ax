@@ -26,6 +26,10 @@ export interface ShiftAxExecutionPromptArtifact {
   outputPath: string;
 }
 
+interface ResolvedContextSummary {
+  matches?: Array<{ label?: string; path?: string }>;
+}
+
 async function readArtifact(path: string): Promise<string> {
   return readFile(path, 'utf8');
 }
@@ -58,52 +62,110 @@ export async function readExecutionWorktreePath(topicDir: string): Promise<strin
   return parsed.worktree_path;
 }
 
+function parseMarkdownSections(markdown: string): Map<string, string> {
+  const sections = new Map<string, string>();
+  const lines = String(markdown || '').split(/\r?\n/);
+  let currentSection: string | null = null;
+  let buffer: string[] = [];
+
+  const flush = () => {
+    if (!currentSection) return;
+    sections.set(currentSection, buffer.join('\n').trim());
+  };
+
+  for (const line of lines) {
+    const heading = line.match(/^##\s+(.+?)\s*$/);
+    if (heading) {
+      flush();
+      currentSection = heading[1]!.trim();
+      buffer = [];
+      continue;
+    }
+
+    if (currentSection) {
+      buffer.push(line);
+    }
+  }
+
+  flush();
+  return sections;
+}
+
+function bulletizeSection(content: string | undefined, fallback?: string): string[] {
+  const items = String(content || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.replace(/^[-*]\s+/, '').trim())
+    .filter(Boolean)
+    .map((line) => (line.startsWith('- ') ? line : `- ${line}`));
+
+  if (items.length > 0) return items;
+  return fallback ? [`- ${fallback}`] : [];
+}
+
 function buildExecutionPromptContent(input: {
   request: string;
   summary: string;
   brainstorm: string;
   spec: string;
   plan: string;
+  resolvedContext: ResolvedContextSummary;
   task: ShiftAxExecutionHandoffTask;
   worktreePath: string;
 }): string {
+  const brainstormSections = parseMarkdownSections(input.brainstorm);
+  const specSections = parseMarkdownSections(input.spec);
+  const relevantDocs = (input.resolvedContext.matches ?? [])
+    .map((match) => {
+      const label = match.label?.trim();
+      const path = match.path?.trim();
+      if (!label || !path) return null;
+      return `- ${label} -> ${path}`;
+    })
+    .filter((item): item is string => Boolean(item));
+  const constraints = bulletizeSection(
+    specSections.get('Constraints') || brainstormSections.get('Constraints'),
+    'No extra constraints were recorded.',
+  );
+  const outOfScope = bulletizeSection(
+    specSections.get('Out of Scope') || brainstormSections.get('Out of Scope'),
+    'No out-of-scope items were recorded.',
+  );
+  const verification = bulletizeSection(
+    specSections.get('Verification Expectations') || brainstormSections.get('Verification Expectations'),
+    'No explicit verification expectations were recorded.',
+  );
+
   return [
-    '# Shift AX Execution Task',
+    `You are executing Shift AX task ${input.task.id} inside this worktree: ${input.worktreePath}`,
     '',
-    `- Task ID: ${input.task.id}`,
-    `- Execution Mode: ${input.task.execution_mode}`,
-    `- Worktree: ${input.worktreePath}`,
+    `Request summary: ${input.summary.trim() || input.request.trim()}`,
     '',
-    '## Request Summary',
+    `Do this task now: ${input.task.source_text.trim()}`,
     '',
-    input.summary.trim() || input.request.trim(),
+    'Relevant base-context docs to consult first if they apply:',
+    ...(relevantDocs.length > 0 ? relevantDocs : ['- No directly matched base-context docs were recorded.']),
     '',
-    '## Assigned Task',
+    'Constraints:',
+    ...constraints,
     '',
-    input.task.source_text.trim(),
+    'Out of scope:',
+    ...outOfScope,
     '',
-    '## Routing Reason',
+    'Verification expectations:',
+    ...verification,
     '',
-    input.task.reason.trim(),
+    'Execution rules:',
+    '- Read any listed base-context docs before editing when they are relevant.',
+    '- Make the file edits now; do not stop at an explanation or plan.',
+    '- Keep changes inside the assigned worktree only.',
+    '- Do not widen scope beyond the assigned task.',
+    '- If you cannot complete the edit, say exactly why.',
     '',
-    '## Constraints',
+    `Routing reason: ${input.task.reason.trim()}`,
     '',
-    '- Do not guess when the artifacts can answer.',
-    '- Follow the spec and implementation plan before making code changes.',
-    '- Keep changes inside the assigned worktree.',
-    '- Preserve the reviewed scope and out-of-scope boundaries.',
-    '',
-    '## Brainstorm',
-    '',
-    input.brainstorm.trim(),
-    '',
-    '## Spec',
-    '',
-    input.spec.trim(),
-    '',
-    '## Implementation Plan',
-    '',
-    input.plan.trim(),
+    'In your final response, briefly list changed files and tests run.',
     '',
   ].join('\n');
 }
@@ -113,7 +175,7 @@ export async function materializeExecutionPrompts(
   taskId?: string,
 ): Promise<ShiftAxExecutionPromptArtifact[]> {
   await assertResolvedContextReady(topicDir);
-  const [handoff, worktreePath, request, summary, brainstorm, spec, plan] =
+  const [handoff, worktreePath, request, summary, brainstorm, spec, plan, resolvedContextRaw] =
     await Promise.all([
       readExecutionHandoff(topicDir),
       readExecutionWorktreePath(topicDir),
@@ -122,7 +184,9 @@ export async function materializeExecutionPrompts(
       readArtifact(topicArtifactPath(topicDir, 'brainstorm')),
       readArtifact(topicArtifactPath(topicDir, 'spec')),
       readArtifact(topicArtifactPath(topicDir, 'implementation_plan')),
+      readArtifact(topicArtifactPath(topicDir, 'resolved_context')),
     ]);
+  const resolvedContext = JSON.parse(resolvedContextRaw) as ResolvedContextSummary;
 
   const tasks = taskId
     ? handoff.tasks.filter((task) => task.id === taskId)
@@ -146,6 +210,7 @@ export async function materializeExecutionPrompts(
         brainstorm,
         spec,
         plan,
+        resolvedContext,
         task,
         worktreePath,
       }).trimEnd()}\n`,

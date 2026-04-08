@@ -16,7 +16,7 @@ function shellQuote(value: string): string {
 }
 
 function buildClaudeExecShellCommand(plan: ShiftAxExecutionTaskPlan): string {
-  return `claude -p --output-format text --permission-mode bypassPermissions --no-session-persistence --add-dir ${shellQuote(plan.working_directory)} \"$(cat ${shellQuote(plan.prompt_path)})\" > ${shellQuote(plan.output_path)}`;
+  return `cd ${shellQuote(plan.working_directory)} && claude -p --output-format text --permission-mode bypassPermissions --no-session-persistence \"$(cat ${shellQuote(plan.prompt_path)})\" > ${shellQuote(plan.output_path)}`;
 }
 
 function formatProcessError(error: unknown): string {
@@ -169,11 +169,10 @@ export async function launchClaudeCodeExecution({
           '--permission-mode',
           'bypassPermissions',
           '--no-session-persistence',
-          '--add-dir',
-          task.working_directory,
           readFileSync(task.prompt_path, 'utf8'),
         ],
         {
+          cwd: task.working_directory,
           encoding: 'utf8',
           stdio: ['ignore', 'pipe', 'pipe'],
           timeout: claudeExecutionTimeoutMs(),

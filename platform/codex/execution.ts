@@ -182,6 +182,7 @@ export async function launchCodexExecution({
           readFileSync(task.prompt_path, 'utf8'),
         ],
         {
+          cwd: task.working_directory,
           stdio: ['ignore', 'pipe', 'pipe'],
           timeout: codexExecutionTimeoutMs(),
         },
