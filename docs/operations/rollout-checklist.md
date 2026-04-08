@@ -4,6 +4,8 @@
 
 Adopt Shift AX in a team without assuming prior AX expertise.
 
+Reference the detailed plan in `docs/operations/pilot-plan.md` while running this checklist.
+
 ## Phase 1 — Preconditions
 
 - [ ] Pick 1 pilot repository

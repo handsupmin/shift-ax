@@ -96,6 +96,8 @@ npm run ax -- topics-status --limit 10
 
 Use this instead of a dashboard when you only need a compact operator view.
 
+For a real team rollout, pair this guide with `docs/operations/pilot-plan.md`.
+
 ## When to use launch-execution directly
 
 Use platform launchers when you want the runtime to perform the task itself.
