@@ -1,5 +1,7 @@
 # Shift AX Internal Pilot Plan
 
+**한국어 버전:** [pilot-plan.ko.md](./pilot-plan.ko.md)
+
 ## Objective
 
 Run a controlled internal pilot that proves Shift AX can be adopted by a real team with low AX familiarity while preserving the required product behavior:

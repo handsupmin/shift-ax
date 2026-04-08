@@ -1,5 +1,7 @@
 # Shift AX Operator Guide
 
+**한국어 버전:** [operator-guide.ko.md](./operator-guide.ko.md)
+
 ## Purpose
 
 This guide is for teams operating Shift AX day to day.
@@ -96,7 +98,7 @@ npm run ax -- topics-status --limit 10
 
 Use this instead of a dashboard when you only need a compact operator view.
 
-For a real team rollout, pair this guide with `docs/operations/pilot-plan.md`.
+For a real team rollout, pair this guide with [pilot-plan.md](./pilot-plan.md).
 
 ## When to use launch-execution directly
 

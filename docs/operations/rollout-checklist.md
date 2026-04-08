@@ -1,5 +1,7 @@
 # Shift AX Rollout Checklist
 
+**한국어 버전:** [rollout-checklist.ko.md](./rollout-checklist.ko.md)
+
 ## Goal
 
 Adopt Shift AX in a team without assuming prior AX expertise.
