@@ -33,6 +33,14 @@ test('ax platform-manifest prints platform manifest for codex', async () => {
     natural_language_first: boolean;
     worktree_support: string;
     core_commands: string[];
+    execution_runtime: {
+      support: string;
+      operations: {
+        launch: {
+          command: string[];
+        };
+      };
+    };
     tmux_runtime: {
       support: string;
       workspace_mode: string;
@@ -66,6 +74,12 @@ test('ax platform-manifest prints platform manifest for codex', async () => {
   assert.ok(manifest.core_commands.includes('run-request'));
   assert.ok(manifest.core_commands.includes('approve-plan'));
   assert.ok(manifest.core_commands.includes('finalize-commit'));
+  assert.ok(manifest.core_commands.includes('launch-execution'));
+  assert.equal(manifest.execution_runtime.support, 'available');
+  assert.deepEqual(manifest.execution_runtime.operations.launch.command, [
+    'ax',
+    'launch-execution',
+  ]);
   assert.equal(manifest.tmux_runtime.support, 'imported-helpers');
   assert.equal(manifest.tmux_runtime.workspace_mode, 'leader-attached-layout');
   assert.equal(manifest.tmux_runtime.upstream_boundary.active_imports.length, 3);

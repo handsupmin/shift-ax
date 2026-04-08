@@ -107,6 +107,17 @@ npm run ax -- run-request \
   --no-auto-commit
 ```
 
+### 6. 필요하면 플랫폼 실행 명령 생성
+
+```bash
+npm run ax -- launch-execution \
+  --platform codex \
+  --topic .ax/topics/<topic-slug> \
+  --dry-run
+```
+
+이 명령은 `execution-handoff.json`을 읽어 task별 execution prompt를 만들고, Codex / Claude / tmux 실행 명령을 반환합니다.
+
 ## 필수 사람 검토 중단 트리거
 
 계획이 승인된 뒤에도 아래 상황이 생기면 Shift AX는 반드시 멈추고 사람 검토를 받아야 합니다.

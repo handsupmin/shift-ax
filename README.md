@@ -118,6 +118,17 @@ npm run ax -- run-request \
   --no-auto-commit
 ```
 
+### 6. Materialize platform launch commands when needed
+
+```bash
+npm run ax -- launch-execution \
+  --platform codex \
+  --topic .ax/topics/<topic-slug> \
+  --dry-run
+```
+
+This reads `execution-handoff.json`, writes per-task execution prompts, and returns the concrete Codex / Claude / tmux launch commands for the planned slices.
+
 ## Mandatory human-escalation triggers
 
 Even after plan approval, Shift AX must stop and request human review if any of these appear:

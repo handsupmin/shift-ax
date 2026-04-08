@@ -30,6 +30,7 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(agents, /ax onboard-context/);
     assert.match(agents, /ax run-request/);
     assert.match(prompt, /ax approve-plan/);
+    assert.match(prompt, /ax launch-execution/);
     assert.match(prompt, /ax finalize-commit/);
     assert.match(agents, /platform\/codex\/upstream\/worktree\/provenance\.md/);
     assert.match(prompt, /ensureCodexManagedWorktree/);
@@ -61,6 +62,7 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(claude, /ax onboard-context/);
     assert.match(claude, /ax run-request/);
     assert.match(hook, /ax approve-plan/);
+    assert.match(hook, /ax launch-execution/);
     assert.match(hook, /ax finalize-commit/);
     assert.match(claude, /platform\/claude-code\/upstream\/worktree\/provenance\.md/);
     assert.match(hook, /createClaudeManagedWorktree/);

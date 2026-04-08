@@ -21,9 +21,11 @@ export type ShiftAxCoreCommand =
   | 'onboard-context'
   | 'run-request'
   | 'approve-plan'
-  | 'finalize-commit';
+  | 'finalize-commit'
+  | 'launch-execution';
 export type ShiftAxWorktreeSupport = 'planned' | 'available';
 export type ShiftAxTmuxRuntimeSupport = 'planned' | 'imported-helpers';
+export type ShiftAxExecutionRuntimeSupport = 'planned' | 'available';
 
 export interface ShiftAxPlatformCommandEntrypoint {
   command: string[];
@@ -74,6 +76,43 @@ export interface ShiftAxPlatformTmuxRuntime {
   };
 }
 
+export interface ShiftAxPlatformExecutionRuntime {
+  support: ShiftAxExecutionRuntimeSupport;
+  entrypoint_style: 'cli';
+  execution_handoff_artifact: string;
+  operations: {
+    launch: ShiftAxPlatformCommandEntrypoint;
+  };
+  hosts: {
+    subagent_cli: string;
+    tmux_cli: 'tmux';
+  };
+}
+
+export interface ShiftAxExecutionTaskPlan {
+  task_id: string;
+  source_text: string;
+  execution_mode: 'subagent' | 'tmux';
+  working_directory: string;
+  prompt_path: string;
+  output_path: string;
+  command: string[];
+  shell_command: string;
+  session_name?: string;
+}
+
+export interface ShiftAxExecutionLaunchInput {
+  topicDir: string;
+  taskId?: string;
+}
+
+export interface ShiftAxExecutionLaunchResult {
+  platform: ShiftAxPlatform;
+  launched: boolean;
+  topic_dir: string;
+  tasks: ShiftAxExecutionTaskPlan[];
+}
+
 export interface ShiftAxPlatformManifest {
   platform: ShiftAxPlatform;
   integration_mode: ShiftAxIntegrationMode;
@@ -81,6 +120,7 @@ export interface ShiftAxPlatformManifest {
   worktree_support: ShiftAxWorktreeSupport;
   worktree_runtime: ShiftAxPlatformWorktreeRuntime;
   tmux_runtime: ShiftAxPlatformTmuxRuntime;
+  execution_runtime: ShiftAxPlatformExecutionRuntime;
   default_base_context_index: string;
   default_topic_root: string;
   core_commands: ShiftAxCoreCommand[];
@@ -91,6 +131,8 @@ export interface ShiftAxPlatformAdapter {
   getManifest(rootDir: string): ShiftAxPlatformManifest;
   renderBootstrapInstructions(rootDir: string): string;
   commandFor(command: ShiftAxCoreCommand): string[];
+  planExecution(input: ShiftAxExecutionLaunchInput): Promise<ShiftAxExecutionLaunchResult>;
+  launchExecution(input: ShiftAxExecutionLaunchInput): Promise<ShiftAxExecutionLaunchResult>;
   planWorktree(input: TopicWorktreePlanInput): Promise<ShiftAxWorktreePlan>;
   createWorktree(input: TopicWorktreeCreateInput): Promise<TopicWorktreeCreateResult>;
   removeWorktree(input: TopicWorktreeRemoveInput): Promise<TopicWorktreeRemoveResult>;

@@ -15,6 +15,7 @@ Currently implemented:
 - `ax-run-request.ts`
 - `ax-approve-plan.ts`
 - `ax-finalize-commit.ts`
+- `ax-launch-execution.ts`
 - `ax-platform-manifest.ts`
 - `ax-bootstrap-assets.ts`
 - `ax-scaffold-build.ts`
@@ -26,6 +27,7 @@ Current request-to-commit behavior:
 - `ax approve-plan --topic <dir> --reviewer <name> --decision approve|reject` records the human planning-review decision and an approved-plan fingerprint.
 - `ax run-request --topic <dir> --resume` resumes after approval, reruns review aggregation, auto-generates a Lore-compatible commit message artifact, and auto-commits by default once review passes. Use `--no-auto-commit` to stop at commit-ready for manual inspection. It also accepts `--escalation <kind>:<summary>` / `--clear-escalations` to pause or resume around the three mandatory human-escalation triggers.
 - `ax finalize-commit --topic <dir>` validates or auto-generates the Lore commit message, verifies the aggregate review gate allows commit, and writes the local commit state artifact.
+- `ax launch-execution --platform <codex|claude-code> --topic <dir> [--task-id <id>] [--dry-run]` materializes execution prompts from `execution-handoff.json` and returns or launches the concrete Codex / Claude / tmux commands for each task.
 
 Current review behavior:
 

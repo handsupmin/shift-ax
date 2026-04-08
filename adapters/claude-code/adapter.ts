@@ -5,6 +5,11 @@ import type {
 } from '../contracts.js';
 import { defaultBaseContextIndex, defaultTopicRoot } from '../contracts.js';
 import {
+  getClaudeCodeExecutionRuntime,
+  launchClaudeCodeExecution,
+  planClaudeCodeExecutionLaunch,
+} from '../../platform/claude-code/execution.js';
+import {
   createClaudeCodeTopicWorktree,
   getClaudeCodeWorktreeRuntime,
   planClaudeCodeTopicWorktree,
@@ -24,6 +29,7 @@ const CORE_COMMANDS: ShiftAxCoreCommand[] = [
   'run-request',
   'approve-plan',
   'finalize-commit',
+  'launch-execution',
 ];
 
 export const claudeCodeAdapter: ShiftAxPlatformAdapter = {
@@ -33,6 +39,7 @@ export const claudeCodeAdapter: ShiftAxPlatformAdapter = {
     const platformRoot = resolvePlatformRoot(rootDir);
     const worktreeRuntime = getClaudeCodeWorktreeRuntime(platformRoot);
     const tmuxRuntime = getClaudeCodeTmuxRuntime(platformRoot);
+    const executionRuntime = getClaudeCodeExecutionRuntime();
 
     return {
       platform: 'claude-code',
@@ -41,6 +48,7 @@ export const claudeCodeAdapter: ShiftAxPlatformAdapter = {
       worktree_support: worktreeRuntime.support,
       worktree_runtime: worktreeRuntime,
       tmux_runtime: tmuxRuntime,
+      execution_runtime: executionRuntime,
       default_base_context_index: defaultBaseContextIndex(platformRoot),
       default_topic_root: defaultTopicRoot(platformRoot),
       core_commands: [...CORE_COMMANDS],
@@ -59,6 +67,7 @@ export const claudeCodeAdapter: ShiftAxPlatformAdapter = {
       'If the base-context index is missing, interview the team and persist it with `ax onboard-context` (interactive) or `ax onboard-context --input <file>` before starting request work.',
       'Use `ax run-request` to bootstrap the request-scoped topic/worktree, resolve context, run the planning interview, write `execution-handoff.json`, and pause at the human planning-review gate.',
       'Use `ax approve-plan` to record the human planning-review decision, then resume with `ax run-request --topic <dir> --resume` for automatic review and commit. Add `--no-auto-commit` only when a human explicitly wants a final manual stop.',
+      'Use `ax launch-execution --platform claude-code --topic <dir> [--task-id <id>] [--dry-run]` when you need the platform-owned Claude launch commands for subagent or tmux execution from `execution-handoff.json`.',
       'If a reviewed request hits a mandatory escalation trigger, persist that stop with `ax run-request --topic <dir> --resume --escalation <kind>:<summary>` and resume only after human review with `--clear-escalations`.',
       'Use `ax finalize-commit` after `ax review --run` reports commit-ready status.',
       'Use `ax worktree-plan` to inspect the preferred branch and worktree path for a topic.',
@@ -69,6 +78,14 @@ export const claudeCodeAdapter: ShiftAxPlatformAdapter = {
 
   commandFor(command: ShiftAxCoreCommand): string[] {
     return ['ax', command];
+  },
+
+  async planExecution(input) {
+    return planClaudeCodeExecutionLaunch(input);
+  },
+
+  async launchExecution(input) {
+    return launchClaudeCodeExecution(input);
   },
 
   async planWorktree(input) {

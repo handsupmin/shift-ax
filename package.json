@@ -16,7 +16,8 @@
     "ax-onboard-context": "./dist/scripts/ax-onboard-context.js",
     "ax-run-request": "./dist/scripts/ax-run-request.js",
     "ax-approve-plan": "./dist/scripts/ax-approve-plan.js",
-    "ax-finalize-commit": "./dist/scripts/ax-finalize-commit.js"
+    "ax-finalize-commit": "./dist/scripts/ax-finalize-commit.js",
+    "ax-launch-execution": "./dist/scripts/ax-launch-execution.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

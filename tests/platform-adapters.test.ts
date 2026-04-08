@@ -62,6 +62,7 @@ test('platform adapters produce ax command routes for core flows', () => {
   assert.deepEqual(codex.commandFor('run-request'), ['ax', 'run-request']);
   assert.deepEqual(codex.commandFor('approve-plan'), ['ax', 'approve-plan']);
   assert.deepEqual(codex.commandFor('finalize-commit'), ['ax', 'finalize-commit']);
+  assert.deepEqual(codex.commandFor('launch-execution'), ['ax', 'launch-execution']);
 
   assert.deepEqual(claude.commandFor('bootstrap-topic'), ['ax', 'bootstrap-topic']);
   assert.deepEqual(claude.commandFor('resolve-context'), ['ax', 'resolve-context']);
@@ -73,6 +74,7 @@ test('platform adapters produce ax command routes for core flows', () => {
   assert.deepEqual(claude.commandFor('run-request'), ['ax', 'run-request']);
   assert.deepEqual(claude.commandFor('approve-plan'), ['ax', 'approve-plan']);
   assert.deepEqual(claude.commandFor('finalize-commit'), ['ax', 'finalize-commit']);
+  assert.deepEqual(claude.commandFor('launch-execution'), ['ax', 'launch-execution']);
 });
 
 test('platform adapters expose worktree capability metadata', () => {
@@ -112,6 +114,11 @@ test('platform adapters expose worktree capability metadata', () => {
   );
   assert.equal(codexManifest.tmux_runtime.support, 'imported-helpers');
   assert.equal(codexManifest.tmux_runtime.workspace_mode, 'leader-attached-layout');
+  assert.equal(codexManifest.execution_runtime.support, 'available');
+  assert.deepEqual(codexManifest.execution_runtime.operations.launch.command, [
+    'ax',
+    'launch-execution',
+  ]);
   assert.equal(codexManifest.tmux_runtime.upstream_boundary.active_imports.length, 3);
   assert.equal(
     codexManifest.tmux_runtime.upstream_boundary.active_imports[0].source_file,
@@ -153,6 +160,11 @@ test('platform adapters expose worktree capability metadata', () => {
   );
   assert.equal(claudeManifest.tmux_runtime.support, 'imported-helpers');
   assert.equal(claudeManifest.tmux_runtime.workspace_mode, 'detached-sessions');
+  assert.equal(claudeManifest.execution_runtime.support, 'available');
+  assert.deepEqual(claudeManifest.execution_runtime.operations.launch.command, [
+    'ax',
+    'launch-execution',
+  ]);
   assert.equal(claudeManifest.tmux_runtime.upstream_boundary.active_imports.length, 2);
   assert.equal(
     claudeManifest.tmux_runtime.upstream_boundary.active_imports[0].source_file,
