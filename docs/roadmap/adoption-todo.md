@@ -35,7 +35,7 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 
 ## Later
 
-- [ ] **Review / CI feedback reactions**
+- [x] **Review / CI feedback reactions**
   - Reopen execution automatically when downstream checks fail.
 - [ ] **Dashboard / fleet supervision**
   - Add broader session visibility only if it stays simple for non-expert teams.

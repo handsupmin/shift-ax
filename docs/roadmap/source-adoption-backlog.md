@@ -63,6 +63,7 @@ Everything adopted here must preserve two non-negotiable goals:
   - Track topic/session metadata and resumability cleanly.
 - **Reaction / event model**
   - Future-proof review/CI feedback loops.
+  - Keep the first feedback loop compact: one operator command to reopen implementation after downstream failures.
 - **Observability**
   - Keep correlation IDs, health summaries, and last-failure reasoning.
   - Provide compact operator surfaces such as `ax topic-status` instead of a heavyweight dashboard.

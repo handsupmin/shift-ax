@@ -23,6 +23,7 @@ export type ShiftAxCoreCommand =
   | 'run-request'
   | 'approve-plan'
   | 'sync-policy-context'
+  | 'react-feedback'
   | 'finalize-commit'
   | 'launch-execution'
   | 'topic-status';

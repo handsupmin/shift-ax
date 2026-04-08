@@ -18,6 +18,7 @@
     "ax-run-request": "./dist/scripts/ax-run-request.js",
     "ax-approve-plan": "./dist/scripts/ax-approve-plan.js",
     "ax-sync-policy-context": "./dist/scripts/ax-sync-policy-context.js",
+    "ax-react-feedback": "./dist/scripts/ax-react-feedback.js",
     "ax-finalize-commit": "./dist/scripts/ax-finalize-commit.js",
     "ax-launch-execution": "./dist/scripts/ax-launch-execution.js",
     "ax-topic-status": "./dist/scripts/ax-topic-status.js",

@@ -13,6 +13,7 @@ You are running inside a Shift AX Codex build.
 - Use `ax approve-plan` after the human reviewer signs off.
 - If the reviewed plan requires shared policy or base-context doc changes, record them first with `ax sync-policy-context --topic <dir> --summary "<what changed>" [--path <doc>]... [--entry "Label -> path"]...`.
 - Then resume with `ax run-request --topic <dir> --resume` for automatic review and commit. Use `--no-auto-commit` only when a human explicitly wants the final commit step held back.
+- If downstream review or CI fails after the topic looked ready, use `ax react-feedback --topic <dir> --kind <review-changes-requested|ci-failed> --summary "<text>"` to reopen implementation with a file-backed reaction trail.
 - Use `ax launch-execution --platform codex --topic <dir> [--task-id <id>] [--dry-run]` when you need the concrete Codex or tmux launch commands from `execution-handoff.json`.
 - Use `ax topic-status --topic <dir>` when you need a compact summary of phase, review gate, execution state, and last failure.
 - If a reviewed request hits a mandatory escalation trigger, persist that stop with `ax run-request --topic <dir> --resume --escalation <kind>:<summary>` and resume only after human review with `--clear-escalations`.

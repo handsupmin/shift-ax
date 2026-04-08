@@ -32,7 +32,11 @@ async function readJson<T>(path: string, fallback: T): Promise<T> {
 
 export async function summarizeTopicStatus(topicDir: string): Promise<ShiftAxTopicStatusSummary> {
   const [workflow, executionState, aggregate, policyContextSync, lifecycle, reactions] = await Promise.all([
-    readJson<{ topic_slug?: string; phase?: string }>(join(topicDir, 'workflow-state.json'), {}),
+    readJson<{
+      topic_slug?: string;
+      phase?: string;
+      review?: { overall_status?: string };
+    }>(join(topicDir, 'workflow-state.json'), {}),
     readJson<{ overall_status?: string }>(join(topicDir, 'execution-state.json'), {}),
     readJson<{ overall_status?: string }>(join(topicDir, 'review', 'aggregate.json'), {}),
     readJson<{ status?: 'not_needed' | 'required' | 'completed' }>(
@@ -55,7 +59,7 @@ export async function summarizeTopicStatus(topicDir: string): Promise<ShiftAxTop
   return {
     topic_slug: workflow.topic_slug ?? topicDir.split('/').pop() ?? 'unknown-topic',
     phase: workflow.phase ?? 'unknown',
-    review_status: aggregate.overall_status ?? 'unknown',
+    review_status: workflow.review?.overall_status ?? aggregate.overall_status ?? 'unknown',
     execution_status: executionState.overall_status ?? 'unknown',
     ...(policyContextSync.status ? { policy_context_status: policyContextSync.status } : {}),
     ...(lastEvent ? { last_event: lastEvent } : {}),
@@ -63,10 +67,10 @@ export async function summarizeTopicStatus(topicDir: string): Promise<ShiftAxTop
     ...(policyContextSync.status === 'required'
       ? { last_failure_reason: 'policy context sync is required before implementation can start' }
       : {}),
-    ...(lastReaction?.outcome && lastReaction.outcome !== 'approved'
-      ? { last_failure_reason: `${lastReaction.key}: ${lastReaction.outcome}` }
-      : lastEvent && /fail|blocked|changes/i.test(lastEvent.summary)
+    ...(lastEvent && /fail|blocked|changes|requested/i.test(lastEvent.summary)
         ? { last_failure_reason: lastEvent.summary }
+        : lastReaction?.outcome && lastReaction.outcome !== 'approved'
+          ? { last_failure_reason: `${lastReaction.key}: ${lastReaction.outcome}` }
         : {}),
   };
 }

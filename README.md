@@ -22,6 +22,7 @@ Shift AX adds a control plane on top of existing coding-agent runtimes so teams 
 - pause at a mandatory human plan-review gate
 - block implementation until any required shared policy/base-context doc updates have been written and recorded
 - resume with automated verification and structured review lanes
+- reopen implementation with a file-backed reaction trail when downstream review or CI fails
 - expose a compact topic-status view for the current phase, review gate, execution state, and last failure reason
 - finalize only after the gates allow a local Lore-protocol commit
 
