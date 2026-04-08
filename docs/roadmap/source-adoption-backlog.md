@@ -67,6 +67,7 @@ Everything adopted here must preserve two non-negotiable goals:
 - **Observability**
   - Keep correlation IDs, health summaries, and last-failure reasoning.
   - Provide compact operator surfaces such as `ax topic-status` instead of a heavyweight dashboard.
+  - Extend that with a compact multi-topic list (`ax topics-status`) before considering any broader dashboard.
 
 ### From claw-code
 - **Doctor-first runtime health checks**

@@ -26,7 +26,8 @@ export type ShiftAxCoreCommand =
   | 'react-feedback'
   | 'finalize-commit'
   | 'launch-execution'
-  | 'topic-status';
+  | 'topic-status'
+  | 'topics-status';
 export type ShiftAxWorktreeSupport = 'planned' | 'available';
 export type ShiftAxTmuxRuntimeSupport = 'planned' | 'imported-helpers';
 export type ShiftAxExecutionRuntimeSupport = 'planned' | 'available';

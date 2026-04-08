@@ -34,6 +34,7 @@ const CORE_COMMANDS: ShiftAxCoreCommand[] = [
   'finalize-commit',
   'launch-execution',
   'topic-status',
+  'topics-status',
 ];
 
 export const codexAdapter: ShiftAxPlatformAdapter = {
@@ -76,6 +77,7 @@ export const codexAdapter: ShiftAxPlatformAdapter = {
       'If downstream review or CI fails after the topic looked ready, use `ax react-feedback --topic <dir> --kind <review-changes-requested|ci-failed> --summary "<text>"` to reopen implementation with a file-backed reaction trail.',
       'Use `ax launch-execution --platform codex --topic <dir> [--task-id <id>] [--dry-run]` when you need the platform-owned Codex launch commands for subagent or tmux execution from `execution-handoff.json`.',
       'Use `ax topic-status --topic <dir>` for a compact summary of workflow phase, review gate, execution status, and latest failure reason.',
+      'Use `ax topics-status [--root DIR] [--limit N]` when you need a compact list of recent topics without opening a separate dashboard.',
       'If a reviewed request hits a mandatory escalation trigger, persist that stop with `ax run-request --topic <dir> --resume --escalation <kind>:<summary>` and resume only after human review with `--clear-escalations`.',
       'Use `ax finalize-commit` after `ax review --run` reports commit-ready status.',
       'Use `ax worktree-plan` to inspect the preferred branch and worktree path for a topic.',

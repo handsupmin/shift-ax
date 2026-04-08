@@ -16,6 +16,7 @@ You are running inside a Shift AX Codex build.
 - If downstream review or CI fails after the topic looked ready, use `ax react-feedback --topic <dir> --kind <review-changes-requested|ci-failed> --summary "<text>"` to reopen implementation with a file-backed reaction trail.
 - Use `ax launch-execution --platform codex --topic <dir> [--task-id <id>] [--dry-run]` when you need the concrete Codex or tmux launch commands from `execution-handoff.json`.
 - Use `ax topic-status --topic <dir>` when you need a compact summary of phase, review gate, execution state, and last failure.
+- Use `ax topics-status [--root DIR] [--limit N]` when you need a compact multi-topic view without leaving the CLI.
 - If a reviewed request hits a mandatory escalation trigger, persist that stop with `ax run-request --topic <dir> --resume --escalation <kind>:<summary>` and resume only after human review with `--clear-escalations`.
 - Use `ax worktree-plan` to inspect the preferred branch/worktree path for the topic.
 - Use `ax worktree-create` before implementation begins and `ax worktree-remove` when the topic worktree should be torn down.
