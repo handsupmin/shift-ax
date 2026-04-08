@@ -16,6 +16,7 @@ Shift AX adds a control plane on top of existing coding-agent runtimes so teams 
 - generate a domain glossary from discovered docs and vocabulary
 - resolve relevant context before planning or implementation
 - recall similar completed topics as supporting context after authoritative docs have been checked
+- keep a lightweight file-backed register of important decisions and when they became valid
 - create a request-scoped topic directory and git worktree
 - pause at a mandatory human plan-review gate
 - resume with automated verification and structured review lanes

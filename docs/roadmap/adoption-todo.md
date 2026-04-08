@@ -22,7 +22,7 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 
 - [x] **Past-topic recall helper**
   - Add a file-backed memory layer for previous topic artifacts, subordinate to authoritative docs.
-- [ ] **Decision register with validity windows**
+- [x] **Decision register with validity windows**
   - Track major decisions, effective dates, and replacements.
 - [ ] **Lifecycle / reaction layer**
   - Add event-driven feedback loops for failed reviews, blocked execution, and future CI handling.

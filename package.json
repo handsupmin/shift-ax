@@ -18,7 +18,8 @@
     "ax-approve-plan": "./dist/scripts/ax-approve-plan.js",
     "ax-finalize-commit": "./dist/scripts/ax-finalize-commit.js",
     "ax-launch-execution": "./dist/scripts/ax-launch-execution.js",
-    "ax-recall-topics": "./dist/scripts/ax-recall-topics.js"
+    "ax-recall-topics": "./dist/scripts/ax-recall-topics.js",
+    "ax-decisions": "./dist/scripts/ax-decisions.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
