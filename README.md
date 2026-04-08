@@ -12,6 +12,8 @@ Shift AX turns a raw development request into a document-aware, review-gated wor
 Shift AX adds a control plane on top of existing coding-agent runtimes so teams can:
 
 - onboard domain and policy context into tracked docs
+- propose a first base-context index from existing docs during onboarding
+- generate a domain glossary from discovered docs and vocabulary
 - resolve relevant context before planning or implementation
 - create a request-scoped topic directory and git worktree
 - pause at a mandatory human plan-review gate
@@ -67,7 +69,13 @@ File-driven mode:
 npm run ax -- onboard-context --input ./onboarding.json
 ```
 
-This writes tracked docs under `docs/base-context/`, regenerates `docs/base-context/index.md`, and stores shared engineering defaults in `.ax/project-profile.json`.
+Discovery-assisted mode:
+
+```bash
+npm run ax -- onboard-context --discover
+```
+
+This writes or discovers tracked docs under `docs/base-context/`, regenerates `docs/base-context/index.md`, creates `docs/base-context/domain-glossary.md`, and stores shared engineering defaults in `.ax/project-profile.json`.
 
 ### 3. Start a request
 
