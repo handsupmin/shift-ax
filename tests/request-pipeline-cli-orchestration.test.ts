@@ -2,8 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
 import { chmod, mkdtemp, readFile, rm, writeFile, mkdir } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+
+const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
 async function createGitRepo(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-cli-orchestrate-'));
@@ -27,7 +30,7 @@ async function runAx(args: string[], input = '', env?: NodeJS.ProcessEnv): Promi
       process.execPath,
       ['--import', 'tsx', 'scripts/ax.ts', ...args],
       {
-        cwd: '/Users/sangmin/sources/shift-ax/.worktrees/phase1-auto-execution-orchestrator',
+        cwd: REPO_ROOT,
         stdio: ['pipe', 'pipe', 'pipe'],
         env,
       },

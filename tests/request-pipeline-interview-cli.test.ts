@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+
+const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
 async function createGitRepo(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-interview-cli-'));
@@ -27,7 +30,7 @@ async function runAxInteractive(args: string[], input: string): Promise<{
       process.execPath,
       ['--import', 'tsx', 'scripts/ax.ts', ...args],
       {
-        cwd: '/Users/sangmin/sources/shift-ax',
+        cwd: REPO_ROOT,
         stdio: ['pipe', 'pipe', 'pipe'],
       },
     );
@@ -117,6 +120,29 @@ test('ax run-request interviews for planning details and writes structured artif
     assert.match(plan, /subagent/i);
     assert.match(handoff, /"execution_mode": "tmux"/);
     assert.match(handoff, /"execution_mode": "subagent"/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('ax run-request fails fast when the base-context index points to an unresolved document', async () => {
+  const root = await createGitRepo();
+
+  try {
+    await mkdir(join(root, 'docs', 'base-context'), { recursive: true });
+    await writeFile(
+      join(root, 'docs', 'base-context', 'index.md'),
+      ['# Base Context Index', '', '- Auth policy -> docs/base-context/auth-policy.md', ''].join('\n'),
+      'utf8',
+    );
+
+    const started = await runAxInteractive(
+      ['run-request', '--root', root, '--request', 'Update auth policy flow'],
+      '',
+    );
+
+    assert.equal(started.code, 1);
+    assert.match(started.stderr, /unresolved|base-context|resolved context/i);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

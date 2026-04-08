@@ -24,6 +24,7 @@ async function writeReviewableTopic(root: string): Promise<{ topicDir: string; w
   const worktreePath = join(root, '.ax', 'worktrees', '2026-04-08-auth-refresh');
   await mkdir(join(topicDir, 'review'), { recursive: true });
   await mkdir(join(topicDir, 'final'), { recursive: true });
+  await mkdir(join(topicDir, 'execution-results'), { recursive: true });
   await mkdir(join(worktreePath, 'src'), { recursive: true });
   await mkdir(join(worktreePath, 'tests'), { recursive: true });
 
@@ -165,6 +166,42 @@ async function writeReviewableTopic(root: string): Promise<{ topicDir: string; w
     ),
     'utf8',
   );
+  await writeFile(
+    join(topicDir, 'execution-state.json'),
+    JSON.stringify(
+      {
+        version: 1,
+        overall_status: 'completed',
+        started_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        tasks: [
+          {
+            task_id: 'task-1',
+            execution_mode: 'subagent',
+            status: 'completed',
+            output_path: join(topicDir, 'execution-results', 'task-1.json'),
+            started_at: new Date().toISOString(),
+            completed_at: new Date().toISOString(),
+          },
+        ],
+      },
+      null,
+      2,
+    ),
+    'utf8',
+  );
+  await writeFile(
+    join(topicDir, 'execution-results', 'task-1.json'),
+    JSON.stringify(
+      {
+        changed_files: ['src/auth-refresh.ts', 'tests/auth-refresh.test.ts'],
+        summary: 'Updated auth refresh service and tests for token rotation without schema changes.',
+      },
+      null,
+      2,
+    ),
+    'utf8',
+  );
 
   execFileSync('git', ['init', '--initial-branch=main'], { cwd: worktreePath, stdio: 'pipe' });
   execFileSync('git', ['config', 'user.name', 'Shift AX Test'], { cwd: worktreePath, stdio: 'pipe' });
@@ -256,6 +293,79 @@ test('spec-conformance review fails when changed files touch an out-of-scope are
 
     assert.equal(byLane.get('spec-conformance')?.status, 'changes_requested');
     assert.match(byLane.get('spec-conformance')?.summary ?? '', /out-of-scope|scope/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('spec-conformance review fails when execution-state is not completed', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir, worktreePath } = await writeReviewableTopic(root);
+    await writeFile(join(worktreePath, 'src', 'auth-refresh.ts'), 'export const refresh = true;\n', 'utf8');
+    execFileSync('git', ['add', 'src/auth-refresh.ts'], { cwd: worktreePath, stdio: 'pipe' });
+    await writeFile(
+      join(topicDir, 'execution-state.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          overall_status: 'failed',
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          tasks: [
+            {
+              task_id: 'task-1',
+              execution_mode: 'subagent',
+              status: 'failed',
+              output_path: join(topicDir, 'execution-results', 'task-1.json'),
+              started_at: new Date().toISOString(),
+              completed_at: new Date().toISOString(),
+              error: 'task failed',
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+
+    assert.equal(byLane.get('spec-conformance')?.status, 'changes_requested');
+    assert.match(byLane.get('spec-conformance')?.summary ?? '', /execution/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('conversation-trace review fails when execution results do not mention changed files', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir, worktreePath } = await writeReviewableTopic(root);
+    await writeFile(join(worktreePath, 'src', 'auth-refresh.ts'), 'export const refresh = true;\n', 'utf8');
+    execFileSync('git', ['add', 'src/auth-refresh.ts'], { cwd: worktreePath, stdio: 'pipe' });
+    await writeFile(
+      join(topicDir, 'execution-results', 'task-1.json'),
+      JSON.stringify(
+        {
+          changed_files: ['src/other-file.ts'],
+          summary: 'Updated an unrelated helper.',
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+
+    assert.equal(byLane.get('conversation-trace')?.status, 'changes_requested');
+    assert.match(byLane.get('conversation-trace')?.summary ?? '', /execution|trace/i);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import { onboardProjectContext } from '../core/context/onboarding.js';
@@ -21,6 +21,75 @@ async function createGitRepo(): Promise<string> {
   execFileSync('git', ['add', 'README.md'], { cwd: root, stdio: 'pipe' });
   execFileSync('git', ['commit', '-m', 'init'], { cwd: root, stdio: 'pipe' });
   return root;
+}
+
+function buildExecutionRunner(
+  changedFiles: string[],
+): ({ topicDir, worktreePath }: { topicDir: string; worktreePath: string }) => Promise<{
+  version: 1;
+  overall_status: 'completed';
+  started_at: string;
+  completed_at: string;
+  tasks: Array<{
+    task_id: string;
+    execution_mode: 'subagent';
+    status: 'completed';
+    output_path: string;
+    started_at: string;
+    completed_at: string;
+  }>;
+}> {
+  return async ({ topicDir, worktreePath }) => {
+    await mkdir(join(topicDir, 'execution-results'), { recursive: true });
+    const outputPath = join(topicDir, 'execution-results', 'task-1.json');
+    for (const file of changedFiles) {
+      await mkdir(dirname(join(worktreePath, file)), { recursive: true });
+      const content = file.endsWith('.test.ts')
+        ? [
+            "import { test } from 'node:test';",
+            "test('auth refresh keeps users signed in without schema changes', () => {});",
+            '// Covers auth policy token rotation behavior',
+            '',
+          ].join('\n')
+        : file.endsWith('.test.js')
+        ? [
+            "import { test } from 'node:test';",
+            "test('auth refresh keeps users signed in without schema changes', () => {});",
+            '// Covers auth policy token rotation behavior',
+            '',
+          ].join('\n')
+        : 'auth refresh done\n';
+      await writeFile(join(worktreePath, file), content, 'utf8');
+    }
+    await writeFile(
+      outputPath,
+      JSON.stringify(
+        {
+          changed_files: changedFiles,
+          summary: 'Updated auth refresh flow and its tests for auth policy token rotation without schema changes.',
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+    return {
+      version: 1,
+      overall_status: 'completed',
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      tasks: [
+        {
+          task_id: 'task-1',
+          execution_mode: 'subagent',
+          status: 'completed',
+          output_path: outputPath,
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+        },
+      ],
+    };
+  };
 }
 
 test('finalizeTopicCommit creates a local git commit and records the sha', async () => {
@@ -55,26 +124,10 @@ test('finalizeTopicCommit creates a local git commit and records the sha', async
       notes: 'Approved for implementation.',
     });
 
-    await mkdir(join(started.worktree.worktree_path, 'src'), { recursive: true });
-    await writeFile(
-      join(started.worktree.worktree_path, 'src', 'feature.txt'),
-      'auth refresh done\n',
-      'utf8',
-    );
-    await writeFile(
-      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
-      [
-        "import { test } from 'node:test';",
-        "test('auth refresh keeps users signed in without schema changes', () => {});",
-        '// Covers auth policy token rotation behavior',
-        '',
-      ].join('\n'),
-      'utf8',
-    );
-
     await resumeRequestPipeline({
       topicDir: started.topicDir,
-      verificationCommands: ['echo test'],
+      verificationCommands: ['node --test auth-refresh.test.js'],
+      executionRunner: buildExecutionRunner(['src/feature.txt', 'auth-refresh.test.js']),
     });
 
     const result = await finalizeTopicCommit({ topicDir: started.topicDir });
@@ -138,26 +191,10 @@ test('finalizeTopicCommit persists explicit commit messages before committing', 
       notes: 'Approved for implementation.',
     });
 
-    await mkdir(join(started.worktree.worktree_path, 'src'), { recursive: true });
-    await writeFile(
-      join(started.worktree.worktree_path, 'src', 'feature.txt'),
-      'auth refresh done\n',
-      'utf8',
-    );
-    await writeFile(
-      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
-      [
-        "import { test } from 'node:test';",
-        "test('auth refresh keeps users signed in without schema changes', () => {});",
-        '// Covers auth policy token rotation behavior',
-        '',
-      ].join('\n'),
-      'utf8',
-    );
-
     await resumeRequestPipeline({
       topicDir: started.topicDir,
-      verificationCommands: ['echo test'],
+      verificationCommands: ['node --test auth-refresh.test.js'],
+      executionRunner: buildExecutionRunner(['src/feature.txt', 'auth-refresh.test.js']),
     });
 
     const explicitMessage = buildLoreCommitMessage({

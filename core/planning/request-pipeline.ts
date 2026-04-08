@@ -270,6 +270,9 @@ export async function startRequestPipeline({
     maxMatches,
   });
   const matchedLabels = resolvedContext.matches.map((match) => match.label);
+  if (resolvedContext.unresolved_paths.length > 0) {
+    throw new Error('resolved context still has unresolved base-context paths');
+  }
 
   await writeFile(
     topicArtifactPath(topic.topicDir, 'resolved_context'),
