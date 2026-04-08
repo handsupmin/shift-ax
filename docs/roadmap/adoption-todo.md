@@ -10,17 +10,17 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 - [x] **Domain glossary seeding**
   - Detect service names, key entities, aliases, and internal vocabulary.
   - Write or update a glossary doc that can be referenced from the base-context index.
-- [ ] **Native skill contract for Shift AX workflows**
+- [x] **Native skill contract for Shift AX workflows**
   - Create a standard shape for clarify / plan / implement / review / finalize workflows.
   - Borrow anti-rationalization and verification sections from agent-skills.
-- [ ] **First-run onboarding refinement**
+- [x] **First-run onboarding refinement**
   - Expand onboarding prompts for business model, policy areas, architecture, and risky domains.
-- [ ] **Execution-state-aware review expansion**
+- [x] **Execution-state-aware review expansion**
   - Continue improving review to reason from execution artifacts, changed files, and test evidence.
 
 ## Next
 
-- [ ] **Past-topic recall helper**
+- [x] **Past-topic recall helper**
   - Add a file-backed memory layer for previous topic artifacts, subordinate to authoritative docs.
 - [ ] **Decision register with validity windows**
   - Track major decisions, effective dates, and replacements.
