@@ -5,6 +5,7 @@ export interface ShiftAxPlanningInterviewAnswers {
   verification: string;
   implementationAreas: string;
   longRunningWork: string;
+  policyUpdates: string;
 }
 
 export interface ShiftAxPlanningArtifactsInput {
@@ -53,6 +54,7 @@ export function buildPlanningArtifactsFromInterview({
   const verification = bulletize(answers.verification);
   const implementationAreas = bulletize(answers.implementationAreas);
   const longRunningWork = bulletize(answers.longRunningWork);
+  const policyUpdates = bulletize(answers.policyUpdates);
 
   const brainstormContent = [
     '# Brainstorm',
@@ -80,6 +82,10 @@ export function buildPlanningArtifactsFromInterview({
     '## Verification Expectations',
     '',
     ...verification,
+    '',
+    '## Base-Context Policy Updates',
+    '',
+    ...(policyUpdates.length > 0 ? policyUpdates : ['- None yet.']),
     '',
     '## Implementation Areas',
     '',
@@ -114,6 +120,10 @@ export function buildPlanningArtifactsFromInterview({
     '',
     ...verification,
     '',
+    '## Base-Context Policy Updates',
+    '',
+    ...(policyUpdates.length > 0 ? policyUpdates : ['- None yet.']),
+    '',
   ].join('\n');
 
   const implementationPlanContent = [
@@ -135,6 +145,10 @@ export function buildPlanningArtifactsFromInterview({
     ...implementationAreas
       .filter((item) => !longRunningWork.some((longItem) => longItem.includes(item.replace(/^-\s*/, ''))))
       .map((item) => `${item} -> ${engineeringDefaults.short_task_execution}`),
+    '',
+    '## Base-Context Policy Updates',
+    '',
+    ...(policyUpdates.length > 0 ? policyUpdates : ['- None yet.']),
     '',
   ].join('\n');
 

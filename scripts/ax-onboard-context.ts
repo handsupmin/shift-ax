@@ -4,15 +4,19 @@ import { readFile } from 'node:fs/promises';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stderr } from 'node:process';
 
-import { onboardProjectContext } from '../core/context/onboarding.js';
+import {
+  onboardProjectContext,
+  onboardProjectContextFromDiscovery,
+} from '../core/context/onboarding.js';
 import {
   defaultEngineeringDefaults,
   type ShiftAxEngineeringDefaults,
+  type ShiftAxOnboardingContextProfile,
 } from '../core/policies/project-profile.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-onboard-context [--input FILE] [--root DIR]\n',
+    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--root DIR]\n',
   );
 }
 
@@ -105,6 +109,31 @@ async function promptInteractivePayload(): Promise<
       addAnother = answer === 'y' || answer === 'yes';
     }
 
+    const onboardingContext: ShiftAxOnboardingContextProfile = {
+      business_context: await promptUntilNonEmpty(
+        ask,
+        'Business / product context: ',
+      ),
+      policy_areas: (await promptUntilNonEmpty(
+        ask,
+        'Policy areas to care about (comma-separated): ',
+      ))
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+      architecture_summary: await promptUntilNonEmpty(
+        ask,
+        'Architecture summary: ',
+      ),
+      risky_domains: (await promptUntilNonEmpty(
+        ask,
+        'Risky domains to escalate carefully (comma-separated): ',
+      ))
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+    };
+
     const engineeringDefaults: ShiftAxEngineeringDefaults = {
       test_strategy: await promptWithDefault(
         ask,
@@ -131,6 +160,7 @@ async function promptInteractivePayload(): Promise<
 
     return {
       documents,
+      onboardingContext,
       engineeringDefaults,
     };
   } finally {
@@ -141,17 +171,22 @@ async function promptInteractivePayload(): Promise<
 async function main(): Promise<void> {
   const inputPath = readArg('--input');
   const rootDir = readArg('--root') || process.cwd();
+  const discover = process.argv.includes('--discover');
+  const includeGlossary = !process.argv.includes('--no-glossary');
 
-  const payload = inputPath
-    ? (JSON.parse(await readFile(inputPath, 'utf8')) as Parameters<
-        typeof onboardProjectContext
-      >[0])
-    : await promptInteractivePayload();
-
-  const result = await onboardProjectContext({
-    ...payload,
-    rootDir,
-  });
+  const result = inputPath
+    ? await onboardProjectContext({
+        ...(JSON.parse(await readFile(inputPath, 'utf8')) as Parameters<
+          typeof onboardProjectContext
+        >[0]),
+        rootDir,
+      })
+    : discover
+      ? await onboardProjectContextFromDiscovery({ rootDir, includeGlossary })
+      : await onboardProjectContext({
+          ...(await promptInteractivePayload()),
+          rootDir,
+        });
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 }
 

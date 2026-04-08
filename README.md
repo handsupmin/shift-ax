@@ -12,10 +12,20 @@ Shift AX turns a raw development request into a document-aware, review-gated wor
 Shift AX adds a control plane on top of existing coding-agent runtimes so teams can:
 
 - onboard domain and policy context into tracked docs
+- propose a first base-context index from existing docs during onboarding
+- generate a domain glossary from discovered docs and vocabulary
 - resolve relevant context before planning or implementation
+- recall similar completed topics as supporting context after authoritative docs have been checked
+- keep a lightweight file-backed register of important decisions and when they became valid
+- search decision memory with linked source-topic summaries when the team needs to recall why something became policy
+- run a compact doctor check for repo, topic, and launcher health when setup looks suspicious
 - create a request-scoped topic directory and git worktree
 - pause at a mandatory human plan-review gate
+- block implementation until any required shared policy/base-context doc updates have been written and recorded
 - resume with automated verification and structured review lanes
+- reopen implementation with a file-backed reaction trail when downstream review or CI fails
+- expose a compact topic-status view for the current phase, review gate, execution state, and last failure reason
+- expose a compact multi-topic status list when a team needs lightweight supervision without a dashboard
 - finalize only after the gates allow a local Lore-protocol commit
 
 ## Current v1 boundary
@@ -51,6 +61,7 @@ That means Shift AX currently covers:
 npm install
 npm test
 npm run build
+npm run ax -- doctor
 ```
 
 ### 2. Onboard base context
@@ -67,7 +78,13 @@ File-driven mode:
 npm run ax -- onboard-context --input ./onboarding.json
 ```
 
-This writes tracked docs under `docs/base-context/`, regenerates `docs/base-context/index.md`, and stores shared engineering defaults in `.ax/project-profile.json`.
+Discovery-assisted mode:
+
+```bash
+npm run ax -- onboard-context --discover
+```
+
+This writes or discovers tracked docs under `docs/base-context/`, regenerates `docs/base-context/index.md`, creates `docs/base-context/domain-glossary.md`, and stores shared engineering defaults in `.ax/project-profile.json`.
 
 ### 3. Start a request
 
@@ -93,6 +110,17 @@ npm run ax -- approve-plan \
 ```
 
 ### 5. Resume after approval
+
+If the approved plan says shared domain or policy docs must be updated first, record that before implementation resumes:
+
+```bash
+npm run ax -- sync-policy-context \
+  --topic .ax/topics/<topic-slug> \
+  --summary "Updated shared auth policy docs before implementation" \
+  --path docs/base-context/auth-policy.md
+```
+
+Then resume:
 
 ```bash
 npm run ax -- run-request \
@@ -128,6 +156,12 @@ npm run ax -- launch-execution \
 ```
 
 This reads `execution-handoff.json`, writes per-task execution prompts, and returns the concrete Codex / Claude / tmux launch commands for the planned slices.
+
+### 7. Inspect compact topic status when needed
+
+```bash
+npm run ax -- topic-status --topic .ax/topics/<topic-slug>
+```
 
 ## Mandatory human-escalation triggers
 

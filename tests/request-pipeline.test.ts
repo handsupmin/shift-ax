@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -13,6 +13,7 @@ import {
   startRequestPipeline,
 } from '../core/planning/request-pipeline.js';
 import { recordPlanReviewDecision } from '../core/planning/plan-review.js';
+import { readLifecycleEvents } from '../core/planning/lifecycle-events.js';
 import { topicArtifactPath } from '../core/topics/topic-artifacts.js';
 
 async function createGitRepo(): Promise<string> {
@@ -51,6 +52,67 @@ function reviewablePlan(): string {
     'Add tests for auth refresh rotation behavior.',
     '',
   ].join('\n');
+}
+
+function buildExecutionRunner(
+  changedFiles: string[],
+): ({ topicDir, worktreePath }: { topicDir: string; worktreePath: string }) => Promise<{
+  version: 1;
+  overall_status: 'completed';
+  started_at: string;
+  completed_at: string;
+  tasks: Array<{
+    task_id: string;
+    execution_mode: 'subagent';
+    status: 'completed';
+    output_path: string;
+    started_at: string;
+    completed_at: string;
+  }>;
+}> {
+  return async ({ topicDir, worktreePath }) => {
+    const outputPath = join(topicDir, 'execution-results', 'task-1.json');
+    await mkdir(join(topicDir, 'execution-results'), { recursive: true });
+    for (const file of changedFiles) {
+      const content = file.endsWith('.test.ts') || file.endsWith('.test.js')
+        ? [
+            "import { test } from 'node:test';",
+            "test('auth refresh keeps users signed in without schema changes', () => {});",
+            '// Covers auth policy token rotation behavior',
+            '',
+          ].join('\n')
+        : 'done\n';
+      await writeFile(join(worktreePath, file), content, 'utf8');
+    }
+    await writeFile(
+      outputPath,
+      JSON.stringify(
+        {
+          changed_files: changedFiles,
+          summary: 'Updated auth refresh flow and its tests for auth policy token rotation without schema changes.',
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+    return {
+      version: 1,
+      overall_status: 'completed',
+      started_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      tasks: [
+        {
+          task_id: 'task-1',
+          execution_mode: 'subagent',
+          status: 'completed',
+          output_path: outputPath,
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+        },
+      ],
+    };
+  };
 }
 
 test('startRequestPipeline bootstraps worktree, resolves context, and pauses for plan review', async () => {
@@ -120,21 +182,10 @@ test('resumeRequestPipeline round-trips from approval to commit_ready when artif
       status: 'approved',
       notes: 'Approved for implementation.',
     });
-    await writeFile(join(started.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
-    await writeFile(
-      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
-      [
-        "import { test } from 'node:test';",
-        "test('auth refresh keeps users signed in without schema changes', () => {});",
-        '// Covers auth policy token rotation behavior',
-        '',
-      ].join('\n'),
-      'utf8',
-    );
-
     const resumed = await resumeRequestPipeline({
       topicDir: started.topicDir,
       verificationCommands: ['echo test'],
+      executionRunner: buildExecutionRunner(['feature.txt', 'auth-refresh.test.ts']),
     });
     const workflow = await readWorkflowState(started.topicDir);
     const commitMessage = await readFile(
@@ -200,23 +251,12 @@ test('resumeRequestPipeline records mandatory escalation triggers and blocks unt
     assert.equal(blocked.escalation?.status, 'required');
     assert.equal(blocked.escalation?.triggers[0]?.kind, 'policy-conflict');
 
-    await writeFile(join(started.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
-    await writeFile(
-      join(started.worktree.worktree_path, 'auth-refresh.test.ts'),
-      [
-        "import { test } from 'node:test';",
-        "test('auth refresh keeps users signed in without schema changes', () => {});",
-        '// Covers auth policy token rotation behavior',
-        '',
-      ].join('\n'),
-      'utf8',
-    );
-
     const resumed = await resumeRequestPipeline({
       topicDir: started.topicDir,
       clearEscalations: true,
       escalationResolution: 'Human reviewer accepted the policy change after follow-up.',
       verificationCommands: ['echo test'],
+      executionRunner: buildExecutionRunner(['feature.txt', 'auth-refresh.test.ts']),
     });
     const workflow = await readWorkflowState(started.topicDir);
 
@@ -224,6 +264,143 @@ test('resumeRequestPipeline records mandatory escalation triggers and blocks unt
     assert.equal(workflow.phase, 'commit_ready');
     assert.equal(workflow.escalation?.status, 'clear');
     assert.ok(workflow.escalation?.triggers[0]?.resolved_at);
+  } finally {
+    await rm(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test('resumeRequestPipeline can orchestrate execution tasks before verification and review', async () => {
+  const repoRoot = await createGitRepo();
+
+  try {
+    await onboardProjectContext({
+      rootDir: repoRoot,
+      documents: [
+        {
+          label: 'Auth policy',
+          content: '# Auth Policy\n\nRefresh token rotation is required.\n',
+        },
+      ],
+    });
+
+    const started = await startRequestPipeline({
+      rootDir: repoRoot,
+      request: 'Build safer auth refresh flow',
+      summary: 'Need a reviewed auth-refresh delivery flow.',
+      brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
+      specContent: reviewableSpec(),
+      implementationPlanContent: reviewablePlan(),
+      baseBranch: 'main',
+    });
+
+    await recordPlanReviewDecision({
+      topicDir: started.topicDir,
+      reviewer: 'Alex Reviewer',
+      status: 'approved',
+      notes: 'Approved for implementation.',
+    });
+
+    const resumed = await resumeRequestPipeline({
+      topicDir: started.topicDir,
+      verificationCommands: ['test -f executed.txt'],
+      executionRunner: async ({ topicDir, worktreePath }) => {
+        await mkdir(join(topicDir, 'execution-results'), { recursive: true });
+        await writeFile(join(worktreePath, 'executed.txt'), 'done\n', 'utf8');
+        await writeFile(
+          join(worktreePath, 'executed.test.js'),
+          [
+            "import test from 'node:test';",
+            "test('auth refresh keeps users signed in without schema changes', () => {});",
+            '// Covers auth policy token rotation behavior',
+            '',
+          ].join('\n'),
+          'utf8',
+        );
+        await writeFile(
+          join(topicDir, 'execution-results', 'task-1.json'),
+          JSON.stringify(
+            {
+              changed_files: ['executed.txt', 'executed.test.js'],
+              summary: 'Executed auth refresh work and added regression coverage.',
+            },
+            null,
+            2,
+          ),
+          'utf8',
+        );
+        return {
+          version: 1,
+          overall_status: 'completed',
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          tasks: [
+            {
+              task_id: 'task-1',
+              execution_mode: 'subagent',
+              status: 'completed',
+              output_path: join(topicDir, 'execution-results', 'task-1.json'),
+              started_at: new Date().toISOString(),
+              completed_at: new Date().toISOString(),
+            },
+          ],
+        };
+      },
+    });
+
+    const workflow = await readWorkflowState(started.topicDir);
+    const executionState = JSON.parse(
+      await readFile(join(started.topicDir, 'execution-state.json'), 'utf8'),
+    ) as { overall_status: string };
+    const lifecycle = await readLifecycleEvents(started.topicDir);
+
+    assert.equal(resumed.aggregate.commit_allowed, true);
+    assert.equal(executionState.overall_status, 'completed');
+    assert.equal(workflow.phase, 'commit_ready');
+    assert.ok(lifecycle.some((event) => event.event === 'execution.started'));
+    assert.ok(lifecycle.some((event) => event.event === 'review.completed'));
+  } finally {
+    await rm(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test('startRequestPipeline refuses to begin when resolved context still has unresolved paths', async () => {
+  const repoRoot = await createGitRepo();
+
+  try {
+    await assert.rejects(
+      startRequestPipeline({
+        rootDir: repoRoot,
+        request: 'Update auth policy flow',
+        summary: 'Need a reviewed auth-refresh delivery flow.',
+        brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
+        specContent: reviewableSpec(),
+        implementationPlanContent: reviewablePlan(),
+        indexPath: join(repoRoot, 'docs', 'base-context', 'index.md'),
+        baseBranch: 'main',
+      }),
+      /resolved context|unresolved/i,
+    );
+  } finally {
+    await rm(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test('startRequestPipeline refuses to begin when the base-context index is missing', async () => {
+  const repoRoot = await createGitRepo();
+
+  try {
+    await assert.rejects(
+      startRequestPipeline({
+        rootDir: repoRoot,
+        request: 'Build safer auth refresh flow',
+        summary: 'Need a reviewed auth-refresh delivery flow.',
+        brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
+        specContent: reviewableSpec(),
+        implementationPlanContent: reviewablePlan(),
+        baseBranch: 'main',
+      }),
+      /base-context|resolved context|index/i,
+    );
   } finally {
     await rm(repoRoot, { recursive: true, force: true });
   }

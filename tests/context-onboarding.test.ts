@@ -29,6 +29,12 @@ test('onboardProjectContext writes docs, index, and project profile', async () =
         short_task_execution: 'subagent',
         long_task_execution: 'tmux',
       },
+      onboardingContext: {
+        business_context: 'B2B fintech operations platform.',
+        policy_areas: ['auth', 'billing'],
+        architecture_summary: 'Service boundaries around auth and ledger.',
+        risky_domains: ['payments'],
+      },
     });
 
     const authDoc = await readFile(join(root, 'docs', 'base-context', 'auth-policy.md'), 'utf8');
@@ -48,6 +54,8 @@ test('onboardProjectContext writes docs, index, and project profile', async () =
     assert.equal(profile?.engineering_defaults.test_strategy, 'tdd');
     assert.equal(profile?.engineering_defaults.short_task_execution, 'subagent');
     assert.equal(profile?.context_docs.length, 2);
+    assert.equal(profile?.onboarding_context?.policy_areas[1], 'billing');
+    assert.match(profile?.onboarding_context?.business_context ?? '', /fintech/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

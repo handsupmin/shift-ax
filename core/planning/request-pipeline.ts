@@ -33,6 +33,13 @@ import {
   type ShiftAxWorkflowEscalationInput,
 } from './escalation.js';
 import { writeExecutionHandoff } from './execution-handoff.js';
+import type { ShiftAxExecutionState } from './execution-orchestrator.js';
+import { recordLifecycleEvent } from './lifecycle-events.js';
+import {
+  inferPolicyContextSyncArtifact,
+  readPolicyContextSyncArtifact,
+  writePolicyContextSyncArtifact,
+} from './policy-context-sync.js';
 import {
   hasActiveWorkflowEscalations,
   readWorkflowState,
@@ -69,6 +76,10 @@ export interface ResumeRequestPipelineInput {
   clearEscalations?: boolean;
   escalationResolution?: string;
   autoCommit?: boolean;
+  executionRunner?: (input: {
+    topicDir: string;
+    worktreePath: string;
+  }) => Promise<ShiftAxExecutionState>;
   now?: Date;
 }
 
@@ -120,6 +131,10 @@ function buildDefaultBrainstorm(request: string, matchedLabels: string[]): strin
     '',
     ...(matchedLabels.length > 0 ? matchedLabels.map((label) => `- ${label}`) : ['- No matched context documents yet.']),
     '',
+    '## Base-Context Policy Updates',
+    '',
+    '- None yet.',
+    '',
   ].join('\n');
 }
 
@@ -135,6 +150,10 @@ function buildDefaultSpec(request: string, matchedLabels: string[]): string {
     '',
     ...(matchedLabels.length > 0 ? matchedLabels.map((label) => `- ${label}`) : ['- No matched context documents yet.']),
     '',
+    '## Base-Context Policy Updates',
+    '',
+    '- None yet.',
+    '',
   ].join('\n');
 }
 
@@ -145,6 +164,10 @@ function buildDefaultImplementationPlan(testStrategy: string, architecture: stri
     `Use ${testStrategy.toUpperCase()} first.`,
     `Respect ${architecture.replace(/-/g, ' ')}.`,
     'Add focused verification steps before commit finalization.',
+    '',
+    '## Base-Context Policy Updates',
+    '',
+    '- None yet.',
     '',
   ].join('\n');
 }
@@ -227,6 +250,18 @@ async function resolveExecutionCwd(topicDir: string): Promise<string> {
   return rootDir;
 }
 
+async function assertResolvedContextReady(topicDir: string): Promise<void> {
+  const raw = await readFile(topicArtifactPath(topicDir, 'resolved_context'), 'utf8').catch(() => '');
+  if (!raw) {
+    throw new Error('resolved context artifact is missing');
+  }
+
+  const parsed = JSON.parse(raw) as { unresolved_paths?: string[] };
+  if ((parsed.unresolved_paths ?? []).length > 0) {
+    throw new Error('resolved context still has unresolved base-context paths');
+  }
+}
+
 export async function startRequestPipeline({
   rootDir,
   request,
@@ -253,6 +288,9 @@ export async function startRequestPipeline({
     maxMatches,
   });
   const matchedLabels = resolvedContext.matches.map((match) => match.label);
+  if (resolvedContext.unresolved_paths.length > 0) {
+    throw new Error('resolved context still has unresolved base-context paths');
+  }
 
   await writeFile(
     topicArtifactPath(topic.topicDir, 'resolved_context'),
@@ -276,6 +314,20 @@ export async function startRequestPipeline({
       profile?.engineering_defaults.architecture ?? 'clean-boundaries',
     )}\n`,
     'utf8',
+  );
+  await writePolicyContextSyncArtifact(
+    topic.topicDir,
+    inferPolicyContextSyncArtifact({
+      brainstormContent: brainstormContent ?? buildDefaultBrainstorm(request, matchedLabels),
+      specContent: specContent ?? buildDefaultSpec(request, matchedLabels),
+      implementationPlanContent:
+        implementationPlanContent ??
+        buildDefaultImplementationPlan(
+          profile?.engineering_defaults.test_strategy ?? 'tdd',
+          profile?.engineering_defaults.architecture ?? 'clean-boundaries',
+        ),
+      now,
+    }),
   );
   await writeExecutionHandoff(topic.topicDir, now);
 
@@ -306,6 +358,13 @@ export async function startRequestPipeline({
     },
   };
   await writeWorkflowState(topic.topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir: topic.topicDir,
+    phase: workflow.phase,
+    event: 'plan.review_required',
+    summary: 'Waiting for the human plan review.',
+    now,
+  });
 
   return {
     ...topic,
@@ -322,6 +381,7 @@ export async function resumeRequestPipeline({
   clearEscalations = false,
   escalationResolution,
   autoCommit = false,
+  executionRunner,
   now = new Date(),
 }: ResumeRequestPipelineInput): Promise<ResumeRequestPipelineResult> {
   if (clearEscalations) {
@@ -338,6 +398,18 @@ export async function resumeRequestPipeline({
       triggers: escalationTriggers,
       now,
     });
+    await recordLifecycleEvent({
+      topicDir,
+      phase: 'awaiting_human_escalation',
+      event: 'execution.blocked',
+      summary: 'Execution stopped because a mandatory escalation trigger was raised.',
+      reaction: {
+        key: escalationTriggers[0]!.kind,
+        action: 'await_human_escalation',
+        outcome: 'blocked',
+      },
+      now,
+    });
     throw new Error(
       'workflow requires human escalation review before automation can continue',
     );
@@ -347,6 +419,7 @@ export async function resumeRequestPipeline({
   if (!fingerprint.matches) {
     throw new Error(fingerprint.reason ?? 'approved plan fingerprint check failed');
   }
+  await assertResolvedContextReady(topicDir);
 
   const workflow = await readWorkflowState(topicDir);
   if (hasActiveWorkflowEscalations(workflow)) {
@@ -354,12 +427,43 @@ export async function resumeRequestPipeline({
       'workflow has active escalation triggers; resolve them before resuming automation',
     );
   }
+  const policyContextSync = await readPolicyContextSyncArtifact(topicDir);
+  if (policyContextSync.status === 'required') {
+    workflow.phase = 'awaiting_policy_sync';
+    workflow.updated_at = now.toISOString();
+    await writeWorkflowState(topicDir, workflow);
+    throw new Error(
+      'policy context sync is required before implementation can start',
+    );
+  }
   workflow.phase = 'implementation_running';
   workflow.plan_review_status = 'approved';
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir,
+    phase: workflow.phase,
+    event: 'execution.started',
+    summary: 'Execution resumed after human plan approval.',
+    now,
+  });
 
   const executionCwd = await resolveExecutionCwd(topicDir);
+  if (executionRunner) {
+    const executionState = await executionRunner({
+      topicDir,
+      worktreePath: executionCwd,
+    });
+    await writeFile(
+      topicArtifactPath(topicDir, 'execution_state'),
+      `${JSON.stringify(executionState, null, 2)}\n`,
+      'utf8',
+    );
+    if (executionState.overall_status !== 'completed') {
+      throw new Error('execution orchestration failed');
+    }
+  }
+
   const verification = await runVerificationCommands(executionCwd, verificationCommands);
   await writeVerificationReport(topicDir, verification);
   workflow.verification = verification;
@@ -373,6 +477,13 @@ export async function resumeRequestPipeline({
   workflow.phase = 'review_pending';
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir,
+    phase: workflow.phase,
+    event: 'review.started',
+    summary: 'Structured review lanes are running.',
+    now,
+  });
 
   await runReviewLanes({ topicDir });
   const aggregate = await aggregateReviewVerdicts({ topicDir });
@@ -394,6 +505,24 @@ export async function resumeRequestPipeline({
   workflow.phase = aggregate.commit_allowed ? 'commit_ready' : 'implementation_running';
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir,
+    phase: workflow.phase,
+    event: 'review.completed',
+    summary: aggregate.commit_allowed
+      ? 'Review passed and the topic is commit-ready.'
+      : 'Review requested more implementation work.',
+    ...(aggregate.commit_allowed
+      ? {}
+      : {
+          reaction: {
+            key: 'review-changes-requested',
+            action: 'return_to_implementation',
+            outcome: 'changes_requested',
+          },
+        }),
+    now,
+  });
 
   let finalization: FinalizeTopicCommitResult | undefined;
   if (aggregate.commit_allowed && autoCommit) {
@@ -404,6 +533,13 @@ export async function resumeRequestPipeline({
     workflow.phase = 'committed';
     workflow.updated_at = now.toISOString();
     await writeWorkflowState(topicDir, workflow);
+    await recordLifecycleEvent({
+      topicDir,
+      phase: workflow.phase,
+      event: 'finalization.committed',
+      summary: 'Automatic finalization created the local commit.',
+      now,
+    });
   }
 
   return {

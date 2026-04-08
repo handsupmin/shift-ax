@@ -94,8 +94,61 @@ async function readWorkflowStateMaybe(topicDir: string): Promise<{
   };
 }
 
+async function readExecutionStateMaybe(topicDir: string): Promise<{
+  overall_status?: string;
+  tasks?: Array<{ output_path?: string }>;
+} | null> {
+  const raw = await readMaybe(join(topicDir, 'execution-state.json'));
+  if (!raw) return null;
+  return JSON.parse(raw) as {
+    overall_status?: string;
+    tasks?: Array<{ output_path?: string }>;
+  };
+}
+
+async function readExecutionResultArtifacts(topicDir: string): Promise<string[]> {
+  const executionState = await readExecutionStateMaybe(topicDir);
+  const outputPaths = (executionState?.tasks ?? [])
+    .map((task) => task.output_path)
+    .filter((path): path is string => Boolean(path));
+
+  return Promise.all(
+    outputPaths.map(async (path) => {
+      const resolved = path.startsWith('/') ? path : join(topicDir, path);
+      return readMaybe(resolved);
+    }),
+  );
+}
+
+function extractMentionedFilesFromExecutionResults(results: string[]): string[] {
+  const mentioned = new Set<string>();
+
+  for (const result of results) {
+    if (!result.trim()) continue;
+    try {
+      const parsed = JSON.parse(result) as { changed_files?: string[]; summary?: string };
+      for (const file of parsed.changed_files ?? []) {
+        if (file) mentioned.add(file);
+      }
+      const summary = parsed.summary ?? '';
+      const summaryMatches = summary.match(/[A-Za-z0-9_./-]+\.[A-Za-z0-9]+/g) ?? [];
+      for (const file of summaryMatches) {
+        mentioned.add(file);
+      }
+      continue;
+    } catch {
+      const matches = result.match(/[A-Za-z0-9_./-]+\.[A-Za-z0-9]+/g) ?? [];
+      for (const file of matches) {
+        mentioned.add(file);
+      }
+    }
+  }
+
+  return [...mentioned];
+}
+
 function listChangedFiles(worktreePath: string): string[] {
-  const output = execFileSync('git', ['status', '--porcelain'], {
+  const output = execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], {
     cwd: worktreePath,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -179,6 +232,7 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
   const spec = await readMaybe(join(topicDir, 'spec.md'));
   const plan = await readMaybe(join(topicDir, 'implementation-plan.md'));
   const planReview = await readPlanReviewArtifact(topicDir);
+  const workflow = await readWorkflowStateMaybe(topicDir);
 
   if (planReview.status !== 'approved') {
     return verdictBase(
@@ -221,6 +275,45 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
         },
       ],
     );
+  }
+
+  const worktreePath = workflow?.worktree?.worktree_path;
+  if (worktreePath) {
+    const changedFiles = listChangedFiles(worktreePath);
+    const executionState = await readExecutionStateMaybe(topicDir);
+    const outOfScopeContent =
+      parseMarkdownSections(spec).get('Out of Scope') ??
+      parseMarkdownSections(await readMaybe(join(topicDir, 'brainstorm.md'))).get('Out of Scope') ??
+      '';
+
+    if (changedFiles.length > 0 && executionState && executionState.overall_status !== 'completed') {
+      return verdictBase(
+        'spec-conformance',
+        'changes_requested',
+        'Execution state is not completed for the current changed files.',
+        [
+          {
+            severity: 'high',
+            message: `execution-state.json reports ${executionState.overall_status ?? 'unknown'} instead of completed.`,
+          },
+        ],
+      );
+    }
+
+    const outOfScopeTouched = changedFiles.find((file) => hasTokenOverlap(file, outOfScopeContent));
+    if (outOfScopeTouched) {
+      return verdictBase(
+        'spec-conformance',
+        'changes_requested',
+        'Changed files touch an area that is explicitly out of scope for the reviewed plan.',
+        [
+          {
+            severity: 'high',
+            message: `Out-of-scope file changed: ${outOfScopeTouched}`,
+          },
+        ],
+      );
+    }
   }
 
   return verdictBase(
@@ -365,6 +458,7 @@ async function runConversationTraceLane(topicDir: string): Promise<ReviewVerdict
   const spec = await readMaybe(join(topicDir, 'spec.md'));
   const brainstorm = await readMaybe(join(topicDir, 'brainstorm.md'));
   const plan = await readMaybe(join(topicDir, 'implementation-plan.md'));
+  const workflow = await readWorkflowStateMaybe(topicDir);
 
   if (!request.trim() || !summary.trim() || !brainstorm.trim() || containsPlaceholder(spec)) {
     return verdictBase(
@@ -410,6 +504,30 @@ async function runConversationTraceLane(topicDir: string): Promise<ReviewVerdict
         })),
       ],
     );
+  }
+
+  const worktreePath = workflow?.worktree?.worktree_path;
+  if (worktreePath) {
+    const changedFiles = listChangedFiles(worktreePath);
+    if (changedFiles.length > 0) {
+      const executionResults = await readExecutionResultArtifacts(topicDir);
+      const mentionedFiles = extractMentionedFilesFromExecutionResults(executionResults);
+      const unmentionedChangedFile = changedFiles.find((file) => !mentionedFiles.includes(file));
+
+      if (unmentionedChangedFile) {
+        return verdictBase(
+          'conversation-trace',
+          'changes_requested',
+          'Execution results do not describe all of the changed files yet.',
+          [
+            {
+              severity: 'medium',
+              message: `Changed file is missing from execution result artifacts: ${unmentionedChangedFile}.`,
+            },
+          ],
+        );
+      }
+    }
   }
 
   return verdictBase(

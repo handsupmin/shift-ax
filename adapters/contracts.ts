@@ -19,10 +19,15 @@ export type ShiftAxCoreCommand =
   | 'worktree-create'
   | 'worktree-remove'
   | 'onboard-context'
+  | 'doctor'
   | 'run-request'
   | 'approve-plan'
+  | 'sync-policy-context'
+  | 'react-feedback'
   | 'finalize-commit'
-  | 'launch-execution';
+  | 'launch-execution'
+  | 'topic-status'
+  | 'topics-status';
 export type ShiftAxWorktreeSupport = 'planned' | 'available';
 export type ShiftAxTmuxRuntimeSupport = 'planned' | 'imported-helpers';
 export type ShiftAxExecutionRuntimeSupport = 'planned' | 'available';

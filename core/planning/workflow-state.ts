@@ -17,6 +17,7 @@ export type ShiftAxWorkflowPhase =
   | 'brainstorming'
   | 'plan_ready'
   | 'awaiting_plan_review'
+  | 'awaiting_policy_sync'
   | 'awaiting_human_escalation'
   | 'approved'
   | 'implementation_running'
