@@ -74,3 +74,7 @@ export async function recordLifecycleEvent({
 export async function readLifecycleEvents(topicDir: string): Promise<ShiftAxLifecycleEvent[]> {
   return readJsonArray<ShiftAxLifecycleEvent>(lifecycleLogPath(topicDir));
 }
+
+export async function readReactionRecords(topicDir: string): Promise<ShiftAxReactionRecord[]> {
+  return readJsonArray<ShiftAxReactionRecord>(reactionLogPath(topicDir));
+}

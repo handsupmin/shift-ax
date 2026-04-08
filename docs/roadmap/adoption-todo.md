@@ -15,6 +15,8 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
   - Borrow anti-rationalization and verification sections from agent-skills.
 - [x] **First-run onboarding refinement**
   - Expand onboarding prompts for business model, policy areas, architecture, and risky domains.
+- [x] **Policy-context sync gate before implementation**
+  - If planning changes shared domain/policy docs under the base-context index, require those updates and record them before implementation starts.
 - [x] **Execution-state-aware review expansion**
   - Continue improving review to reason from execution artifacts, changed files, and test evidence.
 
@@ -26,9 +28,9 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
   - Track major decisions, effective dates, and replacements.
 - [x] **Lifecycle / reaction layer**
   - Add event-driven feedback loops for failed reviews, blocked execution, and future CI handling.
-- [ ] **Observability surfaces**
+- [x] **Observability surfaces**
   - Add compact operator views for current phase, failure reason, and active task state.
-- [ ] **Doctor / health diagnostics expansion**
+- [x] **Doctor / health diagnostics expansion**
   - Extend environment and runtime checks around launchers, worktrees, and state integrity.
 
 ## Later

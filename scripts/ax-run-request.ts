@@ -100,6 +100,7 @@ async function promptInteractivePlanning(
     verification: (await ask('Verification / tests that should prove this: ')).trim(),
     implementationAreas: (await ask('Likely implementation areas: ')).trim(),
     longRunningWork: (await ask('Any long-running or cross-cutting work: ')).trim(),
+    policyUpdates: (await ask('Shared base-context or policy docs to add/update before implementation: ')).trim(),
   };
 
   rl?.close();

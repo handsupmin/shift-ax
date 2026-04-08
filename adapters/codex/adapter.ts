@@ -26,10 +26,13 @@ const CORE_COMMANDS: ShiftAxCoreCommand[] = [
   'worktree-create',
   'worktree-remove',
   'onboard-context',
+  'doctor',
   'run-request',
   'approve-plan',
+  'sync-policy-context',
   'finalize-commit',
   'launch-execution',
+  'topic-status',
 ];
 
 export const codexAdapter: ShiftAxPlatformAdapter = {
@@ -64,9 +67,13 @@ export const codexAdapter: ShiftAxPlatformAdapter = {
       'Bootstrap mode: AGENTS.md-driven startup.',
       `Before planning or implementation, load the base-context index at ${defaultBaseContextIndex(platformRoot)} and route the request through Shift AX core flow.`,
       'If the base-context index is missing, interview the team and persist it with `ax onboard-context` (interactive) or `ax onboard-context --input <file>` before starting request work.',
+      'Use `ax doctor` for a compact repo/runtime health report when the setup or launcher state is unclear.',
       'Use `ax run-request` to bootstrap the request-scoped topic/worktree, resolve context, run the planning interview, write `execution-handoff.json`, and pause at the human planning-review gate.',
-      'Use `ax approve-plan` to record the human planning-review decision, then resume with `ax run-request --topic <dir> --resume` for automatic review and commit. Add `--no-auto-commit` only when a human explicitly wants a final manual stop.',
+      'Use `ax approve-plan` to record the human planning-review decision.',
+      'If the approved plan requires shared domain or policy document updates, complete them first and record that gate with `ax sync-policy-context --topic <dir> --summary "<what changed>" [--path <doc>]... [--entry "Label -> path"]...` before resuming implementation.',
+      'Then resume with `ax run-request --topic <dir> --resume` for automatic review and commit. Add `--no-auto-commit` only when a human explicitly wants a final manual stop.',
       'Use `ax launch-execution --platform codex --topic <dir> [--task-id <id>] [--dry-run]` when you need the platform-owned Codex launch commands for subagent or tmux execution from `execution-handoff.json`.',
+      'Use `ax topic-status --topic <dir>` for a compact summary of workflow phase, review gate, execution status, and latest failure reason.',
       'If a reviewed request hits a mandatory escalation trigger, persist that stop with `ax run-request --topic <dir> --resume --escalation <kind>:<summary>` and resume only after human review with `--clear-escalations`.',
       'Use `ax finalize-commit` after `ax review --run` reports commit-ready status.',
       'Use `ax worktree-plan` to inspect the preferred branch and worktree path for a topic.',

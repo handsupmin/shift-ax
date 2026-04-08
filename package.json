@@ -14,10 +14,13 @@
     "ax-bootstrap-assets": "./dist/scripts/ax-bootstrap-assets.js",
     "ax-scaffold-build": "./dist/scripts/ax-scaffold-build.js",
     "ax-onboard-context": "./dist/scripts/ax-onboard-context.js",
+    "ax-doctor": "./dist/scripts/ax-doctor.js",
     "ax-run-request": "./dist/scripts/ax-run-request.js",
     "ax-approve-plan": "./dist/scripts/ax-approve-plan.js",
+    "ax-sync-policy-context": "./dist/scripts/ax-sync-policy-context.js",
     "ax-finalize-commit": "./dist/scripts/ax-finalize-commit.js",
     "ax-launch-execution": "./dist/scripts/ax-launch-execution.js",
+    "ax-topic-status": "./dist/scripts/ax-topic-status.js",
     "ax-recall-topics": "./dist/scripts/ax-recall-topics.js",
     "ax-decisions": "./dist/scripts/ax-decisions.js"
   },

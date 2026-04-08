@@ -36,6 +36,11 @@ import { writeExecutionHandoff } from './execution-handoff.js';
 import type { ShiftAxExecutionState } from './execution-orchestrator.js';
 import { recordLifecycleEvent } from './lifecycle-events.js';
 import {
+  inferPolicyContextSyncArtifact,
+  readPolicyContextSyncArtifact,
+  writePolicyContextSyncArtifact,
+} from './policy-context-sync.js';
+import {
   hasActiveWorkflowEscalations,
   readWorkflowState,
   writeWorkflowState,
@@ -126,6 +131,10 @@ function buildDefaultBrainstorm(request: string, matchedLabels: string[]): strin
     '',
     ...(matchedLabels.length > 0 ? matchedLabels.map((label) => `- ${label}`) : ['- No matched context documents yet.']),
     '',
+    '## Base-Context Policy Updates',
+    '',
+    '- None yet.',
+    '',
   ].join('\n');
 }
 
@@ -141,6 +150,10 @@ function buildDefaultSpec(request: string, matchedLabels: string[]): string {
     '',
     ...(matchedLabels.length > 0 ? matchedLabels.map((label) => `- ${label}`) : ['- No matched context documents yet.']),
     '',
+    '## Base-Context Policy Updates',
+    '',
+    '- None yet.',
+    '',
   ].join('\n');
 }
 
@@ -151,6 +164,10 @@ function buildDefaultImplementationPlan(testStrategy: string, architecture: stri
     `Use ${testStrategy.toUpperCase()} first.`,
     `Respect ${architecture.replace(/-/g, ' ')}.`,
     'Add focused verification steps before commit finalization.',
+    '',
+    '## Base-Context Policy Updates',
+    '',
+    '- None yet.',
     '',
   ].join('\n');
 }
@@ -298,6 +315,20 @@ export async function startRequestPipeline({
     )}\n`,
     'utf8',
   );
+  await writePolicyContextSyncArtifact(
+    topic.topicDir,
+    inferPolicyContextSyncArtifact({
+      brainstormContent: brainstormContent ?? buildDefaultBrainstorm(request, matchedLabels),
+      specContent: specContent ?? buildDefaultSpec(request, matchedLabels),
+      implementationPlanContent:
+        implementationPlanContent ??
+        buildDefaultImplementationPlan(
+          profile?.engineering_defaults.test_strategy ?? 'tdd',
+          profile?.engineering_defaults.architecture ?? 'clean-boundaries',
+        ),
+      now,
+    }),
+  );
   await writeExecutionHandoff(topic.topicDir, now);
 
   const worktree = await createTopicWorktree({
@@ -394,6 +425,15 @@ export async function resumeRequestPipeline({
   if (hasActiveWorkflowEscalations(workflow)) {
     throw new Error(
       'workflow has active escalation triggers; resolve them before resuming automation',
+    );
+  }
+  const policyContextSync = await readPolicyContextSyncArtifact(topicDir);
+  if (policyContextSync.status === 'required') {
+    workflow.phase = 'awaiting_policy_sync';
+    workflow.updated_at = now.toISOString();
+    await writeWorkflowState(topicDir, workflow);
+    throw new Error(
+      'policy context sync is required before implementation can start',
     );
   }
   workflow.phase = 'implementation_running';

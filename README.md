@@ -17,9 +17,12 @@ Shift AX adds a control plane on top of existing coding-agent runtimes so teams 
 - resolve relevant context before planning or implementation
 - recall similar completed topics as supporting context after authoritative docs have been checked
 - keep a lightweight file-backed register of important decisions and when they became valid
+- run a compact doctor check for repo, topic, and launcher health when setup looks suspicious
 - create a request-scoped topic directory and git worktree
 - pause at a mandatory human plan-review gate
+- block implementation until any required shared policy/base-context doc updates have been written and recorded
 - resume with automated verification and structured review lanes
+- expose a compact topic-status view for the current phase, review gate, execution state, and last failure reason
 - finalize only after the gates allow a local Lore-protocol commit
 
 ## Current v1 boundary
@@ -55,6 +58,7 @@ That means Shift AX currently covers:
 npm install
 npm test
 npm run build
+npm run ax -- doctor
 ```
 
 ### 2. Onboard base context
@@ -104,6 +108,17 @@ npm run ax -- approve-plan \
 
 ### 5. Resume after approval
 
+If the approved plan says shared domain or policy docs must be updated first, record that before implementation resumes:
+
+```bash
+npm run ax -- sync-policy-context \
+  --topic .ax/topics/<topic-slug> \
+  --summary "Updated shared auth policy docs before implementation" \
+  --path docs/base-context/auth-policy.md
+```
+
+Then resume:
+
 ```bash
 npm run ax -- run-request \
   --topic .ax/topics/<topic-slug> \
@@ -138,6 +153,12 @@ npm run ax -- launch-execution \
 ```
 
 This reads `execution-handoff.json`, writes per-task execution prompts, and returns the concrete Codex / Claude / tmux launch commands for the planned slices.
+
+### 7. Inspect compact topic status when needed
+
+```bash
+npm run ax -- topic-status --topic .ax/topics/<topic-slug>
+```
 
 ## Mandatory human-escalation triggers
 

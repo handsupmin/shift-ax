@@ -17,6 +17,7 @@ export interface TopicBootstrapArtifacts {
   brainstorm: string;
   spec: string;
   plan_review: string;
+  policy_context_sync: string;
   implementation_plan: string;
   execution_handoff: string;
   execution_state: string;
@@ -103,6 +104,17 @@ export async function bootstrapTopic({
   const brainstormContent = '# Brainstorm\n\nPending.\n';
   const specContent = '# Topic Spec\n\n## Goal\n\nTBD\n';
   const planReviewContent = `${JSON.stringify({ version: 1, status: 'pending' }, null, 2)}\n`;
+  const policyContextSyncContent = `${JSON.stringify(
+    {
+      version: 1,
+      status: 'not_needed',
+      required_updates: [],
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    },
+    null,
+    2,
+  )}\n`;
   const implementationPlanContent = '# Implementation Plan\n\nPending.\n';
   const executionHandoffContent = `${JSON.stringify(
     {
@@ -164,6 +176,7 @@ export async function bootstrapTopic({
     writeFile(join(topicDir, artifacts.brainstorm), brainstormContent, 'utf8'),
     writeFile(join(topicDir, artifacts.spec), specContent, 'utf8'),
     writeFile(join(topicDir, artifacts.plan_review), planReviewContent, 'utf8'),
+    writeFile(join(topicDir, artifacts.policy_context_sync), policyContextSyncContent, 'utf8'),
     writeFile(
       join(topicDir, artifacts.implementation_plan),
       implementationPlanContent,

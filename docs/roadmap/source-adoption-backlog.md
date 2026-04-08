@@ -65,10 +65,12 @@ Everything adopted here must preserve two non-negotiable goals:
   - Future-proof review/CI feedback loops.
 - **Observability**
   - Keep correlation IDs, health summaries, and last-failure reasoning.
+  - Provide compact operator surfaces such as `ax topic-status` instead of a heavyweight dashboard.
 
 ### From claw-code
 - **Doctor-first runtime health checks**
   - Make environment validation explicit and easy.
+  - Prefer a compact CLI doctor report over a complex dashboard for operator usability.
 - **Usage-first documentation**
   - Keep setup and operator docs practical and task-oriented.
 

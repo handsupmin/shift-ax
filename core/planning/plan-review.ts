@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 
 import { topicArtifactPath } from '../topics/topic-artifacts.js';
+import { recordLifecycleEvent } from './lifecycle-events.js';
+import { readPolicyContextSyncArtifact } from './policy-context-sync.js';
 import {
   readWorkflowState,
   writeWorkflowState,
@@ -91,9 +93,25 @@ export async function recordPlanReviewDecision({
 
   const workflow = await readWorkflowState(topicDir);
   workflow.plan_review_status = status;
-  workflow.phase = status === 'approved' ? 'approved' : 'awaiting_plan_review';
+  const policyContextSync = await readPolicyContextSyncArtifact(topicDir);
+  workflow.phase =
+    status === 'approved'
+      ? policyContextSync.status === 'required'
+        ? 'awaiting_policy_sync'
+        : 'approved'
+      : 'awaiting_plan_review';
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
+
+  if (status === 'approved' && policyContextSync.status === 'required') {
+    await recordLifecycleEvent({
+      topicDir,
+      phase: workflow.phase,
+      event: 'policy.sync_required',
+      summary: 'Plan approval requires shared base-context policy updates before implementation can start.',
+      now,
+    });
+  }
 
   return artifact;
 }

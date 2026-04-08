@@ -7,6 +7,7 @@ export interface ShiftAxTopicArtifacts {
   brainstorm: string;
   spec: string;
   plan_review: string;
+  policy_context_sync: string;
   implementation_plan: string;
   execution_handoff: string;
   execution_state: string;
@@ -30,6 +31,7 @@ export function defaultTopicArtifacts(): ShiftAxTopicArtifacts {
     brainstorm: 'brainstorm.md',
     spec: 'spec.md',
     plan_review: 'plan-review.json',
+    policy_context_sync: 'policy-context-sync.json',
     implementation_plan: 'implementation-plan.md',
     execution_handoff: 'execution-handoff.json',
     execution_state: 'execution-state.json',
