@@ -179,6 +179,7 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
   const spec = await readMaybe(join(topicDir, 'spec.md'));
   const plan = await readMaybe(join(topicDir, 'implementation-plan.md'));
   const planReview = await readPlanReviewArtifact(topicDir);
+  const workflow = await readWorkflowStateMaybe(topicDir);
 
   if (planReview.status !== 'approved') {
     return verdictBase(
@@ -221,6 +222,30 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
         },
       ],
     );
+  }
+
+  const worktreePath = workflow?.worktree?.worktree_path;
+  if (worktreePath) {
+    const changedFiles = listChangedFiles(worktreePath);
+    const outOfScopeContent =
+      parseMarkdownSections(spec).get('Out of Scope') ??
+      parseMarkdownSections(await readMaybe(join(topicDir, 'brainstorm.md'))).get('Out of Scope') ??
+      '';
+
+    const outOfScopeTouched = changedFiles.find((file) => hasTokenOverlap(file, outOfScopeContent));
+    if (outOfScopeTouched) {
+      return verdictBase(
+        'spec-conformance',
+        'changes_requested',
+        'Changed files touch an area that is explicitly out of scope for the reviewed plan.',
+        [
+          {
+            severity: 'high',
+            message: `Out-of-scope file changed: ${outOfScopeTouched}`,
+          },
+        ],
+      );
+    }
   }
 
   return verdictBase(

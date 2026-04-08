@@ -242,3 +242,21 @@ test('test-adequacy review approves when changed tests cover spec and policy lan
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('spec-conformance review fails when changed files touch an out-of-scope area', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir, worktreePath } = await writeReviewableTopic(root);
+    await writeFile(join(worktreePath, 'src', 'billing-flow.ts'), 'export const billing = true;\n', 'utf8');
+    execFileSync('git', ['add', 'src/billing-flow.ts'], { cwd: worktreePath, stdio: 'pipe' });
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+
+    assert.equal(byLane.get('spec-conformance')?.status, 'changes_requested');
+    assert.match(byLane.get('spec-conformance')?.summary ?? '', /out-of-scope|scope/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

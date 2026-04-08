@@ -5,7 +5,9 @@ import { createInterface } from 'node:readline/promises';
 import { join } from 'node:path';
 import { stderr, stdin } from 'node:process';
 
+import { getPlatformAdapter } from '../adapters/index.js';
 import { resolveContextFromIndex } from '../core/context/index-resolver.js';
+import { orchestrateExecutionTasks } from '../core/planning/execution-orchestrator.js';
 import {
   resumeRequestPipeline,
   startRequestPipeline,
@@ -25,7 +27,7 @@ function usage(): void {
     [
       'Usage:',
       '  ax-run-request --request "<text>" [--summary "<text>"] [--brainstorm-file PATH] [--spec-file PATH] [--plan-file PATH] [--index PATH] [--root DIR] [--base BRANCH]',
-      '  ax-run-request --topic DIR --resume [--verify-command CMD]... [--escalation KIND[:summary]]... [--clear-escalations] [--escalation-resolution "<text>"] [--no-auto-commit]',
+      '  ax-run-request --topic DIR --resume [--platform <codex|claude-code>] [--verify-command CMD]... [--escalation KIND[:summary]]... [--clear-escalations] [--escalation-resolution "<text>"] [--no-auto-commit]',
       '',
     ].join('\n'),
   );
@@ -130,12 +132,38 @@ async function resolveMatchedContextLabels(
 
 const topicDir = readArg('--topic');
 const resume = process.argv.includes('--resume');
+const platform = readArg('--platform');
 
 if (resume) {
   if (!topicDir) {
     usage();
     process.exit(1);
   }
+
+  if (platform && platform !== 'codex' && platform !== 'claude-code') {
+    usage();
+    process.exit(1);
+  }
+
+  const runtimePlatform =
+    platform === 'codex' || platform === 'claude-code' ? platform : undefined;
+
+  const executionRunner = runtimePlatform
+    ? async ({ topicDir }: { topicDir: string; worktreePath: string }) => {
+        const adapter = getPlatformAdapter(runtimePlatform);
+        const plan = await adapter.planExecution({ topicDir });
+        return orchestrateExecutionTasks({
+          topicDir,
+          tasks: plan.tasks,
+          runTask: async (task) => {
+            await adapter.launchExecution({
+              topicDir,
+              taskId: task.task_id,
+            });
+          },
+        });
+      }
+    : undefined;
 
   const result = await resumeRequestPipeline({
     topicDir,
@@ -146,6 +174,7 @@ if (resume) {
     clearEscalations: process.argv.includes('--clear-escalations'),
     escalationResolution: readArg('--escalation-resolution'),
     autoCommit: !process.argv.includes('--no-auto-commit'),
+    executionRunner,
   });
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   process.exit(0);

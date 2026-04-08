@@ -30,6 +30,18 @@ async function readArtifact(path: string): Promise<string> {
   return readFile(path, 'utf8');
 }
 
+async function assertResolvedContextReady(topicDir: string): Promise<void> {
+  const raw = await readArtifact(topicArtifactPath(topicDir, 'resolved_context')).catch(() => '');
+  if (!raw) {
+    throw new Error('resolved context artifact is missing');
+  }
+
+  const parsed = JSON.parse(raw) as { unresolved_paths?: string[] };
+  if ((parsed.unresolved_paths ?? []).length > 0) {
+    throw new Error('resolved context still has unresolved base-context paths');
+  }
+}
+
 export async function readExecutionHandoff(
   topicDir: string,
 ): Promise<ShiftAxExecutionHandoffDocument> {
@@ -100,6 +112,7 @@ export async function materializeExecutionPrompts(
   topicDir: string,
   taskId?: string,
 ): Promise<ShiftAxExecutionPromptArtifact[]> {
+  await assertResolvedContextReady(topicDir);
   const [handoff, worktreePath, request, summary, brainstorm, spec, plan] =
     await Promise.all([
       readExecutionHandoff(topicDir),

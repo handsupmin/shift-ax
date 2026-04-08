@@ -33,6 +33,7 @@ import {
   type ShiftAxWorkflowEscalationInput,
 } from './escalation.js';
 import { writeExecutionHandoff } from './execution-handoff.js';
+import type { ShiftAxExecutionState } from './execution-orchestrator.js';
 import {
   hasActiveWorkflowEscalations,
   readWorkflowState,
@@ -69,6 +70,10 @@ export interface ResumeRequestPipelineInput {
   clearEscalations?: boolean;
   escalationResolution?: string;
   autoCommit?: boolean;
+  executionRunner?: (input: {
+    topicDir: string;
+    worktreePath: string;
+  }) => Promise<ShiftAxExecutionState>;
   now?: Date;
 }
 
@@ -227,6 +232,18 @@ async function resolveExecutionCwd(topicDir: string): Promise<string> {
   return rootDir;
 }
 
+async function assertResolvedContextReady(topicDir: string): Promise<void> {
+  const raw = await readFile(topicArtifactPath(topicDir, 'resolved_context'), 'utf8').catch(() => '');
+  if (!raw) {
+    throw new Error('resolved context artifact is missing');
+  }
+
+  const parsed = JSON.parse(raw) as { unresolved_paths?: string[] };
+  if ((parsed.unresolved_paths ?? []).length > 0) {
+    throw new Error('resolved context still has unresolved base-context paths');
+  }
+}
+
 export async function startRequestPipeline({
   rootDir,
   request,
@@ -322,6 +339,7 @@ export async function resumeRequestPipeline({
   clearEscalations = false,
   escalationResolution,
   autoCommit = false,
+  executionRunner,
   now = new Date(),
 }: ResumeRequestPipelineInput): Promise<ResumeRequestPipelineResult> {
   if (clearEscalations) {
@@ -347,6 +365,7 @@ export async function resumeRequestPipeline({
   if (!fingerprint.matches) {
     throw new Error(fingerprint.reason ?? 'approved plan fingerprint check failed');
   }
+  await assertResolvedContextReady(topicDir);
 
   const workflow = await readWorkflowState(topicDir);
   if (hasActiveWorkflowEscalations(workflow)) {
@@ -360,6 +379,21 @@ export async function resumeRequestPipeline({
   await writeWorkflowState(topicDir, workflow);
 
   const executionCwd = await resolveExecutionCwd(topicDir);
+  if (executionRunner) {
+    const executionState = await executionRunner({
+      topicDir,
+      worktreePath: executionCwd,
+    });
+    await writeFile(
+      topicArtifactPath(topicDir, 'execution_state'),
+      `${JSON.stringify(executionState, null, 2)}\n`,
+      'utf8',
+    );
+    if (executionState.overall_status !== 'completed') {
+      throw new Error('execution orchestration failed');
+    }
+  }
+
   const verification = await runVerificationCommands(executionCwd, verificationCommands);
   await writeVerificationReport(topicDir, verification);
   workflow.verification = verification;

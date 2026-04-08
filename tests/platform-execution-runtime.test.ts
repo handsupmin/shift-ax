@@ -15,6 +15,20 @@ async function createTopic(root: string): Promise<{ topicDir: string; worktreePa
   await mkdir(worktreePath, { recursive: true });
   await writeFile(join(topicDir, 'request.md'), 'Build safer auth refresh flow\n', 'utf8');
   await writeFile(join(topicDir, 'request-summary.md'), 'Need a reviewed auth-refresh flow.\n', 'utf8');
+  await writeFile(
+    join(topicDir, 'resolved-context.json'),
+    JSON.stringify(
+      {
+        version: 1,
+        query: 'Build safer auth refresh flow',
+        matches: [{ label: 'Auth policy', path: 'docs/base-context/auth-policy.md' }],
+        unresolved_paths: [],
+      },
+      null,
+      2,
+    ),
+    'utf8',
+  );
   await writeFile(join(topicDir, 'brainstorm.md'), '# Brainstorm\n\n## Clarified Outcome\n\n- Keep users signed in.\n', 'utf8');
   await writeFile(join(topicDir, 'spec.md'), '# Topic Spec\n\n## Goal\n\nKeep users signed in.\n', 'utf8');
   await writeFile(
@@ -168,6 +182,62 @@ test('ax launch-execution --dry-run prints execution launch plans', async () => 
     assert.equal(result.tasks.length, 2);
     assert.equal(result.tasks[0]!.execution_mode, 'subagent');
     assert.match(result.tasks[0]!.shell_command, /codex exec/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('ax launch-execution refuses to run when resolved context is still unresolved', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-launch-context-block-'));
+
+  try {
+    const { topicDir } = await createTopic(root);
+    await writeFile(
+      join(topicDir, 'resolved-context.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          query: 'Build safer auth refresh flow',
+          matches: [],
+          unresolved_paths: ['docs/base-context/index.md'],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const failure = await new Promise<{ code: number; stderr: string }>((resolve) => {
+      const child = spawn(
+        process.execPath,
+        [
+          '--import',
+          'tsx',
+          'scripts/ax.ts',
+          'launch-execution',
+          '--platform',
+          'codex',
+          '--topic',
+          topicDir,
+          '--dry-run',
+        ],
+        {
+          cwd: '/Users/sangmin/sources/shift-ax/.worktrees/phase1-auto-execution-orchestrator',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
+      );
+
+      let stderr = '';
+      child.stderr.on('data', (chunk) => {
+        stderr += chunk.toString('utf8');
+      });
+      child.on('exit', (code) => {
+        resolve({ code: code ?? 1, stderr });
+      });
+    });
+
+    assert.equal(failure.code, 1);
+    assert.match(failure.stderr, /resolved context|unresolved/i);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
