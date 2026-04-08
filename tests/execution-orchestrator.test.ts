@@ -72,3 +72,45 @@ test('orchestrateExecutionTasks records task results and waits for output artifa
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('orchestrateExecutionTasks reuses an existing non-empty output artifact instead of re-running the task', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-exec-orchestrator-reuse-'));
+  const topicDir = join(root, '.ax', 'topics', '2026-04-08-exec');
+  const worktreePath = join(root, '.ax', 'worktrees', '2026-04-08-exec');
+
+  try {
+    await mkdir(topicDir, { recursive: true });
+    await mkdir(worktreePath, { recursive: true });
+    const outputPath = join(topicDir, 'execution-results', 'task-1.json');
+    await mkdir(join(topicDir, 'execution-results'), { recursive: true });
+    await writeFile(outputPath, '{"status":"ok","task":"task-1"}\n', 'utf8');
+
+    let runCount = 0;
+    const result = await orchestrateExecutionTasks({
+      topicDir,
+      tasks: [
+        {
+          task_id: 'task-1',
+          source_text: 'Short slice',
+          execution_mode: 'subagent',
+          working_directory: worktreePath,
+          prompt_path: join(topicDir, 'execution-prompts', 'task-1.md'),
+          output_path: outputPath,
+          command: ['echo', 'task-1'],
+          shell_command: 'echo task-1',
+        },
+      ],
+      runTask: async () => {
+        runCount += 1;
+      },
+      pollIntervalMs: 10,
+      timeoutMs: 1000,
+    });
+
+    assert.equal(result.overall_status, 'completed');
+    assert.equal(runCount, 0);
+    assert.equal(result.tasks[0]?.status, 'completed');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

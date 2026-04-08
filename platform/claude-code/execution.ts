@@ -1,4 +1,6 @@
 import { execFileSync } from 'node:child_process';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 
 import type {
   ShiftAxExecutionLaunchInput,
@@ -14,7 +16,44 @@ function shellQuote(value: string): string {
 }
 
 function buildClaudeExecShellCommand(plan: ShiftAxExecutionTaskPlan): string {
-  return `cat ${shellQuote(plan.prompt_path)} | claude -p --output-format json --permission-mode bypassPermissions --add-dir ${shellQuote(plan.working_directory)} > ${shellQuote(plan.output_path)}`;
+  return `claude -p --output-format text --permission-mode bypassPermissions --no-session-persistence --add-dir ${shellQuote(plan.working_directory)} \"$(cat ${shellQuote(plan.prompt_path)})\" > ${shellQuote(plan.output_path)}`;
+}
+
+function formatProcessError(error: unknown): string {
+  const failure = error as { message?: string; stdout?: string | Buffer; stderr?: string | Buffer };
+  const stdout =
+    typeof failure.stdout === 'string'
+      ? failure.stdout
+      : failure.stdout instanceof Buffer
+        ? failure.stdout.toString('utf8')
+        : '';
+  const stderr =
+    typeof failure.stderr === 'string'
+      ? failure.stderr
+      : failure.stderr instanceof Buffer
+        ? failure.stderr.toString('utf8')
+        : '';
+  return [failure.message ?? 'process failed', stdout.trim(), stderr.trim()]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function claudeExecutionTimeoutMs(): number {
+  const parsed = Number(process.env.SHIFT_AX_CLAUDE_EXEC_TIMEOUT_MS || '45000');
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 45_000;
+}
+
+function clearExistingTmuxSession(sessionName: string): void {
+  try {
+    execFileSync('tmux', ['has-session', '-t', sessionName], {
+      stdio: 'pipe',
+    });
+    execFileSync('tmux', ['kill-session', '-t', sessionName], {
+      stdio: 'pipe',
+    });
+  } catch {
+    // no existing session to clear
+  }
 }
 
 export function getClaudeCodeExecutionRuntime(): ShiftAxPlatformExecutionRuntime {
@@ -110,9 +149,41 @@ export async function launchClaudeCodeExecution({
   const plan = await planClaudeCodeExecutionLaunch({ topicDir, taskId });
 
   for (const task of plan.tasks) {
-    execFileSync(task.command[0]!, task.command.slice(1), {
-      stdio: 'pipe',
-    });
+    if (task.execution_mode === 'tmux') {
+      if (task.session_name) {
+        clearExistingTmuxSession(task.session_name);
+      }
+      execFileSync(task.command[0]!, task.command.slice(1), {
+        stdio: 'pipe',
+      });
+      continue;
+    }
+
+    try {
+      const output = execFileSync(
+        'claude',
+        [
+          '-p',
+          '--output-format',
+          'text',
+          '--permission-mode',
+          'bypassPermissions',
+          '--no-session-persistence',
+          '--add-dir',
+          task.working_directory,
+          readFileSync(task.prompt_path, 'utf8'),
+        ],
+        {
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe'],
+          timeout: claudeExecutionTimeoutMs(),
+        },
+      );
+      mkdirSync(dirname(task.output_path), { recursive: true });
+      writeFileSync(task.output_path, output, 'utf8');
+    } catch (error) {
+      throw new Error(`Claude Code execution failed for ${task.task_id}: ${formatProcessError(error)}`);
+    }
   }
 
   return {

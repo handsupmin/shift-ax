@@ -147,3 +147,57 @@ test('ax run-request fails fast when the base-context index points to an unresol
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('ax run-request re-resolves base-context using interview details, not only the raw request text', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const onboardingPath = join(root, 'onboarding.json');
+    await writeFile(
+      onboardingPath,
+      JSON.stringify(
+        {
+          documents: [
+            {
+              label: 'Refund Policy',
+              content: '# Refund Policy\n\nRefund changes must preserve customer-visible traceability.\n',
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const onboard = await runAxInteractive(
+      ['onboard-context', '--root', root, '--input', onboardingPath],
+      '',
+    );
+    assert.equal(onboard.code, 0, onboard.stderr);
+
+    const started = await runAxInteractive(
+      ['run-request', '--root', root, '--request', 'Create ShopBridge core marker flow'],
+      [
+        'Create shopbridge-marker.txt with exact text ShopBridge ready.',
+        'Refund Policy applies and no schema changes are allowed.',
+        'Do not change seller UI.',
+        'Run a marker test.',
+        'shopbridge-marker.txt; shopbridge-marker.test.js',
+        '',
+        '',
+      ].join('\n'),
+    );
+
+    assert.equal(started.code, 0, started.stderr);
+
+    const startResult = JSON.parse(started.stdout) as { topicDir: string };
+    const resolvedContext = JSON.parse(
+      await readFile(join(startResult.topicDir, 'resolved-context.json'), 'utf8'),
+    ) as { matches: Array<{ label: string }> };
+
+    assert.equal(resolvedContext.matches[0]?.label, 'Refund Policy');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

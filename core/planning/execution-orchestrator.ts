@@ -40,6 +40,15 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
+async function hasUsableOutput(path: string): Promise<boolean> {
+  try {
+    const details = await stat(path);
+    return details.size > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function waitForOutput(path: string, pollIntervalMs: number, timeoutMs: number): Promise<void> {
   const startedAt = Date.now();
   while (Date.now() - startedAt <= timeoutMs) {
@@ -71,8 +80,10 @@ export async function orchestrateExecutionTasks({
     const taskStartedAt = new Date().toISOString();
     try {
       await mkdir(dirname(task.output_path), { recursive: true });
-      await runTask(task);
-      await waitForOutput(task.output_path, pollIntervalMs, timeoutMs);
+      if (!(await hasUsableOutput(task.output_path))) {
+        await runTask(task);
+        await waitForOutput(task.output_path, pollIntervalMs, timeoutMs);
+      }
       taskStates.push({
         task_id: task.task_id,
         execution_mode: task.execution_mode,

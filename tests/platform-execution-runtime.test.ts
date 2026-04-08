@@ -2,10 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawn } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 import { getPlatformAdapter } from '../adapters/index.js';
+
+const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
 async function createTopic(root: string): Promise<{ topicDir: string; worktreePath: string }> {
   const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
@@ -121,7 +124,9 @@ test('platform adapters expose execution launch plans for codex and claude-code'
     assert.match(codexPlan.tasks[0]!.prompt_path, /execution-prompts\/task-1\.md$/);
     assert.match(codexPlan.tasks[0]!.shell_command, /codex exec/);
     assert.match(codexPlan.tasks[1]!.command.join(' '), /tmux new-session/);
+    assert.notEqual(codexPlan.tasks[0]!.session_name, codexPlan.tasks[1]!.session_name);
     assert.match(claudePlan.tasks[0]!.shell_command, /claude -p/);
+    assert.match(claudePlan.tasks[0]!.shell_command, /--no-session-persistence/);
     assert.match(claudePlan.tasks[1]!.command.join(' '), /tmux new-session/);
 
     const prompt = await readFile(codexPlan.tasks[0]!.prompt_path, 'utf8');
@@ -152,7 +157,7 @@ test('ax launch-execution --dry-run prints execution launch plans', async () => 
           '--dry-run',
         ],
         {
-          cwd: '/Users/sangmin/sources/shift-ax',
+          cwd: REPO_ROOT,
           stdio: ['ignore', 'pipe', 'pipe'],
         },
       );
@@ -222,7 +227,7 @@ test('ax launch-execution refuses to run when resolved context is still unresolv
           '--dry-run',
         ],
         {
-          cwd: '/Users/sangmin/sources/shift-ax/.worktrees/phase1-auto-execution-orchestrator',
+          cwd: REPO_ROOT,
           stdio: ['ignore', 'pipe', 'pipe'],
         },
       );
@@ -240,5 +245,160 @@ test('ax launch-execution refuses to run when resolved context is still unresolv
     assert.match(failure.stderr, /resolved context|unresolved/i);
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('codex adapter launchExecution can complete a subagent task with a prompt argument and output artifact', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-codex-launch-live-'));
+  const binDir = await mkdtemp(join(tmpdir(), 'shift-ax-codex-launch-bin-'));
+  const previousPath = process.env.PATH;
+
+  try {
+    const { topicDir, worktreePath } = await createTopic(root);
+    const fakeCodex = join(binDir, 'codex');
+    await writeFile(
+      fakeCodex,
+      `#!/bin/sh
+set -eu
+WORKDIR=""
+OUTPUT=""
+PROMPT=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    exec|--full-auto)
+      shift 1
+      ;;
+    -C|--cd)
+      WORKDIR="$2"
+      shift 2
+      ;;
+    -o|--output-last-message)
+      OUTPUT="$2"
+      shift 2
+      ;;
+    *)
+      PROMPT="$1"
+      shift 1
+      ;;
+  esac
+done
+printf '%s\\n' "$PROMPT" > "$WORKDIR/prompt-captured.txt"
+printf 'codex marker\\n' > "$WORKDIR/codex-marker.txt"
+printf 'Implemented codex task.' > "$OUTPUT"
+`,
+      'utf8',
+    );
+    execFileSync('chmod', ['+x', fakeCodex], { stdio: 'pipe' });
+    process.env.PATH = `${binDir}:${previousPath ?? ''}`;
+
+    const adapter = getPlatformAdapter('codex');
+    const result = await adapter.launchExecution({ topicDir, taskId: 'task-1' });
+
+    assert.equal(result.launched, true);
+    assert.match(await readFile(join(worktreePath, 'prompt-captured.txt'), 'utf8'), /Update auth refresh service/);
+    assert.equal(await readFile(join(worktreePath, 'codex-marker.txt'), 'utf8'), 'codex marker\n');
+    assert.equal(
+      await readFile(join(topicDir, 'execution-results', 'task-1.json'), 'utf8'),
+      'Implemented codex task.',
+    );
+  } finally {
+    process.env.PATH = previousPath;
+    await rm(root, { recursive: true, force: true });
+    await rm(binDir, { recursive: true, force: true });
+  }
+});
+
+test('claude-code adapter launchExecution runs in print mode with no session persistence and captures stdout into the output artifact', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-claude-launch-live-'));
+  const binDir = await mkdtemp(join(tmpdir(), 'shift-ax-claude-launch-bin-'));
+  const previousPath = process.env.PATH;
+
+  try {
+    const { topicDir, worktreePath } = await createTopic(root);
+    const fakeClaude = join(binDir, 'claude');
+    await writeFile(
+      fakeClaude,
+      `#!/bin/sh
+set -eu
+WORKDIR=""
+PROMPT=""
+NOPERSIST="0"
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --add-dir)
+      WORKDIR="$2"
+      shift 2
+      ;;
+    --no-session-persistence)
+      NOPERSIST="1"
+      shift 1
+      ;;
+    -p|--print|--output-format|--permission-mode)
+      shift 2
+      ;;
+    *)
+      PROMPT="$1"
+      shift 1
+      ;;
+  esac
+done
+test "$NOPERSIST" = "1"
+printf '%s\\n' "$PROMPT" > "$WORKDIR/prompt-captured.txt"
+printf 'claude marker\\n' > "$WORKDIR/claude-marker.txt"
+printf 'Implemented claude task.'
+`,
+      'utf8',
+    );
+    execFileSync('chmod', ['+x', fakeClaude], { stdio: 'pipe' });
+    process.env.PATH = `${binDir}:${previousPath ?? ''}`;
+
+    const adapter = getPlatformAdapter('claude-code');
+    const result = await adapter.launchExecution({ topicDir, taskId: 'task-1' });
+
+    assert.equal(result.launched, true);
+    assert.match(await readFile(join(worktreePath, 'prompt-captured.txt'), 'utf8'), /Update auth refresh service/);
+    assert.equal(await readFile(join(worktreePath, 'claude-marker.txt'), 'utf8'), 'claude marker\n');
+    assert.equal(
+      await readFile(join(topicDir, 'execution-results', 'task-1.json'), 'utf8'),
+      'Implemented claude task.',
+    );
+  } finally {
+    process.env.PATH = previousPath;
+    await rm(root, { recursive: true, force: true });
+    await rm(binDir, { recursive: true, force: true });
+  }
+});
+
+test('claude-code adapter launchExecution fails fast when the launcher exceeds the configured timeout', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-claude-launch-timeout-'));
+  const binDir = await mkdtemp(join(tmpdir(), 'shift-ax-claude-timeout-bin-'));
+  const previousPath = process.env.PATH;
+  const previousTimeout = process.env.SHIFT_AX_CLAUDE_EXEC_TIMEOUT_MS;
+
+  try {
+    const { topicDir } = await createTopic(root);
+    const fakeClaude = join(binDir, 'claude');
+    await writeFile(
+      fakeClaude,
+      `#!/bin/sh
+sleep 1
+printf 'too slow'
+`,
+      'utf8',
+    );
+    execFileSync('chmod', ['+x', fakeClaude], { stdio: 'pipe' });
+    process.env.PATH = `${binDir}:${previousPath ?? ''}`;
+    process.env.SHIFT_AX_CLAUDE_EXEC_TIMEOUT_MS = '10';
+
+    const adapter = getPlatformAdapter('claude-code');
+    await assert.rejects(
+      adapter.launchExecution({ topicDir, taskId: 'task-1' }),
+      /Claude Code execution failed|timed out/i,
+    );
+  } finally {
+    process.env.PATH = previousPath;
+    process.env.SHIFT_AX_CLAUDE_EXEC_TIMEOUT_MS = previousTimeout;
+    await rm(root, { recursive: true, force: true });
+    await rm(binDir, { recursive: true, force: true });
   }
 });
