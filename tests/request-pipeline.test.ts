@@ -13,6 +13,7 @@ import {
   startRequestPipeline,
 } from '../core/planning/request-pipeline.js';
 import { recordPlanReviewDecision } from '../core/planning/plan-review.js';
+import { readLifecycleEvents } from '../core/planning/lifecycle-events.js';
 import { topicArtifactPath } from '../core/topics/topic-artifacts.js';
 
 async function createGitRepo(): Promise<string> {
@@ -350,10 +351,13 @@ test('resumeRequestPipeline can orchestrate execution tasks before verification 
     const executionState = JSON.parse(
       await readFile(join(started.topicDir, 'execution-state.json'), 'utf8'),
     ) as { overall_status: string };
+    const lifecycle = await readLifecycleEvents(started.topicDir);
 
     assert.equal(resumed.aggregate.commit_allowed, true);
     assert.equal(executionState.overall_status, 'completed');
     assert.equal(workflow.phase, 'commit_ready');
+    assert.ok(lifecycle.some((event) => event.event === 'execution.started'));
+    assert.ok(lifecycle.some((event) => event.event === 'review.completed'));
   } finally {
     await rm(repoRoot, { recursive: true, force: true });
   }

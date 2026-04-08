@@ -24,7 +24,7 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
   - Add a file-backed memory layer for previous topic artifacts, subordinate to authoritative docs.
 - [x] **Decision register with validity windows**
   - Track major decisions, effective dates, and replacements.
-- [ ] **Lifecycle / reaction layer**
+- [x] **Lifecycle / reaction layer**
   - Add event-driven feedback loops for failed reviews, blocked execution, and future CI handling.
 - [ ] **Observability surfaces**
   - Add compact operator views for current phase, failure reason, and active task state.

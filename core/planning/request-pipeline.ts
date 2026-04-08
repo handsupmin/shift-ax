@@ -34,6 +34,7 @@ import {
 } from './escalation.js';
 import { writeExecutionHandoff } from './execution-handoff.js';
 import type { ShiftAxExecutionState } from './execution-orchestrator.js';
+import { recordLifecycleEvent } from './lifecycle-events.js';
 import {
   hasActiveWorkflowEscalations,
   readWorkflowState,
@@ -326,6 +327,13 @@ export async function startRequestPipeline({
     },
   };
   await writeWorkflowState(topic.topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir: topic.topicDir,
+    phase: workflow.phase,
+    event: 'plan.review_required',
+    summary: 'Waiting for the human plan review.',
+    now,
+  });
 
   return {
     ...topic,
@@ -359,6 +367,18 @@ export async function resumeRequestPipeline({
       triggers: escalationTriggers,
       now,
     });
+    await recordLifecycleEvent({
+      topicDir,
+      phase: 'awaiting_human_escalation',
+      event: 'execution.blocked',
+      summary: 'Execution stopped because a mandatory escalation trigger was raised.',
+      reaction: {
+        key: escalationTriggers[0]!.kind,
+        action: 'await_human_escalation',
+        outcome: 'blocked',
+      },
+      now,
+    });
     throw new Error(
       'workflow requires human escalation review before automation can continue',
     );
@@ -380,6 +400,13 @@ export async function resumeRequestPipeline({
   workflow.plan_review_status = 'approved';
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir,
+    phase: workflow.phase,
+    event: 'execution.started',
+    summary: 'Execution resumed after human plan approval.',
+    now,
+  });
 
   const executionCwd = await resolveExecutionCwd(topicDir);
   if (executionRunner) {
@@ -410,6 +437,13 @@ export async function resumeRequestPipeline({
   workflow.phase = 'review_pending';
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir,
+    phase: workflow.phase,
+    event: 'review.started',
+    summary: 'Structured review lanes are running.',
+    now,
+  });
 
   await runReviewLanes({ topicDir });
   const aggregate = await aggregateReviewVerdicts({ topicDir });
@@ -431,6 +465,24 @@ export async function resumeRequestPipeline({
   workflow.phase = aggregate.commit_allowed ? 'commit_ready' : 'implementation_running';
   workflow.updated_at = now.toISOString();
   await writeWorkflowState(topicDir, workflow);
+  await recordLifecycleEvent({
+    topicDir,
+    phase: workflow.phase,
+    event: 'review.completed',
+    summary: aggregate.commit_allowed
+      ? 'Review passed and the topic is commit-ready.'
+      : 'Review requested more implementation work.',
+    ...(aggregate.commit_allowed
+      ? {}
+      : {
+          reaction: {
+            key: 'review-changes-requested',
+            action: 'return_to_implementation',
+            outcome: 'changes_requested',
+          },
+        }),
+    now,
+  });
 
   let finalization: FinalizeTopicCommitResult | undefined;
   if (aggregate.commit_allowed && autoCommit) {
@@ -441,6 +493,13 @@ export async function resumeRequestPipeline({
     workflow.phase = 'committed';
     workflow.updated_at = now.toISOString();
     await writeWorkflowState(topicDir, workflow);
+    await recordLifecycleEvent({
+      topicDir,
+      phase: workflow.phase,
+      event: 'finalization.committed',
+      summary: 'Automatic finalization created the local commit.',
+      now,
+    });
   }
 
   return {
