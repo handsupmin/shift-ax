@@ -54,7 +54,7 @@ if (!command || !commands.has(command)) {
       '  ax launch-execution --platform <codex|claude-code> --topic DIR [--task-id ID] [--dry-run]',
       '  ax topic-status --topic DIR',
       '  ax recall-topics --query "<text>" [--root DIR] [--limit N]',
-      '  ax decisions [--root DIR] [--query "<text>"] [--active-at YYYY-MM-DD]',
+      '  ax decisions [--root DIR] [--query "<text>"] [--active-at YYYY-MM-DD] [--limit N]',
       '  ax platform-manifest --platform <codex|claude-code> [--root DIR]',
       '  ax bootstrap-assets --platform <codex|claude-code> [--root DIR]',
       '  ax scaffold-build --platform <codex|claude-code> [--root DIR]',

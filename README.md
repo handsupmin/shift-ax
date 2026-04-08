@@ -17,6 +17,7 @@ Shift AX adds a control plane on top of existing coding-agent runtimes so teams 
 - resolve relevant context before planning or implementation
 - recall similar completed topics as supporting context after authoritative docs have been checked
 - keep a lightweight file-backed register of important decisions and when they became valid
+- search decision memory with linked source-topic summaries when the team needs to recall why something became policy
 - run a compact doctor check for repo, topic, and launcher health when setup looks suspicious
 - create a request-scoped topic directory and git worktree
 - pause at a mandatory human plan-review gate

@@ -36,6 +36,7 @@ Current request-to-commit behavior:
 - `ax finalize-commit --topic <dir>` validates or auto-generates the Lore commit message, verifies the aggregate review gate allows commit, and writes the local commit state artifact.
 - `ax launch-execution --platform <codex|claude-code> --topic <dir> [--task-id <id>] [--dry-run]` materializes execution prompts from `execution-handoff.json` and returns or launches the concrete Codex / Claude / tmux commands for each task.
 - `ax topic-status --topic <dir>` prints a compact status summary for the topic's current phase, review state, execution state, policy-sync gate, and latest lifecycle/reaction records.
+- `ax decisions --query "<text>" [--active-at YYYY-MM-DD] [--limit N]` can now act as a ranked decision-memory search and includes linked source-topic summaries when they are available.
 
 Current review behavior:
 

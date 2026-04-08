@@ -82,6 +82,7 @@ Everything adopted here must preserve two non-negotiable goals:
   - Search prior topic artifacts and decision history after the authoritative docs and reviewed artifacts have been checked first.
 - **Decision graph / validity graph**
   - Track when key decisions became active, were replaced, or expired.
+  - Search decision memory with linked topic summaries so operators can quickly recall why a decision exists.
 
 ### From agent-orchestrator
 - **Reactive feedback loops**

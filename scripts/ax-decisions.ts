@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { listDecisionRecords } from '../core/memory/decision-register.js';
+import { listDecisionRecords, searchDecisionMemory } from '../core/memory/decision-register.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-decisions [--root DIR] [--query "<text>"] [--active-at YYYY-MM-DD]\n');
+  process.stderr.write('Usage: ax-decisions [--root DIR] [--query "<text>"] [--active-at YYYY-MM-DD] [--limit N]\n');
 }
 
 function readArg(flag: string): string | undefined {
@@ -15,16 +15,24 @@ function readArg(flag: string): string | undefined {
 const rootDir = readArg('--root') || process.cwd();
 const query = readArg('--query');
 const activeAt = readArg('--active-at');
+const limit = Number(readArg('--limit') || '5');
 
 if (process.argv.includes('--help')) {
   usage();
   process.exit(0);
 }
 
-const result = await listDecisionRecords({
-  rootDir,
-  query,
-  activeAt,
-});
+const result = query
+  ? await searchDecisionMemory({
+      rootDir,
+      query,
+      activeAt,
+      limit: Number.isFinite(limit) && limit > 0 ? limit : 5,
+    })
+  : await listDecisionRecords({
+      rootDir,
+      query,
+      activeAt,
+    });
 
 process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
