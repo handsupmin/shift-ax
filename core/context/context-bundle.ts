@@ -33,6 +33,43 @@ export interface ShiftAxContextBundle {
   rendered: string;
 }
 
+export function classifyContextBundle(
+  bundle: ShiftAxContextBundle,
+): {
+  status: 'ok' | 'warn' | 'critical';
+  recommendation: string;
+} {
+  if (bundle.issues.length > 0) {
+    return {
+      status: 'critical',
+      recommendation:
+        'Base-context issues are present. Repair the shared docs or index before trusting this context bundle.',
+    };
+  }
+
+  const ratio = bundle.total_source_chars / Math.max(bundle.max_chars, 1);
+  if (bundle.truncated && ratio >= 1.5) {
+    return {
+      status: 'critical',
+      recommendation:
+        'The current context is far above the bundle budget. Split the work, pause safely, or build a smaller bundle.',
+    };
+  }
+
+  if (bundle.truncated || ratio >= 1.0) {
+    return {
+      status: 'warn',
+      recommendation:
+        'The current context is approaching the bundle budget. Narrow the query or checkpoint the work soon.',
+    };
+  }
+
+  return {
+    status: 'ok',
+    recommendation: 'The current context fits safely inside the bundle budget. Continue working.',
+  };
+}
+
 function tokenize(value: string): string[] {
   return String(value || '')
     .toLowerCase()
@@ -316,7 +353,7 @@ export async function writeContextBundle({
   maxChars?: number;
   outputPath?: string;
   workflowStep?: string;
-}): Promise<{ bundle: ShiftAxContextBundle; output_path: string }> {
+}): Promise<{ bundle: ShiftAxContextBundle; output_path: string; status: 'ok' | 'warn' | 'critical' }> {
   const bundle = await buildContextBundle({
     rootDir,
     topicDir,
@@ -335,5 +372,6 @@ export async function writeContextBundle({
   return {
     bundle,
     output_path: targetPath,
+    status: classifyContextBundle(bundle).status,
   };
 }

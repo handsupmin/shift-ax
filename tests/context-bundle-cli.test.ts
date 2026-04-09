@@ -99,7 +99,9 @@ test('ax init-context writes a bundle markdown file for a workflow step', async 
       });
     });
 
-    const result = JSON.parse(stdout) as { output_path: string };
+    const result = JSON.parse(stdout) as { output_path: string; status: string; issues_count: number };
+    assert.equal(result.status, 'ok');
+    assert.equal(result.issues_count, 0);
     const written = await readFile(result.output_path, 'utf8');
     assert.match(written, /## Base Context/);
     assert.match(written, /Audit Policy/);

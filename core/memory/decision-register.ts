@@ -222,5 +222,11 @@ export async function searchDecisionMemory({
     });
   }
 
-  return matches.sort((left, right) => right.score - left.score).slice(0, limit);
+  return matches
+    .sort((left, right) => {
+      const scoreDiff = right.score - left.score;
+      if (scoreDiff !== 0) return scoreDiff;
+      return String(right.valid_from).localeCompare(String(left.valid_from));
+    })
+    .slice(0, limit);
 }

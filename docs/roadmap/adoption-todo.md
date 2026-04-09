@@ -23,7 +23,7 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 
 - [x] **Readable state / handoff files**
   - Add `.ax/STATE.md` or topic-level handoff summaries for human-readable current state.
-- [ ] **Context-window monitor**
+- [x] **Context-window monitor**
   - Warn before context rot becomes dangerous; add warning and critical thresholds.
 - [x] **Pause-work / resume handoff**
   - Add an explicit command that writes a safe resume bundle when work must stop mid-flight.
@@ -34,7 +34,7 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 
 ## Medium priority
 
-- [ ] **Hybrid ranking for topic / decision recall**
+- [x] **Hybrid ranking for topic / decision recall**
   - Blend lexical match, recency, and linked-artifact context to improve retrieval quality.
 - [x] **Workflow init / context loader command**
   - Provide a compact command that assembles exactly the current context needed for a workflow step.
@@ -47,13 +47,13 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 
 ## Lower priority / scale-up work
 
-- [ ] **Background memory consolidation**
+- [x] **Background memory consolidation** *(implemented as an operator support tool first)*
   - Periodically dedupe decisions, promote glossary candidates, and compress repeated topic learnings.
-- [ ] **Thread promotion into topics**
+- [x] **Thread promotion into topics** *(implemented as an operator support tool first)*
   - Convert long-running thread context into executable topics when it becomes actionable.
-- [ ] **Scoped recall modes**
+- [x] **Scoped recall modes** *(implemented as a support-layer recall surface)*
   - Add repo/topic/decision-specific recall modes with clearer boundaries.
-- [ ] **Lightweight team preference profile**
+- [x] **Lightweight team preference profile** *(implemented as a support-layer profile store)*
   - Capture stable implementation/review preferences without outranking docs.
-- [ ] **Entity-style memory views**
+- [x] **Entity-style memory views** *(implemented as a support-layer query view)*
   - Add richer operator/user/service representations only if real rollout pressure justifies them.

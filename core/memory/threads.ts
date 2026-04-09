@@ -3,11 +3,12 @@ import { dirname, join } from 'node:path';
 
 export interface ShiftAxThreadSummary {
   name: string;
+  slug: string;
   path: string;
   updated_at: string;
 }
 
-function slugify(value: string): string {
+export function slugifyThreadName(value: string): string {
   return String(value || '')
     .trim()
     .toLowerCase()
@@ -16,8 +17,8 @@ function slugify(value: string): string {
     .replace(/^-|-$/g, '') || 'thread';
 }
 
-function threadPath(rootDir: string, name: string): string {
-  return join(rootDir, '.ax', 'threads', `${slugify(name)}.md`);
+export function threadPath(rootDir: string, name: string): string {
+  return join(rootDir, '.ax', 'threads', `${slugifyThreadName(name)}.md`);
 }
 
 export async function saveThreadNote({
@@ -78,11 +79,28 @@ export async function listThreads({
       content.match(/- (\d{4}-\d{2}-\d{2}T[^:]+:[^\n]+)/)?.[1]?.trim() ||
       '';
     result.push({
-      name: entry.name.replace(/\.md$/, ''),
+      name: content.match(/^# Thread:\s*(.+)\s*$/m)?.[1]?.trim() || entry.name.replace(/\.md$/, ''),
+      slug: entry.name.replace(/\.md$/, ''),
       path,
       updated_at: updatedAt,
     });
   }
 
   return result.sort((left, right) => right.updated_at.localeCompare(left.updated_at));
+}
+
+export async function findThread({
+  rootDir,
+  name,
+}: {
+  rootDir: string;
+  name: string;
+}): Promise<ShiftAxThreadSummary | null> {
+  const slug = slugifyThreadName(name);
+  const threads = await listThreads({ rootDir });
+  return (
+    threads.find((thread) => thread.slug === slug) ??
+    threads.find((thread) => thread.name.toLowerCase() === name.toLowerCase()) ??
+    null
+  );
 }

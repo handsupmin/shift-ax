@@ -40,6 +40,8 @@ process.stdout.write(
     {
       query: result.bundle.query,
       workflow_step: workflowStep,
+      status: result.status,
+      issues_count: result.bundle.issues.length,
       max_chars: result.bundle.max_chars,
       sections: result.bundle.sections.map((section) => ({
         kind: section.kind,

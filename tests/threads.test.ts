@@ -25,6 +25,7 @@ test('saveThreadNote creates and appends to a cross-topic thread file', async ()
     const threads = await listThreads({ rootDir: root });
     assert.equal(threads.length, 1);
     assert.equal(threads[0]?.name, 'refund-migration');
+    assert.equal(threads[0]?.slug, 'refund-migration');
 
     const content = await readFile(threads[0]!.path, 'utf8');
     assert.match(content, /Track long-running refund migration notes/);
