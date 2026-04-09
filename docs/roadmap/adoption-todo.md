@@ -2,42 +2,58 @@
 
 This TODO list is ordered by direct impact on Shift AX's product goal.
 
-## Immediate
+## Completed foundations
 
-- [x] **Base-context discovery assistant**
-  - Scan repo docs/folders and propose a first draft of `docs/base-context/index.md`.
-  - Borrow local room/category heuristics from mempalace.
-- [x] **Domain glossary seeding**
-  - Detect service names, key entities, aliases, and internal vocabulary.
-  - Write or update a glossary doc that can be referenced from the base-context index.
-- [x] **Native skill contract for Shift AX workflows**
-  - Create a standard shape for clarify / plan / implement / review / finalize workflows.
-  - Borrow anti-rationalization and verification sections from agent-skills.
-- [x] **First-run onboarding refinement**
-  - Expand onboarding prompts for business model, policy areas, architecture, and risky domains.
-- [x] **Policy-context sync gate before implementation**
-  - If planning changes shared domain/policy docs under the base-context index, require those updates and record them before implementation starts.
-- [x] **Execution-state-aware review expansion**
-  - Continue improving review to reason from execution artifacts, changed files, and test evidence.
+- [x] Base-context discovery assistant
+- [x] Domain glossary seeding
+- [x] Native skill contract for Shift AX workflows
+- [x] First-run onboarding refinement
+- [x] Policy-context sync gate before implementation
+- [x] Execution-state-aware review expansion
+- [x] Past-topic recall helper
+- [x] Decision register with validity windows
+- [x] Lifecycle / reaction layer
+- [x] Observability surfaces
+- [x] Doctor / health diagnostics expansion
+- [x] Review / CI feedback reactions
+- [x] Dashboard / fleet supervision (compact CLI form)
+- [x] Decision-memory search
 
-## Next
+## Next backlog — high priority
 
-- [x] **Past-topic recall helper**
-  - Add a file-backed memory layer for previous topic artifacts, subordinate to authoritative docs.
-- [x] **Decision register with validity windows**
-  - Track major decisions, effective dates, and replacements.
-- [x] **Lifecycle / reaction layer**
-  - Add event-driven feedback loops for failed reviews, blocked execution, and future CI handling.
-- [x] **Observability surfaces**
-  - Add compact operator views for current phase, failure reason, and active task state.
-- [x] **Doctor / health diagnostics expansion**
-  - Extend environment and runtime checks around launchers, worktrees, and state integrity.
+- [x] **Readable state / handoff files**
+  - Add `.ax/STATE.md` or topic-level handoff summaries for human-readable current state.
+- [x] **Context-window monitor**
+  - Warn before context rot becomes dangerous; add warning and critical thresholds.
+- [x] **Pause-work / resume handoff**
+  - Add an explicit command that writes a safe resume bundle when work must stop mid-flight.
+- [x] **Threads for cross-topic context**
+  - Add `.ax/threads/` for long-running decisions, migrations, and rollout work that spans multiple topics.
+- [x] **Token-budgeted context bundle builder**
+  - Generate compact execution/review context bundles that prioritize docs, plans, decisions, and topic recall under a size budget.
 
-## Later
+## Medium priority
 
-- [x] **Review / CI feedback reactions**
-  - Reopen execution automatically when downstream checks fail.
-- [x] **Dashboard / fleet supervision**
-  - Add broader session visibility only if it stays simple for non-expert teams.
-- [x] **Decision-memory search**
-  - Add supporting long-term recall across completed topics.
+- [x] **Hybrid ranking for topic / decision recall**
+  - Blend lexical match, recency, and linked-artifact context to improve retrieval quality.
+- [x] **Workflow init / context loader command**
+  - Provide a compact command that assembles exactly the current context needed for a workflow step.
+- [x] **Verification debt tracking**
+  - Track deferred review issues and missing verification work across topics.
+- [x] **Learned-debug history**
+  - Persist resolved failure patterns so repeated debugging gets faster and more consistent.
+- [x] **Session summary checkpoints**
+  - Add summary checkpoints for long-running work instead of relying only on raw artifact growth.
+
+## Lower priority / scale-up work
+
+- [x] **Background memory consolidation** *(implemented as an operator support tool first)*
+  - Periodically dedupe decisions, promote glossary candidates, and compress repeated topic learnings.
+- [x] **Thread promotion into topics** *(implemented as an operator support tool first)*
+  - Convert long-running thread context into executable topics when it becomes actionable.
+- [x] **Scoped recall modes** *(implemented as a support-layer recall surface)*
+  - Add repo/topic/decision-specific recall modes with clearer boundaries.
+- [x] **Lightweight team preference profile** *(implemented as a support-layer profile store)*
+  - Capture stable implementation/review preferences without outranking docs.
+- [x] **Entity-style memory views** *(implemented as a support-layer query view)*
+  - Add richer operator/user/service representations only if real rollout pressure justifies them.

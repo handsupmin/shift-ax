@@ -17,6 +17,7 @@ export interface ShiftAxTopicArtifacts {
   commit_message: string;
   commit_state: string;
   verification: string;
+  handoff: string;
   worktree_plan: string;
   worktree_state: string;
 }
@@ -41,6 +42,7 @@ export function defaultTopicArtifacts(): ShiftAxTopicArtifacts {
     commit_message: 'final/commit-message.md',
     commit_state: 'final/commit-state.json',
     verification: 'final/verification.md',
+    handoff: 'handoff.md',
     worktree_plan: 'worktree-plan.json',
     worktree_state: 'worktree-state.json',
   };

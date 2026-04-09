@@ -6,6 +6,7 @@ export interface ShiftAxPastTopicMatch {
   summary: string;
   request: string;
   score: number;
+  updated_at?: string;
 }
 
 function tokenize(value: string): string[] {
@@ -45,7 +46,7 @@ export async function searchPastTopics({
     ]);
 
     if (!workflowRaw) continue;
-    const workflow = JSON.parse(workflowRaw) as { phase?: string };
+    const workflow = JSON.parse(workflowRaw) as { phase?: string; updated_at?: string };
     if (workflow.phase !== 'committed') continue;
 
     const score = scoreTopic(query, [request, summary, spec].join('\n'));
@@ -56,8 +57,15 @@ export async function searchPastTopics({
       summary: summary.trim(),
       request: request.trim(),
       score,
+      updated_at: workflow.updated_at,
     });
   }
 
-  return matches.sort((a, b) => b.score - a.score).slice(0, limit);
+  return matches
+    .sort((a, b) => {
+      const scoreDiff = b.score - a.score;
+      if (scoreDiff !== 0) return scoreDiff;
+      return String(b.updated_at ?? '').localeCompare(String(a.updated_at ?? ''));
+    })
+    .slice(0, limit);
 }
