@@ -7,6 +7,15 @@
 
 Shift AX는 자연어 개발 요청을 문서 기반, 리뷰 게이트 기반 워크플로우로 바꿔서 최종적으로 의미 있는 로컬 git 커밋까지 연결합니다.
 
+이제 아래처럼 플랫폼별 **대화형 셸**로도 바로 실행할 수 있습니다.
+
+- `ax --codex`
+- `ax --claude-code`
+- `shift-ax --codex`
+- `shift-ax --claude-code`
+
+첫 실행에서 onboarding artifact가 없으면, Shift AX가 먼저 언어를 묻고 guided onboarding을 자동으로 시작한 뒤 해당 플랫폼 세션을 엽니다.
+
 ## Shift AX가 하는 일
 
 Shift AX는 기존 코딩 에이전트 런타임 위에 제어 평면을 추가해서 팀이 다음을 일관되게 수행할 수 있게 합니다.
@@ -64,6 +73,26 @@ npm run ax -- doctor
 ```
 
 ### 2. base context 온보딩
+
+대화형 플랫폼 셸로 바로 시작:
+
+```bash
+ax --codex
+# 또는
+ax --claude-code
+```
+
+첫 실행에서는 언어를 먼저 묻고, repo가 아직 onboard되지 않았다면 guided onboarding을 자동으로 진행합니다.
+
+셸 안에서는 아래 같은 product-shell 명령을 사용할 수 있어야 합니다.
+
+- `/onboard` 또는 `$onboard`
+- `/doctor` 또는 `$doctor`
+- `/request <text>` 또는 `$request <text>`
+- `/status`
+- `/topics`
+- `/resume <topic>`
+- `/review <topic>`
 
 대화형 온보딩:
 

@@ -7,6 +7,14 @@ import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const command = process.argv[2];
 const args = process.argv.slice(3);
+const shellMode =
+  !command ||
+  command === '--codex' ||
+  command === '--claude-code' ||
+  command === '--lang' ||
+  command === '--root' ||
+  command === '--discover' ||
+  command === '--onboarding-input';
 
 const commands = new Map<string, string>([
   ['bootstrap-topic', 'ax-bootstrap-topic.ts'],
@@ -49,10 +57,23 @@ const commands = new Map<string, string>([
   ['scaffold-build', 'ax-scaffold-build.ts'],
 ]);
 
-if (!command || !commands.has(command)) {
+if (shellMode) {
+  const child = spawn(process.execPath, ['--import', 'tsx', join(here, 'ax-shell.ts'), ...process.argv.slice(2)], {
+    stdio: 'inherit',
+  });
+
+  child.on('exit', (code) => {
+    process.exit(code ?? 1);
+  });
+} else if (!commands.has(command)) {
   process.stderr.write(
     [
       'Shift AX CLI',
+      '',
+      'Shell launcher:',
+      '  ax --codex [--root DIR] [--lang en|ko] [--discover] [--onboarding-input FILE] [initial prompt]',
+      '  ax --claude-code [--root DIR] [--lang en|ko] [--discover] [--onboarding-input FILE] [initial prompt]',
+      '  ax  # interactive launcher that picks language/platform and auto-onboards on first run',
       '',
       'Commands:',
       '  ax bootstrap-topic --request "<text>" [--summary "<text>"] [--root DIR]',
@@ -94,12 +115,12 @@ if (!command || !commands.has(command)) {
     ].join('\n'),
   );
   process.exit(command ? 1 : 0);
+} else {
+  const child = spawn(process.execPath, ['--import', 'tsx', join(here, commands.get(command)!), ...args], {
+    stdio: 'inherit',
+  });
+
+  child.on('exit', (code) => {
+    process.exit(code ?? 1);
+  });
 }
-
-const child = spawn(process.execPath, ['--import', 'tsx', join(here, commands.get(command)!), ...args], {
-  stdio: 'inherit',
-});
-
-child.on('exit', (code) => {
-  process.exit(code ?? 1);
-});

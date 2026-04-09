@@ -39,7 +39,7 @@ export interface OnboardProjectContextResult {
   profile: ShiftAxProjectProfile;
 }
 
-async function writeProjectContextProfile({
+export async function persistProjectContextProfile({
   rootDir,
   entries,
   onboardingContext,
@@ -91,6 +91,26 @@ function resolveDocPath(input: ShiftAxOnboardingDocumentInput): string {
   return `docs/base-context/${slugifyLabel(input.label)}.md`;
 }
 
+export async function writeOnboardingDocuments({
+  rootDir,
+  documents,
+}: {
+  rootDir: string;
+  documents: ShiftAxOnboardingDocumentInput[];
+}): Promise<ShiftAxProjectContextDoc[]> {
+  const resolvedDocs: ShiftAxProjectContextDoc[] = [];
+
+  for (const document of documents) {
+    const relativePath = resolveDocPath(document);
+    const absolutePath = join(rootDir, relativePath);
+    await mkdir(dirname(absolutePath), { recursive: true });
+    await writeFile(absolutePath, document.content, 'utf8');
+    resolvedDocs.push({ label: document.label, path: relativePath });
+  }
+
+  return resolvedDocs;
+}
+
 export async function onboardProjectContext({
   rootDir,
   documents,
@@ -103,17 +123,12 @@ export async function onboardProjectContext({
     throw new Error('documents are required');
   }
 
-  const resolvedDocs: ShiftAxProjectContextDoc[] = [];
+  const resolvedDocs = await writeOnboardingDocuments({
+    rootDir,
+    documents,
+  });
 
-  for (const document of documents) {
-    const relativePath = resolveDocPath(document);
-    const absolutePath = join(rootDir, relativePath);
-    await mkdir(dirname(absolutePath), { recursive: true });
-    await writeFile(absolutePath, document.content, 'utf8');
-    resolvedDocs.push({ label: document.label, path: relativePath });
-  }
-
-  const { index, profile } = await writeProjectContextProfile({
+  const { index, profile } = await persistProjectContextProfile({
     rootDir,
     entries: resolvedDocs,
     onboardingContext,
@@ -168,7 +183,7 @@ export async function onboardProjectContextFromDiscovery({
     }
   }
 
-  const { index, profile } = await writeProjectContextProfile({
+  const { index, profile } = await persistProjectContextProfile({
     rootDir,
     entries: resolvedDocs,
     onboardingContext,

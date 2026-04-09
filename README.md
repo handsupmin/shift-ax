@@ -7,6 +7,15 @@
 
 Shift AX turns a raw development request into a document-aware, review-gated workflow that ends at a meaningful local git commit.
 
+It also supports a platform-specific conversational shell:
+
+- `ax --codex`
+- `ax --claude-code`
+- `shift-ax --codex`
+- `shift-ax --claude-code`
+
+On first run, if onboarding artifacts are missing, Shift AX asks for language first and then runs guided onboarding automatically before opening the platform session.
+
 ## What Shift AX does
 
 Shift AX adds a control plane on top of existing coding-agent runtimes so teams can:
@@ -67,6 +76,26 @@ npm run ax -- doctor
 ```
 
 ### 2. Onboard base context
+
+Conversational shell mode:
+
+```bash
+ax --codex
+# or
+ax --claude-code
+```
+
+On first run, Shift AX asks for language first and then runs guided onboarding automatically if the repo is not yet onboarded.
+
+Inside the shell, the agent should accept product-shell commands such as:
+
+- `/onboard` or `$onboard`
+- `/doctor` or `$doctor`
+- `/request <text>` or `$request <text>`
+- `/status`
+- `/topics`
+- `/resume <topic>`
+- `/review <topic>`
 
 Interactive mode:
 

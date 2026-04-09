@@ -8,15 +8,12 @@ import {
   onboardProjectContext,
   onboardProjectContextFromDiscovery,
 } from '../core/context/onboarding.js';
-import {
-  defaultEngineeringDefaults,
-  type ShiftAxEngineeringDefaults,
-  type ShiftAxOnboardingContextProfile,
-} from '../core/policies/project-profile.js';
+import { runGuidedOnboarding } from '../core/context/guided-onboarding.js';
+import type { ShiftAxLocale } from '../core/settings/project-settings.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--root DIR]\n',
+    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--lang en|ko] [--root DIR]\n',
   );
 }
 
@@ -26,36 +23,10 @@ function readArg(flag: string): string | undefined {
   return process.argv[index + 1];
 }
 
-function toMarkdown(label: string, content: string): string {
-  const trimmed = content.trim();
-  if (trimmed.startsWith('#')) {
-    return `${trimmed}\n`;
-  }
-  return `# ${label.trim()}\n\n${trimmed}\n`;
-}
-
-async function promptUntilNonEmpty(
-  ask: (question: string) => Promise<string>,
-  question: string,
-): Promise<string> {
-  while (true) {
-    const value = (await ask(question)).trim();
-    if (value !== '') return value;
-  }
-}
-
-async function promptWithDefault(
-  ask: (question: string) => Promise<string>,
-  question: string,
-  defaultValue: string,
-): Promise<string> {
-  const value = (await ask(`${question} [${defaultValue}]: `)).trim();
-  return value || defaultValue;
-}
-
-async function promptInteractivePayload(): Promise<
-  Omit<Parameters<typeof onboardProjectContext>[0], 'rootDir'>
-> {
+async function createPromptSession(): Promise<{
+  ask: (question: string) => Promise<string>;
+  close: () => void;
+}> {
   const fallbackAnswers = !stdin.isTTY
     ? (await new Promise<string>((resolve, reject) => {
         let raw = '';
@@ -76,96 +47,29 @@ async function promptInteractivePayload(): Promise<
           output: stderr,
         })
       : null;
-  const ask = async (question: string) => {
-    if (rl) {
-      return rl.question(question);
-    }
 
-    stderr.write(question);
-    const answer = fallbackAnswers?.[fallbackIndex] ?? '';
-    fallbackIndex += 1;
-    return answer;
+  return {
+    ask: async (question: string) => {
+      if (rl) {
+        return rl.question(question);
+      }
+
+      stderr.write(question);
+      const answer = fallbackAnswers?.[fallbackIndex] ?? '';
+      fallbackIndex += 1;
+      return answer;
+    },
+    close: () => rl?.close(),
   };
-  const defaults = defaultEngineeringDefaults();
+}
 
-  try {
-    const documents: Array<{ label: string; content: string }> = [];
-    let addAnother = true;
-
-    while (addAnother) {
-      const label = await promptUntilNonEmpty(ask, 'Context document label: ');
-      const content = await promptUntilNonEmpty(
-        ask,
-        'Document notes or markdown body: ',
-      );
-      documents.push({
-        label,
-        content: toMarkdown(label, content),
-      });
-
-      const answer = (await ask('Add another context document? [y/N]: '))
-        .trim()
-        .toLowerCase();
-      addAnother = answer === 'y' || answer === 'yes';
-    }
-
-    const onboardingContext: ShiftAxOnboardingContextProfile = {
-      business_context: await promptUntilNonEmpty(
-        ask,
-        'Business / product context: ',
-      ),
-      policy_areas: (await promptUntilNonEmpty(
-        ask,
-        'Policy areas to care about (comma-separated): ',
-      ))
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-      architecture_summary: await promptUntilNonEmpty(
-        ask,
-        'Architecture summary: ',
-      ),
-      risky_domains: (await promptUntilNonEmpty(
-        ask,
-        'Risky domains to escalate carefully (comma-separated): ',
-      ))
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-    };
-
-    const engineeringDefaults: ShiftAxEngineeringDefaults = {
-      test_strategy: await promptWithDefault(
-        ask,
-        'Default test strategy',
-        defaults.test_strategy,
-      ),
-      architecture: await promptWithDefault(
-        ask,
-        'Default architecture boundary',
-        defaults.architecture,
-      ),
-      short_task_execution: await promptWithDefault(
-        ask,
-        'Short task execution mode',
-        defaults.short_task_execution,
-      ),
-      long_task_execution: await promptWithDefault(
-        ask,
-        'Long task execution mode',
-        defaults.long_task_execution,
-      ),
-      verification_commands: defaults.verification_commands,
-    };
-
-    return {
-      documents,
-      onboardingContext,
-      engineeringDefaults,
-    };
-  } finally {
-    rl?.close();
-  }
+async function promptLocaleSelection(ask: (question: string) => Promise<string>): Promise<ShiftAxLocale> {
+  const answer = (await ask(
+    'Choose language / 언어를 선택하세요:\n1. English (default)\n2. Korean\n> ',
+  ))
+    .trim()
+    .toLowerCase();
+  return answer === '2' ? 'ko' : 'en';
 }
 
 async function main(): Promise<void> {
@@ -173,21 +77,39 @@ async function main(): Promise<void> {
   const rootDir = readArg('--root') || process.cwd();
   const discover = process.argv.includes('--discover');
   const includeGlossary = !process.argv.includes('--no-glossary');
+  const localeArg = readArg('--lang');
+  const prompts =
+    inputPath || discover || localeArg
+      ? null
+      : await createPromptSession();
 
-  const result = inputPath
-    ? await onboardProjectContext({
-        ...(JSON.parse(await readFile(inputPath, 'utf8')) as Parameters<
-          typeof onboardProjectContext
-        >[0]),
-        rootDir,
-      })
-    : discover
-      ? await onboardProjectContextFromDiscovery({ rootDir, includeGlossary })
-      : await onboardProjectContext({
-          ...(await promptInteractivePayload()),
+  const locale =
+    localeArg === 'ko' || localeArg === 'en'
+      ? localeArg
+      : inputPath || discover
+        ? 'en'
+        : await promptLocaleSelection(prompts!.ask);
+
+  try {
+    const result = inputPath
+      ? await onboardProjectContext({
+          ...(JSON.parse(await readFile(inputPath, 'utf8')) as Parameters<
+            typeof onboardProjectContext
+          >[0]),
           rootDir,
-        });
-  process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+        })
+      : discover
+        ? await onboardProjectContextFromDiscovery({ rootDir, includeGlossary })
+        : await runGuidedOnboarding({
+            rootDir,
+            locale,
+            ask: prompts!.ask,
+          });
+
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  } finally {
+    prompts?.close();
+  }
 }
 
 void main().catch((error) => {

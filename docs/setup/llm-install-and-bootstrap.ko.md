@@ -75,6 +75,22 @@ npm run ax -- <command> --root /absolute/path/to/target-repo
 
 전역 `ax` 바이너리가 꼭 필요하지 않다면 이 방식을 유지한다.
 
+### 권장 대화형 진입점
+
+대화형 사용이라면 플랫폼 셸을 바로 여는 방식을 우선한다.
+
+```bash
+ax --codex --root /absolute/path/to/target-repo
+# 또는
+ax --claude-code --root /absolute/path/to/target-repo
+```
+
+onboarding artifact가 없으면 Shift AX가:
+
+1. 먼저 언어를 묻고
+2. guided onboarding을 자동으로 수행한 뒤
+3. 맞는 플랫폼 세션을 연다
+
 ### 선택 경로: global CLI 노출
 
 직접 `ax` 명령이 꼭 필요할 때만:

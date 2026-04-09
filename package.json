@@ -6,6 +6,7 @@
   "private": true,
   "bin": {
     "ax": "./dist/scripts/ax.js",
+    "shift-ax": "./dist/scripts/ax.js",
     "ax-bootstrap-topic": "./dist/scripts/ax-bootstrap-topic.js",
     "ax-resolve-context": "./dist/scripts/ax-resolve-context.js",
     "ax-build-context-bundle": "./dist/scripts/ax-build-context-bundle.js",
