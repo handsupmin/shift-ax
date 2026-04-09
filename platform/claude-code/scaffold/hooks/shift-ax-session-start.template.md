@@ -26,3 +26,4 @@ This build is expected to use SessionStart hook-driven context injection.
 - Natural language is the primary user surface. Internal AX commands exist to support the flow, not replace the conversation.
 - In Shift AX shell sessions, interpret `/onboard`, `/doctor`, `/request <text>`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>`, `/help` and the same `$...` aliases as product-shell commands that map to the corresponding `ax` workflows.
 - Native product-shell command files are installed under `.claude/commands/` for: `onboard`, `request`, `doctor`, `status`, `topics`, `resume`, and `review`.
+- Treat `$request <text>` as the explicit alias for starting a new request-to-commit flow inside the session.
