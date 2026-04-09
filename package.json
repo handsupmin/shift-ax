@@ -3,7 +3,22 @@
   "version": "0.1.0",
   "description": "Agentic software delivery platform for teams that are not AX experts yet",
   "type": "module",
-  "private": true,
+  "private": false,
+  "homepage": "https://github.com/handsupmin/shift-ax",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/handsupmin/shift-ax.git"
+  },
+  "bugs": {
+    "url": "https://github.com/handsupmin/shift-ax/issues"
+  },
+  "files": [
+    "dist",
+    "!dist/tests",
+    "README.md",
+    "README.ko.md",
+    "LICENSE"
+  ],
   "bin": {
     "ax": "./dist/scripts/ax.js",
     "shift-ax": "./dist/scripts/ax.js",
@@ -39,9 +54,10 @@
     "ax-decisions": "./dist/scripts/ax-decisions.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/copy-package-assets.mjs",
     "test": "node --import tsx --test tests/*.test.ts",
-    "ax": "node --import tsx scripts/ax.ts"
+    "ax": "node --import tsx scripts/ax.ts",
+    "prepack": "npm run build"
   },
   "engines": {
     "node": ">=20"

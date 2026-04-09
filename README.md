@@ -66,7 +66,31 @@ That means Shift AX currently covers:
 
 ## Quick start
 
-### 1. Install and verify
+### 1. Install
+
+Global install from npm:
+
+```bash
+npm install -g shift-ax
+```
+
+One-command install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/handsupmin/shift-ax/main/scripts/install-global.sh | bash
+```
+
+### 2. Verify
+
+After install:
+
+```bash
+ax --codex
+# or
+ax --claude-code
+```
+
+From a source checkout:
 
 ```bash
 npm install
@@ -75,7 +99,7 @@ npm run build
 npm run ax -- doctor
 ```
 
-### 2. Onboard base context
+### 3. Onboard base context
 
 Conversational shell mode:
 
@@ -117,7 +141,7 @@ npm run ax -- onboard-context --discover
 
 This writes or discovers tracked docs under `docs/base-context/`, regenerates `docs/base-context/index.md`, creates `docs/base-context/domain-glossary.md`, and stores shared engineering defaults in `.ax/project-profile.json`.
 
-### 3. Start a request
+### 4. Start a request
 
 ```bash
 npm run ax -- run-request --request "Build safer auth refresh flow"
@@ -131,7 +155,7 @@ This creates:
 
 By default, Shift AX now interviews for planning details before it writes the planning artifacts. The pipeline then pauses at the human plan-review gate.
 
-### 4. Record plan approval
+### 5. Record plan approval
 
 ```bash
 npm run ax -- approve-plan \
@@ -140,7 +164,7 @@ npm run ax -- approve-plan \
   --decision approve
 ```
 
-### 5. Resume after approval
+### 6. Resume after approval
 
 If the approved plan says shared domain or policy docs must be updated first, record that before implementation resumes:
 
@@ -177,7 +201,7 @@ npm run ax -- run-request \
   --no-auto-commit
 ```
 
-### 6. Materialize platform launch commands when needed
+### 7. Materialize platform launch commands when needed
 
 ```bash
 npm run ax -- launch-execution \
@@ -188,7 +212,7 @@ npm run ax -- launch-execution \
 
 This reads `execution-handoff.json`, writes per-task execution prompts, and returns the concrete Codex / Claude / tmux launch commands for the planned slices.
 
-### 7. Inspect compact topic status when needed
+### 8. Inspect compact topic status when needed
 
 ```bash
 npm run ax -- topic-status --topic .ax/topics/<topic-slug>

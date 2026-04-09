@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const command = process.argv[2];
 const args = process.argv.slice(3);
+const compiledMode = existsSync(join(here, 'ax-shell.js'));
 const shellMode =
   !command ||
   command === '--codex' ||
@@ -58,9 +60,13 @@ const commands = new Map<string, string>([
 ]);
 
 if (shellMode) {
-  const child = spawn(process.execPath, ['--import', 'tsx', join(here, 'ax-shell.ts'), ...process.argv.slice(2)], {
-    stdio: 'inherit',
-  });
+  const child = compiledMode
+    ? spawn(process.execPath, [join(here, 'ax-shell.js'), ...process.argv.slice(2)], {
+        stdio: 'inherit',
+      })
+    : spawn(process.execPath, ['--import', 'tsx', join(here, 'ax-shell.ts'), ...process.argv.slice(2)], {
+        stdio: 'inherit',
+      });
 
   child.on('exit', (code) => {
     process.exit(code ?? 1);
@@ -114,11 +120,16 @@ if (shellMode) {
       '',
     ].join('\n'),
   );
-  process.exit(command ? 1 : 0);
+  process.exit(command === '--help' ? 0 : command ? 1 : 0);
 } else {
-  const child = spawn(process.execPath, ['--import', 'tsx', join(here, commands.get(command)!), ...args], {
-    stdio: 'inherit',
-  });
+  const target = commands.get(command)!;
+  const child = compiledMode
+    ? spawn(process.execPath, [join(here, target.replace(/\.ts$/, '.js')), ...args], {
+        stdio: 'inherit',
+      })
+    : spawn(process.execPath, ['--import', 'tsx', join(here, target), ...args], {
+        stdio: 'inherit',
+      });
 
   child.on('exit', (code) => {
     process.exit(code ?? 1);
