@@ -14,7 +14,7 @@ It also supports a platform-specific conversational shell:
 - `shift-ax --codex`
 - `shift-ax --claude-code`
 
-On first run, if onboarding artifacts are missing, Shift AX asks for language first and then runs guided onboarding automatically before opening the platform session.
+On first run, if onboarding artifacts are missing, Shift AX now opens the platform session first and conducts guided onboarding **inside** Codex or Claude Code instead of using a separate readline questionnaire.
 
 ## What Shift AX does
 
@@ -109,7 +109,7 @@ ax --codex
 ax --claude-code
 ```
 
-On first run, Shift AX asks for language first and then runs guided onboarding automatically if the repo is not yet onboarded.
+On first run, the platform session itself asks for language first and then continues guided onboarding if the repo is not yet onboarded.
 
 Inside the shell, the agent should accept product-shell commands such as:
 

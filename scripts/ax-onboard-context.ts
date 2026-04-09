@@ -9,11 +9,12 @@ import {
   onboardProjectContextFromDiscovery,
 } from '../core/context/onboarding.js';
 import { runGuidedOnboarding } from '../core/context/guided-onboarding.js';
-import type { ShiftAxLocale } from '../core/settings/project-settings.js';
+import { readProjectSettings, writeProjectSettings, type ShiftAxLocale } from '../core/settings/project-settings.js';
+import type { ShiftAxPlatform } from '../adapters/contracts.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--lang en|ko] [--root DIR]\n',
+    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--lang en|ko] [--platform codex|claude-code] [--root DIR]\n',
   );
 }
 
@@ -78,6 +79,7 @@ async function main(): Promise<void> {
   const discover = process.argv.includes('--discover');
   const includeGlossary = !process.argv.includes('--no-glossary');
   const localeArg = readArg('--lang');
+  const platformArg = readArg('--platform');
   const prompts =
     inputPath || discover || localeArg
       ? null
@@ -105,6 +107,24 @@ async function main(): Promise<void> {
             locale,
             ask: prompts!.ask,
           });
+
+    if (platformArg === 'codex' || platformArg === 'claude-code' || localeArg === 'en' || localeArg === 'ko') {
+      const existing = await readProjectSettings(rootDir);
+      await writeProjectSettings({
+        rootDir,
+        settings: {
+          ...(existing ?? {}),
+          version: 1,
+          updated_at: new Date().toISOString(),
+          locale: localeArg === 'en' || localeArg === 'ko' ? localeArg : existing?.locale ?? locale,
+          ...(platformArg === 'codex' || platformArg === 'claude-code'
+            ? { preferred_platform: platformArg as ShiftAxPlatform }
+            : existing?.preferred_platform
+              ? { preferred_platform: existing.preferred_platform }
+              : {}),
+        },
+      });
+    }
 
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } finally {

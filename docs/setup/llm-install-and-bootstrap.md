@@ -103,9 +103,9 @@ ax --claude-code --root /absolute/path/to/target-repo
 
 If onboarding artifacts are missing, Shift AX will:
 
-1. ask for language first
-2. run guided onboarding automatically
-3. open the matching platform session
+1. open the matching platform session first
+2. ask for language inside that session
+3. run guided onboarding inside that same conversation
 
 ### Optional: global CLI exposure
 
@@ -194,7 +194,7 @@ Use interactive onboarding only if a human is present and expects to answer ques
 npm run ax -- onboard-context --root /absolute/path/to/target-repo
 ```
 
-For autonomous LLM execution, prefer **discovery** or **file-driven** onboarding.
+For autonomous LLM execution, prefer **in-shell onboarding through `ax --codex` / `ax --claude-code`** unless you already have a curated onboarding file.
 
 ## 6. Verify onboarding
 

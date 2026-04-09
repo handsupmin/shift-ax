@@ -105,9 +105,9 @@ ax --claude-code --root /absolute/path/to/target-repo
 
 onboarding artifact가 없으면 Shift AX가:
 
-1. 먼저 언어를 묻고
-2. guided onboarding을 자동으로 수행한 뒤
-3. 맞는 플랫폼 세션을 연다
+1. 먼저 맞는 플랫폼 세션을 열고
+2. 그 안에서 언어를 묻고
+3. 같은 대화 안에서 guided onboarding을 진행한다
 
 ### 선택 경로: global CLI 노출
 
@@ -198,7 +198,7 @@ npm run ax -- onboard-context --root /absolute/path/to/target-repo --input /abso
 npm run ax -- onboard-context --root /absolute/path/to/target-repo
 ```
 
-자율 실행 LLM이라면 **interactive보다 discover 또는 input 파일 기반**을 우선한다.
+자율 실행 LLM이라면, curated onboarding 파일이 이미 없는 한 **`ax --codex` / `ax --claude-code`를 통한 in-shell onboarding**을 우선한다.
 
 ## 6. onboarding 검증
 

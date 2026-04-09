@@ -5,14 +5,12 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
 import {
-  ensureShellOnboarding,
   isProjectOnboarded,
   launchPlatformShell,
   persistShellSettings,
 } from '../core/shell/platform-shell.js';
 import type { ShiftAxPlatform } from '../adapters/contracts.js';
 import { onboardProjectContext, onboardProjectContextFromDiscovery } from '../core/context/onboarding.js';
-import { runGuidedOnboarding } from '../core/context/guided-onboarding.js';
 import { readProjectSettings, type ShiftAxLocale } from '../core/settings/project-settings.js';
 
 function readArg(flag: string): string | undefined {
@@ -119,9 +117,8 @@ const prompt = collectPromptArgs();
 const existingSettings = await readProjectSettings(rootDir);
 const onboarded = await isProjectOnboarded(rootDir);
 const prompts =
-  (!requestedLocale && !existingSettings?.locale) ||
   (!requestedPlatform && !existingSettings?.preferred_platform) ||
-  (!onboarded && !onboardingInput && !discover)
+  (!onboarded && !onboardingInput && !discover && !requestedPlatform)
     ? await createPromptSession()
     : null;
 
@@ -130,19 +127,7 @@ if ((requestedLocale === undefined && process.argv.includes('--lang')) || proces
   process.exit(process.argv.includes('--help') ? 0 : 1);
 }
 
-const locale =
-  requestedLocale ??
-  existingSettings?.locale ??
-  (prompts
-    ? ((await (async () => {
-        const answer = (await prompts.ask(
-          'Choose language / 언어를 선택하세요:\n1. English (default)\n2. Korean\n> ',
-        ))
-          .trim()
-          .toLowerCase();
-        return answer === '2' ? 'ko' : 'en';
-      })()) as ShiftAxLocale)
-    : 'en');
+const locale = requestedLocale ?? existingSettings?.locale;
 
 const platform =
   requestedPlatform ??
@@ -166,37 +151,50 @@ if (!onboarded) {
       ...(JSON.parse(await readFile(onboardingInput, 'utf8')) as Parameters<typeof onboardProjectContext>[0]),
       rootDir,
     });
+    await persistShellSettings({
+      rootDir,
+      locale: locale ?? 'en',
+      platform,
+    });
   } else if (discover) {
     await onboardProjectContextFromDiscovery({
       rootDir,
       includeGlossary: true,
     });
-  } else {
-    if (prompts) {
-      await runGuidedOnboarding({
-        rootDir,
-        locale,
-        ask: prompts.ask,
-      });
-    } else {
-      await ensureShellOnboarding({
-        rootDir,
-        locale,
-      });
-    }
+    await persistShellSettings({
+      rootDir,
+      locale: locale ?? 'en',
+      platform,
+    });
   }
 }
 
-await persistShellSettings({
-  rootDir,
-  locale,
-  platform,
-});
+if (onboarded) {
+  const ensuredLocale =
+    locale ??
+    (prompts
+      ? ((await (async () => {
+          const answer = (await prompts.ask(
+            'Choose language / 언어를 선택하세요:\n1. English (default)\n2. Korean\n> ',
+          ))
+            .trim()
+            .toLowerCase();
+          return answer === '2' ? 'ko' : 'en';
+        })()) as ShiftAxLocale)
+      : 'en');
+
+  await persistShellSettings({
+    rootDir,
+    locale: ensuredLocale,
+    platform,
+  });
+}
 
 const exitCode = await launchPlatformShell({
   rootDir,
   platform,
-  locale,
+  ...(locale ? { locale } : {}),
+  onboardingRequired: !onboarded && !onboardingInput && !discover,
   ...(prompt ? { initialPrompt: prompt } : {}),
 });
 

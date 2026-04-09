@@ -19,7 +19,7 @@ async function writeFakeLauncher(binDir: string, name: string, outputPath: strin
   );
 }
 
-test('ax --codex auto-onboards from input and launches Codex shell mode', async () => {
+test('ax --codex with explicit onboarding input still onboards before launch', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-codex-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -98,7 +98,7 @@ test('ax --codex auto-onboards from input and launches Codex shell mode', async 
   }
 });
 
-test('ax with no args asks for language and platform, then runs guided onboarding before launching Codex', async () => {
+test('ax with no args asks only for platform, then launches in-shell onboarding bootstrap', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-interactive-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -130,34 +130,68 @@ test('ax with no args asks for language and platform, then runs guided onboardin
 
       child.stdin.end(
         [
-          '2',
           '1',
-          '결제와 권한을 다루는 서비스입니다.',
-          '사용자 결제 승인과 권한 검증 흐름을 처리합니다.',
-          'auth, billing',
-          'payments, permissions',
-          '모놀리식 API와 작업 워커 구조입니다.',
-          'src/payments, src/auth',
-          'WalletCore, BillingGate',
-          'npm test, npm run build',
         ].join('\n') + '\n',
       );
     });
 
-    const settings = await readProjectSettings(root);
-    const businessDoc = await readFile(join(root, 'docs', 'base-context', 'business-context.md'), 'utf8');
     const codexArgs = await readFile(join(root, 'interactive-codex-launch.args'), 'utf8');
+    const settings = await readProjectSettings(root);
 
-    assert.equal(settings?.locale, 'ko');
-    assert.equal(settings?.preferred_platform, 'codex');
-    assert.match(businessDoc, /결제와 권한/);
-    assert.match(codexArgs, /\/doctor/);
+    assert.equal(settings, null);
+    await assert.rejects(readFile(join(root, 'docs', 'base-context', 'business-context.md'), 'utf8'));
+    assert.match(codexArgs, /first question must be language selection/i);
+    assert.match(codexArgs, /ax onboard-context --root/);
+    assert.match(codexArgs, /--platform codex/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
 
-test('ax --claude-code launches Claude shell mode in the target repo cwd', async () => {
+test('ax --claude-code without onboarding launches Claude shell mode with in-shell onboarding instructions', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-claude-bootstrap-'));
+  const binDir = join(root, 'bin');
+  await mkdir(binDir, { recursive: true });
+  await writeFakeLauncher(binDir, 'claude', join(root, 'claude-bootstrap-launch'));
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(
+        process.execPath,
+        ['--import', 'tsx', 'scripts/ax.ts', '--claude-code', '--root', root],
+        {
+          cwd: REPO_ROOT,
+          env: {
+            ...process.env,
+            PATH: `${binDir}:${process.env.PATH}`,
+          },
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
+      );
+
+      let error = '';
+      child.stderr.on('data', (chunk) => {
+        error += chunk.toString('utf8');
+      });
+      child.on('exit', (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(error || `ax claude bootstrap shell exited ${code}`));
+      });
+    });
+
+    const settings = await readProjectSettings(root);
+    const launchedArgs = await readFile(join(root, 'claude-bootstrap-launch.args'), 'utf8');
+
+    assert.equal(settings, null);
+    await assert.rejects(readFile(join(root, 'docs', 'base-context', 'business-context.md'), 'utf8'));
+    assert.match(launchedArgs, /first question must be language selection/i);
+    assert.match(launchedArgs, /--platform claude-code/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('ax --claude-code with explicit onboarding input launches Claude shell mode in the target repo cwd', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-claude-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
