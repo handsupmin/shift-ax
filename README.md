@@ -52,6 +52,7 @@ That means Shift AX currently covers:
 - [`scripts/`](./scripts/README.md): operator-facing CLI entrypoints
 - [`docs/vision.md`](./docs/vision.md): product direction
 - [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md): architecture goals, differentiators, and adopted concepts by layer
+- [`docs/setup/llm-install-and-bootstrap.md`](./docs/setup/llm-install-and-bootstrap.md): machine-oriented install and bootstrap guide for LLM agents
 - [`docs/architecture/initial-repo-structure.md`](./docs/architecture/initial-repo-structure.md): structure and ownership boundaries
 
 ## Quick start
