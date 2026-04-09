@@ -51,6 +51,7 @@ That means Shift AX currently covers:
 - [`adapters/`](./adapters/README.md): bridges from core to platform surfaces
 - [`scripts/`](./scripts/README.md): operator-facing CLI entrypoints
 - [`docs/vision.md`](./docs/vision.md): product direction
+- [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md): architecture goals, differentiators, and adopted concepts by layer
 - [`docs/architecture/initial-repo-structure.md`](./docs/architecture/initial-repo-structure.md): structure and ownership boundaries
 
 ## Quick start
