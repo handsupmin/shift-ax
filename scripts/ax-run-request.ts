@@ -2,7 +2,6 @@
 
 import { existsSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
-import { join } from 'node:path';
 import { stderr, stdin } from 'node:process';
 
 import { getPlatformAdapter } from '../adapters/index.js';
@@ -21,6 +20,7 @@ import {
   defaultEngineeringDefaults,
   readProjectProfile,
 } from '../core/policies/project-profile.js';
+import { getGlobalContextHome } from '../core/settings/global-context-home.js';
 
 function usage(): void {
   process.stderr.write(
@@ -100,7 +100,7 @@ async function promptInteractivePlanning(
     verification: (await ask('Verification / tests that should prove this: ')).trim(),
     implementationAreas: (await ask('Likely implementation areas: ')).trim(),
     longRunningWork: (await ask('Any long-running or cross-cutting work: ')).trim(),
-    policyUpdates: (await ask('Shared base-context or policy docs to add/update before implementation: ')).trim(),
+    policyUpdates: (await ask('Global knowledge updates to add or refine before implementation: ')).trim(),
   };
 
   rl?.close();
@@ -118,7 +118,9 @@ async function resolveMatchedContextLabels(
   query: string,
   indexPath?: string,
 ): Promise<string[]> {
-  const effectiveIndexPath = indexPath || join(rootDir, 'docs', 'base-context', 'index.md');
+  const home = getGlobalContextHome();
+  const effectiveIndexPath =
+    indexPath || (existsSync(home.indexPath) ? home.indexPath : `${rootDir}/docs/base-context/index.md`);
   if (!existsSync(effectiveIndexPath)) {
     return [];
   }
@@ -126,6 +128,7 @@ async function resolveMatchedContextLabels(
   const resolved = await resolveContextFromIndex({
     rootDir,
     indexPath: effectiveIndexPath,
+    indexRootDir: effectiveIndexPath === home.indexPath ? home.root : rootDir,
     query,
   });
   return resolved.matches.map((match) => match.label);
@@ -211,6 +214,7 @@ async function main(): Promise<void> {
 
   const rootDir = readArg('--root') || process.cwd();
   const indexPath = readArg('--index');
+  const allowMissingGlobalIndex = process.argv.includes('--allow-missing-global-context');
   let brainstormContent = await readMaybeFile(readArg('--brainstorm-file'));
   let specContent = await readMaybeFile(readArg('--spec-file'));
   let implementationPlanContent = await readMaybeFile(readArg('--plan-file'));
@@ -240,6 +244,7 @@ async function main(): Promise<void> {
     specContent,
     implementationPlanContent,
     baseBranch: readArg('--base') || 'main',
+    allowMissingGlobalIndex,
   });
 
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);

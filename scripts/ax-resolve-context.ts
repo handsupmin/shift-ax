@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
-import { join } from 'node:path';
+import { existsSync } from 'node:fs';
 
 import { resolveContextFromIndex } from '../core/context/index-resolver.js';
+import { getGlobalContextHome } from '../core/settings/global-context-home.js';
 
 function usage(): void {
   process.stderr.write(
@@ -17,7 +18,12 @@ function readArg(flag: string): string | undefined {
 }
 
 const rootDir = readArg('--root') || process.cwd();
-const indexPath = readArg('--index') || join(rootDir, 'docs', 'base-context', 'index.md');
+const defaultIndexPath = (() => {
+  const home = getGlobalContextHome();
+  return readArg('--index') || home.indexPath;
+})();
+const localFallbackIndexPath = `${rootDir}/docs/base-context/index.md`;
+const indexPath = existsSync(defaultIndexPath) ? defaultIndexPath : localFallbackIndexPath;
 const query = readArg('--query');
 const maxMatches = Number.parseInt(readArg('--max') || '5', 10);
 
@@ -29,6 +35,7 @@ if (!query) {
 const result = await resolveContextFromIndex({
   rootDir,
   indexPath,
+  indexRootDir: indexPath === getGlobalContextHome().indexPath ? getGlobalContextHome().root : rootDir,
   query,
   maxMatches: Number.isFinite(maxMatches) && maxMatches > 0 ? maxMatches : 5,
 });

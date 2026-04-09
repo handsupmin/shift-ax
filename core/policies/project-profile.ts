@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+
+import { getGlobalContextHome } from '../settings/global-context-home.js';
 
 export interface ShiftAxEngineeringDefaults {
   test_strategy: string;
@@ -15,10 +16,9 @@ export interface ShiftAxProjectContextDoc {
 }
 
 export interface ShiftAxOnboardingContextProfile {
-  business_context: string;
-  policy_areas: string[];
-  architecture_summary: string;
-  risky_domains: string[];
+  primary_role_summary: string;
+  work_types: string[];
+  domain_language: string[];
 }
 
 export interface ShiftAxProjectProfile {
@@ -42,7 +42,7 @@ export function defaultEngineeringDefaults(): ShiftAxEngineeringDefaults {
 }
 
 export function getProjectProfilePath(rootDir: string): string {
-  return join(rootDir, '.ax', 'project-profile.json');
+  return getGlobalContextHome().profilePath;
 }
 
 export async function readProjectProfile(
@@ -61,6 +61,6 @@ export async function writeProjectProfile(
   profile: ShiftAxProjectProfile,
 ): Promise<void> {
   const path = getProjectProfilePath(rootDir);
-  await mkdir(join(rootDir, '.ax'), { recursive: true });
+  await mkdir(getGlobalContextHome().root, { recursive: true });
   await writeFile(path, `${JSON.stringify(profile, null, 2)}\n`, 'utf8');
 }

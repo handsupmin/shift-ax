@@ -23,10 +23,10 @@ Treat the task as complete only when all of these are true:
 - a target repository can be onboarded with either:
   - discovery-assisted onboarding, or
   - file-driven onboarding
-- the target repository has:
-  - `.ax/project-profile.json`
-  - `docs/base-context/index.md`
-  - base-context docs under `docs/base-context/`
+- the global Shift AX profile exists at:
+  - `~/.shift-ax/profile.json`
+  - `~/.shift-ax/index.md`
+  - linked knowledge pages under `~/.shift-ax/`
 
 ## 2. Assumptions
 
@@ -104,8 +104,8 @@ ax --claude-code --root /absolute/path/to/target-repo
 If onboarding artifacts are missing, Shift AX will:
 
 1. open the matching platform session first
-2. ask for language inside that session
-3. run guided onboarding inside that same conversation
+2. let the user run `/onboarding`
+3. write the reusable knowledge base to `~/.shift-ax/`
 
 ### Optional: global CLI exposure
 
@@ -154,21 +154,32 @@ Create an onboarding file like:
 
 ```json
 {
-  "documents": [
+  "primaryRoleSummary": "What this person mainly works on.",
+  "workTypes": [
     {
-      "label": "Architecture Overview",
-      "content": "# Architecture Overview\n\n<curated notes>"
-    },
+      "name": "API development",
+      "summary": "How this work usually looks.",
+      "repositories": [
+        {
+          "repository": "payments-api",
+          "repositoryPath": "/absolute/path/to/payments-api",
+          "purpose": "What this repo does.",
+          "directories": ["src/controllers", "src/services", "src/dto"],
+          "workflow": "How work is actually done in this repo."
+        }
+      ]
+    }
+  ],
+  "domainLanguage": [
     {
-      "label": "Domain Policy",
-      "content": "# Domain Policy\n\n<curated notes>"
+      "term": "LedgerX",
+      "definition": "Company-specific meaning."
     }
   ],
   "onboardingContext": {
-    "business_context": "What the product and team do.",
-    "policy_areas": ["auth", "billing", "permissions"],
-    "architecture_summary": "High-level system shape.",
-    "risky_domains": ["money movement", "permissions"]
+    "primary_role_summary": "What this person mainly works on.",
+    "work_types": ["API development"],
+    "domain_language": ["LedgerX"]
   },
   "engineeringDefaults": {
     "test_strategy": "tdd",
@@ -206,12 +217,13 @@ npm run ax -- doctor --root /absolute/path/to/target-repo
 
 Expected artifacts:
 
-- `docs/base-context/index.md`
-- `docs/base-context/*.md`
-- `docs/base-context/domain-glossary.md` if glossary generation was enabled
-- `.ax/project-profile.json`
+- `~/.shift-ax/index.md`
+- `~/.shift-ax/work-types/*.md`
+- `~/.shift-ax/procedures/*.md`
+- `~/.shift-ax/domain-language/*.md`
+- `~/.shift-ax/profile.json`
 
-If the target repo fails doctor because the base-context index points to missing files:
+If doctor reports that the global index points to missing files:
 
 1. repair the index or document paths
 2. rerun doctor
@@ -312,7 +324,7 @@ npm run ax -- pause-work \
 
 ### Rule 1 — prefer docs over recall
 
-If `docs/base-context/index.md` can answer the question, use that first.  
+If `~/.shift-ax/index.md` and its linked pages can answer the question, use that first.  
 Do not jump straight to memory-style support tools.
 
 ### Rule 2 — do not bypass plan review

@@ -1,87 +1,87 @@
-import { access } from 'node:fs/promises';
+import { access, readdir, readFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
+import { basename, isAbsolute, join, resolve } from 'node:path';
 
 import {
-  onboardProjectContextFromDiscovery,
-  persistProjectContextProfile,
-  writeOnboardingDocuments,
+  onboardProjectContext,
   type OnboardProjectContextResult,
-  type ShiftAxOnboardingDocumentInput,
+  type ShiftAxGlobalOnboardingRepositoryInput,
+  type ShiftAxGlobalOnboardingWorkTypeInput,
 } from './onboarding.js';
 import {
   defaultEngineeringDefaults,
   type ShiftAxEngineeringDefaults,
   type ShiftAxOnboardingContextProfile,
-  type ShiftAxProjectContextDoc,
 } from '../policies/project-profile.js';
-import {
-  extractDomainGlossaryEntries,
-  writeDomainGlossaryDocument,
-  type ShiftAxGlossaryEntry,
-} from './glossary.js';
-import { discoverBaseContextEntries } from './discovery.js';
+import { getGlobalContextHome } from '../settings/global-context-home.js';
 import type { ShiftAxLocale } from '../settings/project-settings.js';
 
 type Ask = (question: string) => Promise<string>;
 
 const COPY = {
   en: {
-    shouldDiscover:
-      'I found existing docs in this repo. Should I scan them first and reuse them in the base-context index? [Y/n]: ',
-    businessContext:
-      'What product, service, or business area does this repository support? ',
-    userJourney:
-      'What user or business workflow does this repository mostly handle? ',
-    policyAreas:
-      'Which policy or rule areas should the AI never guess about? (comma-separated, e.g. auth, billing, permissions): ',
-    riskyDomains:
-      'Which areas are risky or sensitive? (comma-separated, e.g. payments, personal data, permissions): ',
-    architectureSummary:
-      'How is this system structured? Describe the architecture in plain language: ',
-    importantPaths:
-      'Which folders or files matter most for this repo? (comma-separated paths, optional): ',
-    domainTerms:
-      'List important internal terms, service names, or aliases the AI should know. (comma-separated, optional): ',
+    intro:
+      'This step matters most. Please invest 10 minutes so Shift AX can understand how you work.',
+    roleSummary: '1. What kind of work do you usually do? ',
+    workTypes: 'List your main work types (comma-separated, e.g. API development, incident response): ',
+    workTypeSummary: (workType: string) => `Summarize how "${workType}" work usually looks for you: `,
+    repositories: (workType: string) =>
+      `Which repositories are involved in "${workType}"? (comma-separated): `,
+    repositoryPath: (repository: string, defaultPath: string) =>
+      `What path should Shift AX inspect for "${repository}"? [${defaultPath} or blank if unknown]: `,
+    repositoryPurpose: (repository: string) =>
+      `What does "${repository}" mainly do in your work? `,
+    directories: (workType: string, repository: string) =>
+      `For "${workType}" in "${repository}", which directories do you touch? (comma-separated): `,
+    inferredWorkflow: (repository: string, inference: string) =>
+      [
+        `I inspected "${repository}" and inferred this workflow:`,
+        inference,
+        'What is wrong or missing? Be explicit.',
+        '> ',
+      ].join('\n'),
+    confirmedWorkflow: (workType: string, repository: string) =>
+      `Describe the actual working method for "${workType}" in "${repository}": `,
+    glossaryTerms: 'List company-specific terms or aliases Shift AX should know. (comma-separated): ',
+    glossaryDefinition: (term: string) => `What does "${term}" mean in your company/domain? `,
     verificationCommands:
-      'What verification commands should Shift AX run by default? (comma-separated)',
-    labels: {
-      business: 'Business Context',
-      policy: 'Domain and Policy Guardrails',
-      architecture: 'Architecture Overview',
-      importantPaths: 'Important Paths',
-      glossary: 'Domain Glossary',
-    },
-    glossaryDefinition: (term: string) =>
-      `Team-provided glossary term for ${term}. Treat this as shared vocabulary for the repository.`,
+      'Which verification commands should Shift AX run by default? (comma-separated)',
+    overwrite: (path: string) =>
+      `Global knowledge already exists at ${path}. Overwrite and back up the previous files? [y/N]: `,
+    shareMessage: (path: string) =>
+      `Onboarding finished. Please share ${path} with teammates who do similar work and ask them to place it in the same location.`,
   },
   ko: {
-    shouldDiscover:
-      '이 repo 안에 기존 문서가 보입니다. 먼저 스캔해서 base-context index에 재사용할까요? [Y/n]: ',
-    businessContext:
-      '이 저장소가 담당하는 제품, 서비스, 비즈니스 영역은 무엇인가요? ',
-    userJourney:
-      '이 저장소가 주로 처리하는 사용자 흐름이나 업무 흐름은 무엇인가요? ',
-    policyAreas:
-      'AI가 절대 추측하면 안 되는 정책/규칙 영역은 무엇인가요? (쉼표로 구분, 예: auth, billing, permissions): ',
-    riskyDomains:
-      '위험하거나 민감한 영역은 무엇인가요? (쉼표로 구분, 예: payments, personal data, permissions): ',
-    architectureSummary:
-      '시스템 구조를 자연어로 설명해주세요. 이 저장소의 아키텍처는 어떤 형태인가요? ',
-    importantPaths:
-      '중요하게 봐야 할 폴더나 파일 경로는 무엇인가요? (쉼표로 구분, 선택 사항): ',
-    domainTerms:
-      'AI가 알아야 할 내부 용어, 서비스 이름, 별칭을 적어주세요. (쉼표로 구분, 선택 사항): ',
+    intro:
+      '이 절차가 가장 중요합니다. 당신을 잘 이해하기 위해 10분의 시간을 투자해주세요.',
+    roleSummary: '1. 당신은 어떤 업무를 주로 하나요? ',
+    workTypes: '주요 작업 유형을 적어주세요. (쉼표 구분, 예: API 개발, 장애 대응): ',
+    workTypeSummary: (workType: string) => `"${workType}" 업무는 보통 어떤 식으로 진행되나요? `,
+    repositories: (workType: string) =>
+      `"${workType}" 업무에 관련된 레포는 무엇인가요? (쉼표 구분): `,
+    repositoryPath: (repository: string, defaultPath: string) =>
+      `"${repository}"를 Shift AX가 어디서 읽어야 하나요? [${defaultPath} 또는 모르면 공백]: `,
+    repositoryPurpose: (repository: string) =>
+      `"${repository}"는 당신의 업무에서 어떤 역할을 하나요? `,
+    directories: (workType: string, repository: string) =>
+      `"${workType}" 업무를 "${repository}"에서 할 때 주로 만지는 디렉토리는 무엇인가요? (쉼표 구분): `,
+    inferredWorkflow: (repository: string, inference: string) =>
+      [
+        `"${repository}"를 읽어보고 제가 이렇게 추론했습니다:`,
+        inference,
+        '틀린 부분이나 빠진 부분을 꼭 짚어주세요.',
+        '> ',
+      ].join('\n'),
+    confirmedWorkflow: (workType: string, repository: string) =>
+      `"${workType}" 업무를 "${repository}"에서 실제로 어떤 절차로 진행하나요? `,
+    glossaryTerms: '회사/도메인에서만 쓰는 용어를 적어주세요. (쉼표 구분): ',
+    glossaryDefinition: (term: string) => `"${term}"는 무엇인가요? `,
     verificationCommands:
-      'Shift AX가 기본으로 실행해야 할 검증 명령은 무엇인가요? (쉼표로 구분)',
-    labels: {
-      business: '비즈니스 컨텍스트',
-      policy: '도메인 및 정책 가드레일',
-      architecture: '아키텍처 개요',
-      importantPaths: '중요 경로',
-      glossary: '도메인 용어집',
-    },
-    glossaryDefinition: (term: string) =>
-      `${term}에 대한 팀 제공 용어 설명 항목입니다. 이 저장소의 공통 용어로 취급합니다.`,
+      'Shift AX가 기본으로 돌려야 하는 검증 명령은 무엇인가요? (쉼표 구분)',
+    overwrite: (path: string) =>
+      `${path} 아래에 기존 글로벌 지식이 있습니다. 이전 파일을 백업하고 덮어쓸까요? [y/N]: `,
+    shareMessage: (path: string) =>
+      `온보딩이 끝났습니다. 비슷한 업무를 하는 동료에게 ${path} 를 공유하고 같은 위치에 넣어달라고 안내해주세요.`,
   },
 } as const;
 
@@ -101,12 +101,13 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-function promptMarkdown(label: string, body: string): string {
-  return `# ${label}\n\n${body.trim()}\n`;
-}
-
-function joinBullets(items: string[]): string {
-  return items.map((item) => `- ${item}`).join('\n');
+async function homeHasExistingKnowledge(): Promise<boolean> {
+  const home = getGlobalContextHome();
+  return (
+    (await pathExists(home.indexPath)) ||
+    (await pathExists(home.profilePath)) ||
+    (await pathExists(home.settingsPath))
+  );
 }
 
 async function promptNonEmpty(ask: Ask, question: string): Promise<string> {
@@ -121,69 +122,121 @@ async function promptWithDefault(ask: Ask, question: string, defaultValue: strin
   return answer || defaultValue;
 }
 
-function buildGeneratedDocuments({
-  locale,
-  businessContext,
-  userJourney,
-  policyAreas,
-  riskyDomains,
-  architectureSummary,
-  importantPaths,
-}: {
-  locale: ShiftAxLocale;
-  businessContext: string;
-  userJourney: string;
-  policyAreas: string[];
-  riskyDomains: string[];
-  architectureSummary: string;
-  importantPaths: string[];
-}): ShiftAxOnboardingDocumentInput[] {
-  const copy = COPY[locale];
-  const docs: ShiftAxOnboardingDocumentInput[] = [
-    {
-      label: copy.labels.business,
-      path: 'docs/base-context/business-context.md',
-      content: promptMarkdown(
-        copy.labels.business,
-        locale === 'ko'
-          ? `${businessContext}\n\n## 주요 흐름\n\n${userJourney}`
-          : `${businessContext}\n\n## Primary Workflow\n\n${userJourney}`,
-      ),
-    },
-    {
-      label: copy.labels.policy,
-      path: 'docs/base-context/domain-policy-guardrails.md',
-      content: promptMarkdown(
-        copy.labels.policy,
-        [
-          locale === 'ko'
-            ? '## 추측 금지 영역'
-            : '## No-Guessing Areas',
-          '',
-          joinBullets(policyAreas),
-          '',
-          locale === 'ko' ? '## 위험 / 민감 영역' : '## Risky / Sensitive Areas',
-          '',
-          joinBullets(riskyDomains),
-        ].join('\n'),
-      ),
-    },
-    {
-      label: copy.labels.architecture,
-      path: 'docs/base-context/architecture-overview.md',
-      content: promptMarkdown(copy.labels.architecture, architectureSummary),
-    },
-  ];
+async function listInterestingFiles(rootDir: string, directories: string[]): Promise<string[]> {
+  const candidates = directories.length > 0 ? directories : ['.'];
+  const interesting: string[] = [];
 
-  if (importantPaths.length > 0) {
-    docs.push({
-      label: copy.labels.importantPaths,
-      path: 'docs/base-context/important-paths.md',
-      content: promptMarkdown(copy.labels.importantPaths, joinBullets(importantPaths)),
-    });
+  for (const directory of candidates.slice(0, 6)) {
+    const absolute = resolve(rootDir, directory);
+    if (!(await pathExists(absolute))) continue;
+    const entries = await readdir(absolute, { withFileTypes: true }).catch(() => []);
+    for (const entry of entries.slice(0, 20)) {
+      if (entry.name.startsWith('.')) continue;
+      const relative = directory === '.' ? entry.name : join(directory, entry.name);
+      if (entry.isDirectory()) {
+        if (/controller|service|dto|schema|prisma|route|api|worker|job/i.test(entry.name)) {
+          interesting.push(relative);
+        }
+      } else if (/\.(ts|tsx|js|jsx|prisma|sql|md|yaml|yml)$/.test(entry.name)) {
+        interesting.push(relative);
+      }
+      if (interesting.length >= 8) return interesting;
+    }
   }
 
-  return docs;
+  return interesting;
+}
+
+async function inferWorkflow({
+  rootDir,
+  repository,
+  directories,
+}: {
+  rootDir: string;
+  repository: string;
+  directories: string[];
+}): Promise<string> {
+  const interestingFiles = await listInterestingFiles(rootDir, directories);
+  const heuristics: string[] = [];
+  const haystack = interestingFiles.join(' ');
+
+  if (/controller/i.test(haystack) && /service/i.test(haystack)) {
+    heuristics.push('It looks like controller/service boundaries matter here.');
+  }
+  if (/dto/i.test(haystack)) {
+    heuristics.push('DTO definitions appear to be part of the change flow.');
+  }
+  if (/prisma/i.test(haystack)) {
+    heuristics.push('It looks like Prisma schema files may define database changes here.');
+  }
+  if (/worker|job/i.test(haystack)) {
+    heuristics.push('There appear to be worker/job paths that may need runtime or queue-specific handling.');
+  }
+
+  let excerpt = '';
+  const firstInterestingFile = interestingFiles.find((path) => /\.(ts|tsx|js|jsx|prisma)$/.test(path));
+  if (firstInterestingFile) {
+    excerpt = await readFile(resolve(rootDir, firstInterestingFile), 'utf8')
+      .then((content) => content.slice(0, 220).trim())
+      .catch(() => '');
+  }
+
+  return [
+    `Repository: ${repository}`,
+    directories.length > 0 ? `Directories: ${directories.join(', ')}` : 'Directories: none recorded yet.',
+    interestingFiles.length > 0
+      ? `Observed files/dirs: ${interestingFiles.join(', ')}`
+      : 'Observed files/dirs: none',
+    heuristics.length > 0 ? `Inferences: ${heuristics.join(' ')}` : 'Inferences: no strong file-pattern inference yet.',
+    excerpt ? `First code excerpt hint: ${excerpt}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+async function buildRepositoryInput({
+  ask,
+  locale,
+  rootDir,
+  workType,
+  repository,
+  defaultPath,
+}: {
+  ask: Ask;
+  locale: ShiftAxLocale;
+  rootDir: string;
+  workType: string;
+  repository: string;
+  defaultPath: string;
+}): Promise<ShiftAxGlobalOnboardingRepositoryInput> {
+  const copy = COPY[locale];
+  const requestedPath = (await ask(copy.repositoryPath(repository, defaultPath))).trim();
+  const repositoryPath =
+    requestedPath === ''
+      ? defaultPath
+      : isAbsolute(requestedPath)
+        ? requestedPath
+        : resolve(rootDir, requestedPath);
+  const purpose = await promptNonEmpty(ask, copy.repositoryPurpose(repository));
+  const directories = normalizeCommaList(await ask(copy.directories(workType, repository)));
+  const inference = await inferWorkflow({
+    rootDir: repositoryPath,
+    repository,
+    directories,
+  });
+  const correction = await ask(copy.inferredWorkflow(repository, inference));
+  const workflow = await promptNonEmpty(ask, copy.confirmedWorkflow(workType, repository));
+
+  return {
+    repository,
+    repositoryPath,
+    purpose,
+    directories,
+    workflow,
+    inferredNotes: correction.trim() ? [correction.trim()] : [inference],
+    confirmationNotes: correction.trim() || 'User accepted the inferred workflow with no further edits.',
+    volatility: 'volatile',
+  };
 }
 
 export async function runGuidedOnboarding({
@@ -197,21 +250,49 @@ export async function runGuidedOnboarding({
 }): Promise<OnboardProjectContextResult> {
   const copy = COPY[locale];
   const defaults = defaultEngineeringDefaults();
+  const home = getGlobalContextHome();
 
-  const hasDocsDir = await pathExists(`${rootDir}/docs`);
-  const discoverAnswer =
-    hasDocsDir
-      ? (await ask(copy.shouldDiscover)).trim().toLowerCase()
-      : 'n';
-  const useDiscovery = hasDocsDir && !['n', 'no'].includes(discoverAnswer);
+  await ask(`${copy.intro}\n\n(press Enter to continue)\n> `);
 
-  const businessContext = await promptNonEmpty(ask, copy.businessContext);
-  const userJourney = await promptNonEmpty(ask, copy.userJourney);
-  const policyAreas = normalizeCommaList(await promptNonEmpty(ask, copy.policyAreas));
-  const riskyDomains = normalizeCommaList(await promptNonEmpty(ask, copy.riskyDomains));
-  const architectureSummary = await promptNonEmpty(ask, copy.architectureSummary);
-  const importantPaths = normalizeCommaList(await ask(copy.importantPaths));
-  const domainTerms = normalizeCommaList(await ask(copy.domainTerms));
+  const primaryRoleSummary = await promptNonEmpty(ask, copy.roleSummary);
+  const workTypeNames = normalizeCommaList(await promptNonEmpty(ask, copy.workTypes));
+  const workTypes: ShiftAxGlobalOnboardingWorkTypeInput[] = [];
+
+  for (const workType of workTypeNames) {
+    const summary = await promptNonEmpty(ask, copy.workTypeSummary(workType));
+    const repositories = normalizeCommaList(await promptNonEmpty(ask, copy.repositories(workType)));
+    const repositoryInputs: ShiftAxGlobalOnboardingRepositoryInput[] = [];
+
+    for (let index = 0; index < repositories.length; index += 1) {
+      const repository = repositories[index]!;
+      repositoryInputs.push(
+        await buildRepositoryInput({
+          ask,
+          locale,
+          rootDir,
+          workType,
+          repository,
+          defaultPath: index === 0 ? rootDir : '',
+        }),
+      );
+    }
+
+    workTypes.push({
+      name: workType,
+      summary,
+      repositories: repositoryInputs,
+    });
+  }
+
+  const glossaryTerms = normalizeCommaList(await ask(copy.glossaryTerms));
+  const domainLanguage = [];
+  for (const term of glossaryTerms) {
+    domainLanguage.push({
+      term,
+      definition: await promptNonEmpty(ask, copy.glossaryDefinition(term)),
+    });
+  }
+
   const verificationCommands = normalizeCommaList(
     await promptWithDefault(
       ask,
@@ -220,83 +301,27 @@ export async function runGuidedOnboarding({
     ),
   );
 
-  const onboardingContext: ShiftAxOnboardingContextProfile = {
-    business_context: businessContext,
-    policy_areas: policyAreas,
-    architecture_summary: architectureSummary,
-    risky_domains: riskyDomains,
-  };
+  const overwriteAnswer = (await homeHasExistingKnowledge())
+    ? (await ask(copy.overwrite(home.root))).trim().toLowerCase()
+    : 'y';
 
-  const engineeringDefaults: ShiftAxEngineeringDefaults = {
-    ...defaults,
-    verification_commands: verificationCommands.length > 0 ? verificationCommands : defaults.verification_commands,
-  };
-
-  const writtenDocs = await writeOnboardingDocuments({
+  const result = await onboardProjectContext({
     rootDir,
-    documents: buildGeneratedDocuments({
-      locale,
-      businessContext,
-      userJourney,
-      policyAreas,
-      riskyDomains,
-      architectureSummary,
-      importantPaths,
-    }),
+    primaryRoleSummary,
+    workTypes,
+    domainLanguage,
+    onboardingContext: {
+      primary_role_summary: primaryRoleSummary,
+      work_types: workTypes.map((item) => item.name),
+      domain_language: domainLanguage.map((item) => item.term),
+    },
+    engineeringDefaults: {
+      ...defaults,
+      verification_commands: verificationCommands.length > 0 ? verificationCommands : defaults.verification_commands,
+    } as ShiftAxEngineeringDefaults,
+    overwrite: ['y', 'yes'].includes(overwriteAnswer),
   });
 
-  const entries: ShiftAxProjectContextDoc[] = [...writtenDocs];
-
-  if (useDiscovery) {
-    const discovered = await discoverBaseContextEntries({ rootDir });
-    for (const entry of discovered) {
-      if (!entries.some((existing) => existing.label === entry.label && existing.path === entry.path)) {
-        entries.push({ label: entry.label, path: entry.path });
-      }
-    }
-  }
-
-  const glossaryEntries: ShiftAxGlossaryEntry[] = [];
-  if (domainTerms.length > 0) {
-    glossaryEntries.push(
-      ...domainTerms.map((term) => ({
-        term,
-        definition: copy.glossaryDefinition(term),
-        sources: ['guided-onboarding'],
-      })),
-    );
-  }
-
-  if (useDiscovery && glossaryEntries.length === 0) {
-    glossaryEntries.push(
-      ...(await extractDomainGlossaryEntries({
-        rootDir,
-        documentPaths: entries.map((entry) => entry.path),
-      })),
-    );
-  }
-
-  if (glossaryEntries.length > 0) {
-    const glossary = await writeDomainGlossaryDocument({
-      rootDir,
-      entries: glossaryEntries,
-    });
-    if (!entries.some((entry) => entry.path === glossary.path)) {
-      entries.push({ label: copy.labels.glossary, path: glossary.path });
-    }
-  }
-
-  const { index, profile } = await persistProjectContextProfile({
-    rootDir,
-    entries,
-    onboardingContext,
-    engineeringDefaults,
-    now: new Date(),
-  });
-
-  return {
-    documents: entries,
-    index,
-    profile,
-  };
+  process.stderr.write(`${copy.shareMessage(result.sharePath)}\n`);
+  return result;
 }

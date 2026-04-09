@@ -1,15 +1,13 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { access, cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { basename, dirname, join, relative } from 'node:path';
 
 import {
-  authorBaseContextIndex,
-  type AuthorBaseContextIndexResult,
-} from './index-authoring.js';
+  authorGlobalKnowledgeBase,
+  type ShiftAxGlobalDomainLanguageInput,
+  type ShiftAxGlobalWorkTypeInput,
+} from './global-index-authoring.js';
 import { discoverBaseContextEntries } from './discovery.js';
-import {
-  extractDomainGlossaryEntries,
-  writeDomainGlossaryDocument,
-} from './glossary.js';
 import {
   defaultEngineeringDefaults,
   type ShiftAxEngineeringDefaults,
@@ -18,6 +16,7 @@ import {
   type ShiftAxProjectProfile,
   writeProjectProfile,
 } from '../policies/project-profile.js';
+import { getGlobalContextHome } from '../settings/global-context-home.js';
 
 export interface ShiftAxOnboardingDocumentInput {
   label: string;
@@ -25,18 +24,145 @@ export interface ShiftAxOnboardingDocumentInput {
   path?: string;
 }
 
+export interface ShiftAxGlobalOnboardingRepositoryInput {
+  repository: string;
+  repositoryPath?: string;
+  purpose?: string;
+  directories: string[];
+  workflow: string;
+  inferredNotes?: string[];
+  confirmationNotes?: string;
+  volatility?: 'stable' | 'volatile';
+}
+
+export interface ShiftAxGlobalOnboardingWorkTypeInput {
+  name: string;
+  summary?: string;
+  repositories: ShiftAxGlobalOnboardingRepositoryInput[];
+}
+
 export interface OnboardProjectContextInput {
   rootDir: string;
-  documents: ShiftAxOnboardingDocumentInput[];
+  primaryRoleSummary?: string;
+  workTypes?: ShiftAxGlobalOnboardingWorkTypeInput[];
+  domainLanguage?: ShiftAxGlobalDomainLanguageInput[];
   onboardingContext?: ShiftAxOnboardingContextProfile;
   engineeringDefaults?: ShiftAxEngineeringDefaults;
-  now?: Date;
+  overwrite?: boolean;
+  documents?: ShiftAxOnboardingDocumentInput[];
 }
 
 export interface OnboardProjectContextResult {
   documents: ShiftAxProjectContextDoc[];
-  index: AuthorBaseContextIndexResult;
+  index: {
+    indexPath: string;
+    entries: ShiftAxProjectContextDoc[];
+  };
   profile: ShiftAxProjectProfile;
+  sharePath: string;
+}
+
+async function pathExists(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function slugify(value: string): string {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || 'context';
+}
+
+function deriveLegacyWorkTypes({
+  rootDir,
+  documents,
+}: {
+  rootDir: string;
+  documents: ShiftAxOnboardingDocumentInput[];
+}): ShiftAxGlobalOnboardingWorkTypeInput[] {
+  const repoName = basename(rootDir);
+
+  return [
+    {
+      name: 'Repository Context',
+      summary: 'Migrated legacy repository-local context.',
+      repositories: [
+        {
+          repository: repoName,
+          repositoryPath: rootDir,
+          directories: documents.map((document) => document.path || `docs/base-context/${slugify(document.label)}.md`),
+          workflow: documents
+            .map((document) => `${document.label}: ${document.content.replace(/^# .*$/m, '').trim()}`)
+            .join('\n\n'),
+          volatility: 'volatile',
+        },
+      ],
+    },
+  ];
+}
+
+function deriveLegacyDomainLanguage(documents: ShiftAxOnboardingDocumentInput[]): ShiftAxGlobalDomainLanguageInput[] {
+  return documents.map((document) => ({
+    term: document.label,
+    definition: `Migrated legacy context entry stored under ${document.path || `docs/base-context/${slugify(document.label)}.md`}.`,
+  }));
+}
+
+async function backupFileIfPresent(path: string): Promise<void> {
+  const home = getGlobalContextHome();
+  if (!(await pathExists(path))) return;
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+  await mkdir(home.backupsDir, { recursive: true });
+  const backupName = `${stamp}-${basename(path)}`;
+  await cp(path, join(home.backupsDir, backupName));
+}
+
+async function ensureOverwriteAllowed({
+  overwrite,
+  candidatePaths,
+}: {
+  overwrite: boolean;
+  candidatePaths: string[];
+}): Promise<void> {
+  if (!overwrite) {
+    for (const path of candidatePaths) {
+      if (await pathExists(path)) {
+        throw new Error(`global context file already exists and requires overwrite confirmation: ${path}`);
+      }
+    }
+    return;
+  }
+
+  for (const path of candidatePaths) {
+    await backupFileIfPresent(path);
+  }
+}
+
+function normalizeOnboardingContext({
+  primaryRoleSummary,
+  workTypes,
+  domainLanguage,
+  onboardingContext,
+}: {
+  primaryRoleSummary: string;
+  workTypes: ShiftAxGlobalWorkTypeInput[];
+  domainLanguage: ShiftAxGlobalDomainLanguageInput[];
+  onboardingContext?: ShiftAxOnboardingContextProfile;
+}): ShiftAxOnboardingContextProfile {
+  return (
+    onboardingContext ?? {
+      primary_role_summary: primaryRoleSummary,
+      work_types: workTypes.map((workType) => workType.name),
+      domain_language: domainLanguage.map((entry) => entry.term),
+    }
+  );
 }
 
 export async function persistProjectContextProfile({
@@ -52,94 +178,118 @@ export async function persistProjectContextProfile({
   engineeringDefaults: ShiftAxEngineeringDefaults;
   now: Date;
 }): Promise<{
-  index: AuthorBaseContextIndexResult;
+  index: {
+    indexPath: string;
+    entries: ShiftAxProjectContextDoc[];
+  };
   profile: ShiftAxProjectProfile;
 }> {
-  const index = await authorBaseContextIndex({
-    rootDir,
-    entries,
-  });
-
+  const home = getGlobalContextHome();
   const profile: ShiftAxProjectProfile = {
     version: 1,
     updated_at: now.toISOString(),
-    docs_root: 'docs/base-context',
-    index_path: 'docs/base-context/index.md',
-    context_docs: index.entries,
+    docs_root: home.root,
+    index_path: relative(home.root, home.indexPath) || 'index.md',
+    context_docs: entries,
     ...(onboardingContext ? { onboarding_context: onboardingContext } : {}),
     engineering_defaults: engineeringDefaults,
   };
 
   await writeProjectProfile(rootDir, profile);
-  return { index, profile };
-}
-
-function slugifyLabel(label: string): string {
-  return String(label || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '') || 'context';
-}
-
-function resolveDocPath(input: ShiftAxOnboardingDocumentInput): string {
-  if (input.path && input.path.trim() !== '') {
-    return input.path.trim();
-  }
-
-  return `docs/base-context/${slugifyLabel(input.label)}.md`;
-}
-
-export async function writeOnboardingDocuments({
-  rootDir,
-  documents,
-}: {
-  rootDir: string;
-  documents: ShiftAxOnboardingDocumentInput[];
-}): Promise<ShiftAxProjectContextDoc[]> {
-  const resolvedDocs: ShiftAxProjectContextDoc[] = [];
-
-  for (const document of documents) {
-    const relativePath = resolveDocPath(document);
-    const absolutePath = join(rootDir, relativePath);
-    await mkdir(dirname(absolutePath), { recursive: true });
-    await writeFile(absolutePath, document.content, 'utf8');
-    resolvedDocs.push({ label: document.label, path: relativePath });
-  }
-
-  return resolvedDocs;
+  return {
+    index: {
+      indexPath: home.indexPath,
+      entries,
+    },
+    profile,
+  };
 }
 
 export async function onboardProjectContext({
   rootDir,
-  documents,
+  primaryRoleSummary,
+  workTypes,
+  domainLanguage,
   onboardingContext,
   engineeringDefaults = defaultEngineeringDefaults(),
-  now = new Date(),
+  overwrite = true,
+  documents,
 }: OnboardProjectContextInput): Promise<OnboardProjectContextResult> {
   if (!rootDir) throw new Error('rootDir is required');
-  if (!documents || documents.length === 0) {
-    throw new Error('documents are required');
+
+  const derivedWorkTypes =
+    workTypes && workTypes.length > 0
+      ? workTypes
+      : documents && documents.length > 0
+        ? deriveLegacyWorkTypes({ rootDir, documents })
+        : [];
+  const derivedDomainLanguage =
+    domainLanguage && domainLanguage.length > 0
+      ? domainLanguage
+      : documents && documents.length > 0
+        ? deriveLegacyDomainLanguage(documents)
+        : [];
+  const derivedPrimaryRoleSummary =
+    primaryRoleSummary?.trim() ||
+    onboardingContext?.primary_role_summary?.trim() ||
+    `Primary workflow owner for ${basename(rootDir)}.`;
+
+  if (derivedWorkTypes.length === 0) {
+    throw new Error('workTypes are required');
   }
 
-  const resolvedDocs = await writeOnboardingDocuments({
-    rootDir,
-    documents,
+  const home = getGlobalContextHome();
+  const candidatePaths = [
+    home.indexPath,
+    home.profilePath,
+    home.settingsPath,
+    ...derivedWorkTypes.flatMap((workType) => [
+      join(home.workTypesDir, `${slugify(workType.name)}.md`),
+      ...workType.repositories.map((repository) =>
+        join(home.reposDir, `${slugify(repository.repository || basename(repository.repositoryPath || 'repo'))}.md`),
+      ),
+      ...workType.repositories.map((repository) =>
+        join(
+          home.proceduresDir,
+          `${slugify(workType.name)}--${slugify(repository.repository || basename(repository.repositoryPath || 'repo'))}.md`,
+        ),
+      ),
+    ]),
+    ...derivedDomainLanguage.map((entry) => join(home.domainLanguageDir, `${slugify(entry.term)}.md`)),
+  ];
+
+  await ensureOverwriteAllowed({
+    overwrite,
+    candidatePaths,
   });
 
-  const { index, profile } = await persistProjectContextProfile({
+  const index = await authorGlobalKnowledgeBase({
+    primaryRoleSummary: derivedPrimaryRoleSummary,
+    workTypes: derivedWorkTypes,
+    domainLanguage: derivedDomainLanguage,
+  });
+
+  const { profile } = await persistProjectContextProfile({
     rootDir,
-    entries: resolvedDocs,
-    onboardingContext,
+    entries: index.contextDocs,
+    onboardingContext: normalizeOnboardingContext({
+      primaryRoleSummary: derivedPrimaryRoleSummary,
+      workTypes: derivedWorkTypes,
+      domainLanguage: derivedDomainLanguage,
+      onboardingContext,
+    }),
     engineeringDefaults,
-    now,
+    now: new Date(),
   });
 
   return {
-    documents: resolvedDocs,
-    index,
+    documents: index.contextDocs,
+    index: {
+      indexPath: index.indexPath,
+      entries: index.contextDocs,
+    },
     profile,
+    sharePath: home.root,
   };
 }
 
@@ -148,52 +298,40 @@ export async function onboardProjectContextFromDiscovery({
   onboardingContext,
   engineeringDefaults = defaultEngineeringDefaults(),
   includeGlossary = false,
-  now = new Date(),
+  overwrite = true,
 }: {
   rootDir: string;
   onboardingContext?: ShiftAxOnboardingContextProfile;
   engineeringDefaults?: ShiftAxEngineeringDefaults;
   includeGlossary?: boolean;
-  now?: Date;
+  overwrite?: boolean;
 }): Promise<OnboardProjectContextResult> {
-  const documents = await discoverBaseContextEntries({ rootDir });
-  if (documents.length === 0) {
+  const discovered = await discoverBaseContextEntries({ rootDir });
+  if (discovered.length === 0) {
     throw new Error('no discoverable base-context documents were found');
   }
 
-  const resolvedDocs: ShiftAxProjectContextDoc[] = documents.map((document) => ({
-    label: document.label,
-    path: document.path,
-  }));
+  const documents: ShiftAxOnboardingDocumentInput[] = await Promise.all(
+    discovered.map(async (entry) => ({
+      label: entry.label,
+      path: entry.path,
+      content: await readFile(join(rootDir, entry.path), 'utf8'),
+    })),
+  );
 
-  if (includeGlossary) {
-    const glossaryEntries = await extractDomainGlossaryEntries({
-      rootDir,
-      documentPaths: resolvedDocs.map((doc) => doc.path),
-    });
-    if (glossaryEntries.length > 0) {
-      const glossary = await writeDomainGlossaryDocument({
-        rootDir,
-        entries: glossaryEntries,
-      });
-      resolvedDocs.push({
-        label: 'Domain Glossary',
-        path: glossary.path,
-      });
-    }
-  }
+  const domainLanguage = includeGlossary
+    ? discovered.map((entry) => ({
+        term: entry.label,
+        definition: `Migrated from ${entry.path}.`,
+      }))
+    : [];
 
-  const { index, profile } = await persistProjectContextProfile({
+  return onboardProjectContext({
     rootDir,
-    entries: resolvedDocs,
+    documents,
+    domainLanguage,
     onboardingContext,
     engineeringDefaults,
-    now,
+    overwrite,
   });
-
-  return {
-    documents: resolvedDocs,
-    index,
-    profile,
-  };
 }

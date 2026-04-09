@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 
 import type { ShiftAxBootstrapAsset } from '../index.js';
 import { buildProductShellAssets, SHIFT_AX_PRODUCT_SHELL_COMMANDS } from '../product-shell-commands.js';
+import { getGlobalContextHome } from '../../core/settings/global-context-home.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_FILES = [
@@ -20,7 +21,9 @@ function templatePath(relativePath: (typeof TEMPLATE_FILES)[number]): string {
 
 function renderTemplate(relativePath: (typeof TEMPLATE_FILES)[number], rootDir: string): string {
   const raw = readFileSync(templatePath(relativePath), 'utf8');
-  return raw.replaceAll('{{BASE_CONTEXT_INDEX}}', `${rootDir}/docs/base-context/index.md`);
+  return raw
+    .replaceAll('{{BASE_CONTEXT_INDEX}}', `${rootDir}/docs/base-context/index.md`)
+    .replaceAll('{{GLOBAL_CONTEXT_INDEX}}', getGlobalContextHome().indexPath);
 }
 
 export function claudeCodeScaffoldTemplateFiles(): string[] {

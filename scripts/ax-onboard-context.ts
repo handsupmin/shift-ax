@@ -14,7 +14,7 @@ import type { ShiftAxPlatform } from '../adapters/contracts.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--lang en|ko] [--platform codex|claude-code] [--root DIR]\n',
+    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--overwrite] [--lang en|ko] [--platform codex|claude-code] [--root DIR]\n',
   );
 }
 
@@ -78,6 +78,7 @@ async function main(): Promise<void> {
   const rootDir = readArg('--root') || process.cwd();
   const discover = process.argv.includes('--discover');
   const includeGlossary = !process.argv.includes('--no-glossary');
+  const overwrite = process.argv.includes('--overwrite');
   const localeArg = readArg('--lang');
   const platformArg = readArg('--platform');
   const prompts =
@@ -99,9 +100,10 @@ async function main(): Promise<void> {
             typeof onboardProjectContext
           >[0]),
           rootDir,
+          overwrite,
         })
       : discover
-        ? await onboardProjectContextFromDiscovery({ rootDir, includeGlossary })
+        ? await onboardProjectContextFromDiscovery({ rootDir, includeGlossary, overwrite })
         : await runGuidedOnboarding({
             rootDir,
             locale,

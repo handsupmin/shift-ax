@@ -5,8 +5,8 @@ This build is expected to use SessionStart hook-driven context injection.
 ## Hook Intent
 
 - SessionStart should inject Shift AX bootstrap context.
-- Before planning or implementation, resolve context from {{BASE_CONTEXT_INDEX}}.
-- If the base-context index is missing, interview the team about domain/policy context and persist it with `ax onboard-context` (interactive) or `ax onboard-context --input <file>` before continuing.
+- Before planning or implementation, resolve context from {{GLOBAL_CONTEXT_INDEX}}.
+- If the global index is missing, recommend `/onboarding` before `/request`. Do not pretend the missing context does not matter.
 - Use `ax doctor` when setup, launcher availability, or topic state looks unhealthy.
 - Use `ax resolve-context` before answering when relevant documents may exist.
 - Use `ax run-request` to create the request-scoped topic/worktree, run the planning interview, write brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pause at the human planning-review gate.
@@ -24,6 +24,6 @@ This build is expected to use SessionStart hook-driven context injection.
 - Active imported worktree helpers currently include `getWorktreeRoot`, `createClaudeManagedWorktree`, and `removeClaudeManagedWorktree`.
 - Use `ax review --run` before finalization and `ax finalize-commit` only after the review gate allows commit.
 - Natural language is the primary user surface. Internal AX commands exist to support the flow, not replace the conversation.
-- In Shift AX shell sessions, interpret `/onboard`, `/doctor`, `/request <text>`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>`, `/help` and the same `$...` aliases as product-shell commands that map to the corresponding `ax` workflows.
-- Native product-shell command files are installed under `.claude/commands/` for: `onboard`, `request`, `doctor`, `status`, `topics`, `resume`, and `review`.
+- In Shift AX shell sessions, interpret `/onboarding`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>`, `/help` and the same `$...` aliases as product-shell commands that map to the corresponding `ax` workflows.
+- Native product-shell command files are installed under `.claude/commands/` for: `onboarding`, `request`, `export-context`, `doctor`, `status`, `topics`, `resume`, and `review`.
 - Treat `$request <text>` as the explicit alias for starting a new request-to-commit flow inside the session.

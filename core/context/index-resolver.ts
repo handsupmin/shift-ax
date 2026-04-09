@@ -15,6 +15,7 @@ export interface ResolvedContextMatch extends IndexEntry {
 export interface ResolveContextInput {
   rootDir: string;
   indexPath: string;
+  indexRootDir?: string;
   query: string;
   maxMatches?: number;
 }
@@ -68,6 +69,7 @@ function scoreEntry(entry: IndexEntry, queryTokens: string[]): number {
 export async function resolveContextFromIndex({
   rootDir,
   indexPath,
+  indexRootDir,
   query,
   maxMatches = 5,
 }: ResolveContextInput): Promise<ResolveContextResult> {
@@ -87,9 +89,10 @@ export async function resolveContextFromIndex({
 
   const matches: ResolvedContextMatch[] = [];
   const unresolvedPaths: string[] = [];
+  const effectiveIndexRootDir = indexRootDir || rootDir;
 
   for (const item of scored) {
-    const absolutePath = resolve(rootDir, item.entry.path);
+    const absolutePath = resolve(effectiveIndexRootDir, item.entry.path);
     try {
       const content = await readFile(absolutePath, 'utf8');
       matches.push({

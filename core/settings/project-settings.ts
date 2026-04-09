@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
 
 import type { ShiftAxPlatform } from '../../adapters/contracts.js';
+import { getGlobalContextHome } from './global-context-home.js';
 
 export type ShiftAxLocale = 'en' | 'ko';
 
@@ -13,7 +13,7 @@ export interface ShiftAxProjectSettings {
 }
 
 export function getProjectSettingsPath(rootDir: string): string {
-  return join(rootDir, '.ax', 'project-settings.json');
+  return getGlobalContextHome().settingsPath;
 }
 
 export async function readProjectSettings(
@@ -33,6 +33,7 @@ export async function writeProjectSettings({
   rootDir: string;
   settings: ShiftAxProjectSettings;
 }): Promise<void> {
-  await mkdir(join(rootDir, '.ax'), { recursive: true });
-  await writeFile(getProjectSettingsPath(rootDir), `${JSON.stringify(settings, null, 2)}\n`, 'utf8');
+  const path = getProjectSettingsPath(rootDir);
+  await mkdir(getGlobalContextHome().root, { recursive: true });
+  await writeFile(path, `${JSON.stringify(settings, null, 2)}\n`, 'utf8');
 }

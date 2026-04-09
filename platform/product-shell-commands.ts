@@ -1,8 +1,9 @@
 import type { ShiftAxBootstrapAsset } from './index.js';
 
 export const SHIFT_AX_PRODUCT_SHELL_COMMANDS = [
-  'onboard',
+  'onboarding',
   'request',
+  'export-context',
   'doctor',
   'status',
   'topics',

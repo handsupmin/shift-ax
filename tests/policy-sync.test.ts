@@ -1,11 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { onboardProjectContext } from '../core/context/onboarding.js';
 import { recordPlanReviewDecision } from '../core/planning/plan-review.js';
 import {
   completePolicyContextSync,
@@ -16,6 +15,8 @@ import {
   resumeRequestPipeline,
   startRequestPipeline,
 } from '../core/planning/request-pipeline.js';
+import { seedSampleOnboarding } from './helpers/sample-onboarding.js';
+import { withTempGlobalHome } from './helpers/global-home.js';
 
 async function createGitRepo(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-policy-sync-git-'));
@@ -49,99 +50,94 @@ test('approved plans that require base-context policy updates block implementati
   const repoRoot = await createGitRepo();
 
   try {
-    await onboardProjectContext({
-      rootDir: repoRoot,
-      documents: [
-        {
-          label: 'Auth policy',
-          content: '# Auth Policy\n\nRefresh token rotation is required.\n',
-        },
-      ],
-    });
+    await withTempGlobalHome('shift-ax-policy-sync-home-', async () => {
+      await seedSampleOnboarding(repoRoot);
 
-    const started = await startRequestPipeline({
-      rootDir: repoRoot,
-      request: 'Build safer auth refresh flow',
-      summary: 'Need a reviewed auth-refresh delivery flow.',
-      brainstormContent: [
-        '# Brainstorm',
-        '',
-        '## Request',
-        '',
-        'Build safer auth refresh flow',
-        '',
-        '## Base-Context Policy Updates',
-        '',
-        '- Update Auth policy to explain the new refresh-token revocation rule.',
-        '',
-      ].join('\n'),
-      specContent: [
-        '# Topic Spec',
-        '',
-        '## Goal',
-        '',
-        'Implement auth refresh token rotation.',
-        '',
-        '## Base-Context Policy Updates',
-        '',
-        '- Update Auth policy to explain the new refresh-token revocation rule.',
-        '',
-      ].join('\n'),
-      implementationPlanContent: reviewablePlanWithPolicyUpdate(),
-      baseBranch: 'main',
-    });
+      const started = await startRequestPipeline({
+        rootDir: repoRoot,
+        request: 'Build safer auth refresh flow',
+        summary: 'Need a reviewed auth-refresh delivery flow.',
+        brainstormContent: [
+          '# Brainstorm',
+          '',
+          '## Request',
+          '',
+          'Build safer auth refresh flow',
+          '',
+          '## Base-Context Policy Updates',
+          '',
+          '- Update Auth policy to explain the new refresh-token revocation rule.',
+          '',
+        ].join('\n'),
+        specContent: [
+          '# Topic Spec',
+          '',
+          '## Goal',
+          '',
+          'Implement auth refresh token rotation.',
+          '',
+          '## Base-Context Policy Updates',
+          '',
+          '- Update Auth policy to explain the new refresh-token revocation rule.',
+          '',
+        ].join('\n'),
+        implementationPlanContent: reviewablePlanWithPolicyUpdate(),
+        baseBranch: 'main',
+      });
 
-    const syncArtifact = await readPolicyContextSyncArtifact(started.topicDir);
-    assert.equal(syncArtifact.status, 'required');
-    assert.match(syncArtifact.required_updates[0] ?? '', /Auth policy/i);
+      const syncArtifact = await readPolicyContextSyncArtifact(started.topicDir);
+      assert.equal(syncArtifact.status, 'required');
+      assert.match(syncArtifact.required_updates[0] ?? '', /Auth policy/i);
 
-    await recordPlanReviewDecision({
-      topicDir: started.topicDir,
-      reviewer: 'Alex Reviewer',
-      status: 'approved',
-      notes: 'Approved once shared policy docs are updated first.',
-    });
+      await recordPlanReviewDecision({
+        topicDir: started.topicDir,
+        reviewer: 'Alex Reviewer',
+        status: 'approved',
+        notes: 'Approved once shared policy docs are updated first.',
+      });
 
-    const blockedWorkflow = await readWorkflowState(started.topicDir);
-    assert.equal(blockedWorkflow.phase, 'awaiting_policy_sync');
+      const blockedWorkflow = await readWorkflowState(started.topicDir);
+      assert.equal(blockedWorkflow.phase, 'awaiting_policy_sync');
 
-    await assert.rejects(
-      resumeRequestPipeline({
+      await assert.rejects(
+        resumeRequestPipeline({
+          topicDir: started.topicDir,
+          verificationCommands: ['echo test'],
+        }),
+        /policy context sync|policy sync/i,
+      );
+
+      await mkdir(join(repoRoot, 'docs', 'base-context'), { recursive: true });
+      await writeFile(
+        join(repoRoot, 'docs', 'base-context', 'auth-policy.md'),
+        '# Auth Policy\n\nRefresh token rotation is required.\n\nRevocation events must clear the old refresh token.\n',
+        'utf8',
+      );
+
+      const completed = await completePolicyContextSync({
+        topicDir: started.topicDir,
+        summary: 'Updated the shared auth policy before implementation.',
+        syncedPaths: ['docs/base-context/auth-policy.md'],
+      });
+
+      assert.equal(completed.status, 'completed');
+
+      const resumed = await resumeRequestPipeline({
         topicDir: started.topicDir,
         verificationCommands: ['echo test'],
-      }),
-      /policy context sync|policy sync/i,
-    );
+        executionRunner: async () => ({
+          version: 1,
+          overall_status: 'completed',
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          tasks: [],
+        }),
+      });
 
-    await writeFile(
-      join(repoRoot, 'docs', 'base-context', 'auth-policy.md'),
-      '# Auth Policy\n\nRefresh token rotation is required.\n\nRevocation events must clear the old refresh token.\n',
-      'utf8',
-    );
-
-    const completed = await completePolicyContextSync({
-      topicDir: started.topicDir,
-      summary: 'Updated the shared auth policy before implementation.',
-      syncedPaths: ['docs/base-context/auth-policy.md'],
+      assert.equal(resumed.aggregate.commit_allowed, false);
+      const workflow = await readWorkflowState(started.topicDir);
+      assert.equal(workflow.phase, 'implementation_running');
     });
-
-    assert.equal(completed.status, 'completed');
-
-    const resumed = await resumeRequestPipeline({
-      topicDir: started.topicDir,
-      verificationCommands: ['echo test'],
-      executionRunner: async () => ({
-        version: 1,
-        overall_status: 'completed',
-        started_at: new Date().toISOString(),
-        completed_at: new Date().toISOString(),
-        tasks: [],
-      }),
-    });
-
-    assert.equal(resumed.aggregate.commit_allowed, false);
-    const workflow = await readWorkflowState(started.topicDir);
-    assert.equal(workflow.phase, 'implementation_running');
   } finally {
     await rm(repoRoot, { recursive: true, force: true });
   }

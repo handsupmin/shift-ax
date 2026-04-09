@@ -6,8 +6,9 @@ import { tmpdir } from 'node:os';
 
 import { onboardProjectContextFromDiscovery } from '../core/context/onboarding.js';
 import { readProjectProfile } from '../core/policies/project-profile.js';
+import { withTempGlobalHome } from './helpers/global-home.js';
 
-test('onboardProjectContextFromDiscovery seeds the base-context index from existing docs', async () => {
+test('onboardProjectContextFromDiscovery migrates discovered docs into the global knowledge home', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboard-discovery-'));
 
   try {
@@ -24,14 +25,15 @@ test('onboardProjectContextFromDiscovery seeds the base-context index from exist
       'utf8',
     );
 
-    const result = await onboardProjectContextFromDiscovery({ rootDir: root });
-    const index = await readFile(join(root, 'docs', 'base-context', 'index.md'), 'utf8');
-    const profile = await readProjectProfile(root);
+    await withTempGlobalHome('shift-ax-discovery-home-', async (home) => {
+      const result = await onboardProjectContextFromDiscovery({ rootDir: root });
+      const index = await readFile(join(home, 'index.md'), 'utf8');
+      const profile = await readProjectProfile(root);
 
-    assert.equal(result.documents.length, 2);
-    assert.match(index, /System Overview -> docs\/architecture\/system-overview.md/);
-    assert.match(index, /Auth Policy -> docs\/policies\/auth-policy.md/);
-    assert.equal(profile?.context_docs.length, 2);
+      assert.ok(result.documents.length >= 3);
+      assert.match(index, /Repository Context -> work-types\/repository-context.md/);
+      assert.equal(profile?.context_docs.some((entry) => entry.path === 'work-types/repository-context.md'), true);
+    });
   } finally {
     await rm(root, { recursive: true, force: true });
   }

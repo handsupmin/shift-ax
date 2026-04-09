@@ -29,13 +29,14 @@ Currently implemented:
 
 Current request-to-commit behavior:
 
-- `ax --codex`, `ax --claude-code`, or plain `ax` now open a conversational platform shell. On first run, if onboarding artifacts are missing, Shift AX opens the matching Codex or Claude Code session first and performs guided onboarding inside that platform conversation instead of using a separate readline questionnaire.
-- Inside that shell, the agent is expected to understand `/onboard`, `$onboard`, `/doctor`, `/request <text>`, `/status`, `/topics`, `/resume <topic>`, and `/review <topic>` as Shift AX product-shell commands.
+- `ax --codex`, `ax --claude-code`, or plain `ax` now open a conversational platform shell. The reusable knowledge base lives under `~/.shift-ax/`, with `~/.shift-ax/index.md` as the main index.
+- Inside that shell, the agent is expected to understand `/onboarding`, `$onboarding`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, `/resume <topic>`, and `/review <topic>` as Shift AX product-shell commands.
 - `ax onboard-context` still exists for explicit scripted or manual onboarding, but the preferred first-run UX is now in-shell onboarding through the platform wrapper.
 - `scripts/install-global.sh` is the one-command installer used by the public README and setup docs for global npm installation.
-- `ax onboard-context` now supports a guided interactive interview by default and still accepts `--input <file>` for scripted onboarding. It writes tracked domain/policy docs, regenerates `docs/base-context/index.md`, and persists the shared engineering profile.
-- `ax doctor [--root <dir>] [--topic <dir>] [--platform codex|claude-code]` prints a compact health report for the repo, base-context docs, shared profile, topic state, and optional launcher readiness.
-- `ax run-request --request <text>` bootstraps a topic/worktree, resolves base context, runs an interactive planning interview by default, writes brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pauses at the human planning-review gate.
+- `ax onboard-context` now supports a guided interactive interview by default and still accepts `--input <file>` for scripted onboarding. It writes or migrates knowledge into `~/.shift-ax/`, regenerates `~/.shift-ax/index.md`, and persists the shared engineering profile.
+- `ax export-context` prints sharing guidance for the global `~/.shift-ax/` profile.
+- `ax doctor [--root <dir>] [--topic <dir>] [--platform codex|claude-code]` prints a compact health report for the repo, global index, shared profile, topic state, and optional launcher readiness.
+- `ax run-request --request <text>` bootstraps a topic/worktree, resolves the global index first, runs an interactive planning interview by default, writes brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pauses at the human planning-review gate.
 - `ax approve-plan --topic <dir> --reviewer <name> --decision approve|reject` records the human planning-review decision and an approved-plan fingerprint. If planning identified shared policy/base-context changes, the workflow now pauses in a dedicated policy-sync gate before implementation starts.
 - `ax sync-policy-context --topic <dir> --summary "<text>" [--path <doc>]... [--entry "Label -> path"]...` records that required shared policy/context docs were updated and, when needed, merges new entries into the base-context index before implementation resumes.
 - `ax react-feedback --topic <dir> --kind <review-changes-requested|ci-failed> --summary "<text>"` reopens implementation when downstream review or CI feedback says the topic must go back to work.

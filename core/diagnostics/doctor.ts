@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { parseIndexDocument } from '../context/index-resolver.js';
 import { summarizeTopicStatus, type ShiftAxTopicStatusSummary } from '../observability/topic-status.js';
 import { getProjectProfilePath, readProjectProfile } from '../policies/project-profile.js';
+import { getGlobalContextHome } from '../settings/global-context-home.js';
 
 export type ShiftAxDoctorStatus = 'ok' | 'warn' | 'fail';
 
@@ -80,11 +81,12 @@ function checkGitRoot(rootDir: string): ShiftAxDoctorReport['git'] {
 }
 
 async function checkBaseContext(rootDir: string): Promise<ShiftAxDoctorReport['base_context']> {
-  const indexPath = join(rootDir, 'docs', 'base-context', 'index.md');
+  const home = getGlobalContextHome();
+  const indexPath = home.indexPath;
   if (!existsSync(indexPath)) {
     return {
       status: 'fail',
-      message: 'Base-context index is missing.',
+      message: 'Global Shift AX index is missing.',
       index_path: indexPath,
       entry_count: 0,
       missing_paths: [],
@@ -95,14 +97,14 @@ async function checkBaseContext(rootDir: string): Promise<ShiftAxDoctorReport['b
   const entries = parseIndexDocument(rawIndex);
   const missingPaths = entries
     .map((entry) => entry.path)
-    .filter((path) => !existsSync(resolve(rootDir, path)));
+    .filter((path) => !existsSync(resolve(home.root, path)));
 
   return {
     status: missingPaths.length > 0 ? 'fail' : 'ok',
     message:
       missingPaths.length > 0
-        ? 'Base-context index includes unresolved or missing document paths.'
-        : 'Base-context index and linked documents are present.',
+        ? 'Global index includes unresolved or missing document paths.'
+        : 'Global index and linked documents are present.',
     index_path: indexPath,
     entry_count: entries.length,
     missing_paths: missingPaths,
@@ -116,8 +118,8 @@ async function checkProfile(rootDir: string): Promise<ShiftAxDoctorReport['profi
   return {
     status: profile ? 'ok' : 'fail',
     message: profile
-      ? 'Shared project profile is available.'
-      : 'Project profile is missing. Run `ax onboard-context` first.',
+      ? 'Global Shift AX profile is available.'
+      : 'Global Shift AX profile is missing. Run `/onboarding` or `ax onboard-context` first.',
     path,
   };
 }

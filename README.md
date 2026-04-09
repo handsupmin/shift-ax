@@ -7,6 +7,11 @@
 
 Shift AX turns a raw development request into a document-aware, review-gated workflow that ends at a meaningful local git commit.
 
+Its primary reusable knowledge base now lives in:
+
+- `~/.shift-ax/`
+- main index: `~/.shift-ax/index.md`
+
 It also supports a platform-specific conversational shell:
 
 - `ax --codex`
@@ -14,15 +19,15 @@ It also supports a platform-specific conversational shell:
 - `shift-ax --codex`
 - `shift-ax --claude-code`
 
-On first run, if onboarding artifacts are missing, Shift AX now opens the platform session first and conducts guided onboarding **inside** Codex or Claude Code instead of using a separate readline questionnaire.
+On first run, Shift AX opens the platform session first. The user can then run `/onboarding` inside that session to build the global `~/.shift-ax/` knowledge base instead of filling out a separate readline questionnaire.
 
 ## What Shift AX does
 
 Shift AX adds a control plane on top of existing coding-agent runtimes so teams can:
 
-- onboard domain and policy context into tracked docs
-- propose a first base-context index from existing docs during onboarding
-- generate a domain glossary from discovered docs and vocabulary
+- onboard reusable work knowledge into a global `~/.shift-ax/` index
+- structure that knowledge into work types, related repositories, per-repository working methods, and domain language
+- keep the main index lightweight and link-based so retrieval stays token-efficient
 - resolve relevant context before planning or implementation
 - recall similar completed topics as supporting context after authoritative docs have been checked
 - keep a lightweight file-backed register of important decisions and when they became valid
@@ -99,7 +104,7 @@ npm run build
 npm run ax -- doctor
 ```
 
-### 3. Onboard base context
+### 3. Run onboarding
 
 Conversational shell mode:
 
@@ -109,13 +114,31 @@ ax --codex
 ax --claude-code
 ```
 
-On first run, the platform session itself asks for language first and then continues guided onboarding if the repo is not yet onboarded.
+If `~/.shift-ax/index.md` does not exist yet, open the shell and run:
+
+```text
+/onboarding
+```
+
+Shift AX should begin with:
+
+> This step matters most. Please invest 10 minutes so Shift AX can understand how you work.
+
+The onboarding flow should capture:
+
+1. work types
+2. related repositories
+3. per-repository working methods
+4. domain language
+
+The resulting knowledge is written under `~/.shift-ax/`, and `~/.shift-ax/index.md` stays lightweight by linking to detailed pages.
 
 Inside the shell, the agent should accept product-shell commands such as:
 
-- `/onboard` or `$onboard`
+- `/onboarding` or `$onboarding`
 - `/doctor` or `$doctor`
 - `/request <text>` or `$request <text>`
+- `/export-context`
 - `/status`
 - `/topics`
 - `/resume <topic>`
@@ -123,8 +146,8 @@ Inside the shell, the agent should accept product-shell commands such as:
 
 Platform-native command files are now scaffolded for both runtimes:
 
-- Codex: `.codex/prompts/{onboard,request,doctor,status,topics,resume,review}.md`
-- Claude Code: `.claude/commands/{onboard,request,doctor,status,topics,resume,review}.md`
+- Codex: `.codex/prompts/{onboarding,request,export-context,doctor,status,topics,resume,review}.md`
+- Claude Code: `.claude/commands/{onboarding,request,export-context,doctor,status,topics,resume,review}.md`
 
 Interactive mode:
 
@@ -144,7 +167,7 @@ Discovery-assisted mode:
 npm run ax -- onboard-context --discover
 ```
 
-This writes or discovers tracked docs under `docs/base-context/`, regenerates `docs/base-context/index.md`, creates `docs/base-context/domain-glossary.md`, and stores shared engineering defaults in `.ax/project-profile.json`.
+This writes or migrates knowledge into `~/.shift-ax/`, regenerates `~/.shift-ax/index.md`, creates linked detailed pages there, and stores shared engineering defaults in `~/.shift-ax/profile.json`.
 
 ### 4. Start a request
 
@@ -159,6 +182,8 @@ This creates:
 - request, summary, brainstorm, spec, plan-review, `execution-handoff.json`, workflow-state, review, and finalization artifacts
 
 By default, Shift AX now interviews for planning details before it writes the planning artifacts. The pipeline then pauses at the human plan-review gate.
+
+If the global index is missing, `/request` should stop by default and recommend `/onboarding` first. It may continue only after an explicit lower-accuracy confirmation.
 
 ### 5. Record plan approval
 

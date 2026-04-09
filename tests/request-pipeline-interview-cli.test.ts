@@ -5,6 +5,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { withTempGlobalHome } from './helpers/global-home.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
@@ -20,7 +21,7 @@ async function createGitRepo(): Promise<string> {
   return root;
 }
 
-async function runAxInteractive(args: string[], input: string): Promise<{
+async function runAxInteractive(args: string[], input: string, env?: NodeJS.ProcessEnv): Promise<{
   code: number;
   stdout: string;
   stderr: string;
@@ -32,6 +33,7 @@ async function runAxInteractive(args: string[], input: string): Promise<{
       {
         cwd: REPO_ROOT,
         stdio: ['pipe', 'pipe', 'pipe'],
+        env,
       },
     );
 
@@ -59,90 +61,108 @@ test('ax run-request interviews for planning details and writes structured artif
   const root = await createGitRepo();
 
   try {
-    const onboardingPath = join(root, 'onboarding.json');
-    await writeFile(
-      onboardingPath,
-      JSON.stringify(
-        {
-          documents: [
-            {
-              label: 'Auth policy',
-              content: '# Auth Policy\n\nRefresh token rotation is required.\n',
-            },
-          ],
-        },
-        null,
-        2,
-      ),
-      'utf8',
-    );
+    await withTempGlobalHome('shift-ax-interview-cli-home-', async (home) => {
+      const onboardingPath = join(root, 'onboarding.json');
+      await writeFile(
+        onboardingPath,
+        JSON.stringify(
+          {
+            primaryRoleSummary: 'I maintain auth APIs.',
+            workTypes: [
+              {
+                name: 'API development',
+                repositories: [
+                  {
+                    repository: 'sample-repo',
+                    repositoryPath: root,
+                    purpose: 'Fixture repo',
+                    directories: ['src', 'tests'],
+                    workflow: 'Update auth code and tests together.',
+                  },
+                ],
+              },
+            ],
+            domainLanguage: [{ term: 'Auth policy', definition: 'Fixture auth policy term.' }],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
 
-    const onboard = await runAxInteractive(
-      ['onboard-context', '--root', root, '--input', onboardingPath],
-      '',
-    );
-    assert.equal(onboard.code, 0, onboard.stderr);
-
-    const started = await runAxInteractive(
-      ['run-request', '--root', root, '--request', 'Build safer auth refresh flow'],
-      [
-        'Users should stay signed in during refresh token rotation.',
-        'Auth policy applies and no schema changes are allowed.',
-        'Do not change billing or the session UI.',
-        'Verification needs auth refresh tests plus a clean build.',
-        'Auth refresh service, token store, and session middleware.',
-        'Token store migration analysis is the only long-running slice.',
+      const env = { ...process.env, SHIFT_AX_HOME: home };
+      const onboard = await runAxInteractive(
+        ['onboard-context', '--root', root, '--input', onboardingPath],
         '',
-      ].join('\n'),
-    );
+        env,
+      );
+      assert.equal(onboard.code, 0, onboard.stderr);
 
-    assert.equal(started.code, 0, started.stderr);
+      const started = await runAxInteractive(
+        ['run-request', '--root', root, '--request', 'Build safer auth refresh flow'],
+        [
+          'Users should stay signed in during refresh token rotation.',
+          'Auth policy applies and no schema changes are allowed.',
+          'Do not change billing or the session UI.',
+          'Verification needs auth refresh tests plus a clean build.',
+          'Auth refresh service, token store, and session middleware.',
+          'Token store migration analysis is the only long-running slice.',
+          '',
+        ].join('\n'),
+        env,
+      );
 
-    const startResult = JSON.parse(started.stdout) as {
-      topicDir: string;
-      workflow: { phase: string };
-    };
+      assert.equal(started.code, 0, started.stderr);
 
-    const brainstorm = await readFile(join(startResult.topicDir, 'brainstorm.md'), 'utf8');
-    const spec = await readFile(join(startResult.topicDir, 'spec.md'), 'utf8');
-    const plan = await readFile(join(startResult.topicDir, 'implementation-plan.md'), 'utf8');
-    const handoff = await readFile(join(startResult.topicDir, 'execution-handoff.json'), 'utf8');
+      const startResult = JSON.parse(started.stdout) as {
+        topicDir: string;
+        workflow: { phase: string };
+      };
 
-    assert.equal(startResult.workflow.phase, 'awaiting_plan_review');
-    assert.match(brainstorm, /Clarified Outcome/i);
-    assert.match(brainstorm, /Users should stay signed in/);
-    assert.match(brainstorm, /No schema changes/i);
-    assert.match(brainstorm, /Do not change billing/i);
-    assert.match(spec, /Out of Scope/i);
-    assert.match(spec, /session UI/i);
-    assert.match(plan, /TDD/i);
-    assert.match(plan, /tmux/i);
-    assert.match(plan, /subagent/i);
-    assert.match(handoff, /"execution_mode": "tmux"/);
-    assert.match(handoff, /"execution_mode": "subagent"/);
+      const brainstorm = await readFile(join(startResult.topicDir, 'brainstorm.md'), 'utf8');
+      const spec = await readFile(join(startResult.topicDir, 'spec.md'), 'utf8');
+      const plan = await readFile(join(startResult.topicDir, 'implementation-plan.md'), 'utf8');
+      const handoff = await readFile(join(startResult.topicDir, 'execution-handoff.json'), 'utf8');
+
+      assert.equal(startResult.workflow.phase, 'awaiting_plan_review');
+      assert.match(brainstorm, /Clarified Outcome/i);
+      assert.match(brainstorm, /Users should stay signed in/);
+      assert.match(brainstorm, /No schema changes/i);
+      assert.match(brainstorm, /Do not change billing/i);
+      assert.match(spec, /Out of Scope/i);
+      assert.match(spec, /session UI/i);
+      assert.match(plan, /TDD/i);
+      assert.match(plan, /tmux/i);
+      assert.match(plan, /subagent/i);
+      assert.match(handoff, /"execution_mode": "tmux"/);
+      assert.match(handoff, /"execution_mode": "subagent"/);
+    });
   } finally {
     await rm(root, { recursive: true, force: true });
   }
 });
 
-test('ax run-request fails fast when the base-context index points to an unresolved document', async () => {
+test('ax run-request fails fast when the global index points to an unresolved document', async () => {
   const root = await createGitRepo();
 
   try {
-    await mkdir(join(root, 'docs', 'base-context'), { recursive: true });
-    await writeFile(
-      join(root, 'docs', 'base-context', 'index.md'),
-      ['# Base Context Index', '', '- Auth policy -> docs/base-context/auth-policy.md', ''].join('\n'),
-      'utf8',
-    );
+    await withTempGlobalHome('shift-ax-interview-cli-home-', async (home) => {
+      await mkdir(join(home, 'work-types'), { recursive: true });
+      await writeFile(
+        join(home, 'index.md'),
+        ['# Shift AX Global Index', '', '## Work Types', '', '- Auth policy -> work-types/auth-policy.md', '', '## Domain Language', '', '- None yet.', ''].join('\n'),
+        'utf8',
+      );
 
-    const started = await runAxInteractive(
-      ['run-request', '--root', root, '--request', 'Update auth policy flow'],
-      '',
-    );
+      const started = await runAxInteractive(
+        ['run-request', '--root', root, '--request', 'Update auth policy flow'],
+        '',
+        { ...process.env, SHIFT_AX_HOME: home },
+      );
 
-    assert.equal(started.code, 1);
-    assert.match(started.stderr, /unresolved|base-context|resolved context/i);
+      assert.equal(started.code, 1);
+      assert.match(started.stderr, /unresolved|resolved context/i);
+    });
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -152,51 +172,66 @@ test('ax run-request re-resolves base-context using interview details, not only 
   const root = await createGitRepo();
 
   try {
-    const onboardingPath = join(root, 'onboarding.json');
-    await writeFile(
-      onboardingPath,
-      JSON.stringify(
-        {
-          documents: [
-            {
-              label: 'Refund Policy',
-              content: '# Refund Policy\n\nRefund changes must preserve customer-visible traceability.\n',
-            },
-          ],
-        },
-        null,
-        2,
-      ),
-      'utf8',
-    );
+    await withTempGlobalHome('shift-ax-interview-cli-home-', async (home) => {
+      const onboardingPath = join(root, 'onboarding.json');
+      await writeFile(
+        onboardingPath,
+        JSON.stringify(
+          {
+            primaryRoleSummary: 'I maintain seller and refund flows.',
+            workTypes: [
+              {
+                name: 'Refund operations',
+                repositories: [
+                  {
+                    repository: 'shopbridge',
+                    repositoryPath: root,
+                    purpose: 'ShopBridge fixture repo',
+                    directories: ['src', 'tests'],
+                    workflow: 'Update refund code and tests together.',
+                  },
+                ],
+              },
+            ],
+            domainLanguage: [{ term: 'Refund Policy', definition: 'Refund changes must preserve customer-visible traceability.' }],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
 
-    const onboard = await runAxInteractive(
-      ['onboard-context', '--root', root, '--input', onboardingPath],
-      '',
-    );
-    assert.equal(onboard.code, 0, onboard.stderr);
-
-    const started = await runAxInteractive(
-      ['run-request', '--root', root, '--request', 'Create ShopBridge core marker flow'],
-      [
-        'Create shopbridge-marker.txt with exact text ShopBridge ready.',
-        'Refund Policy applies and no schema changes are allowed.',
-        'Do not change seller UI.',
-        'Run a marker test.',
-        'shopbridge-marker.txt; shopbridge-marker.test.js',
+      const env = { ...process.env, SHIFT_AX_HOME: home };
+      const onboard = await runAxInteractive(
+        ['onboard-context', '--root', root, '--input', onboardingPath],
         '',
-        '',
-      ].join('\n'),
-    );
+        env,
+      );
+      assert.equal(onboard.code, 0, onboard.stderr);
 
-    assert.equal(started.code, 0, started.stderr);
+      const started = await runAxInteractive(
+        ['run-request', '--root', root, '--request', 'Create ShopBridge core marker flow'],
+        [
+          'Create shopbridge-marker.txt with exact text ShopBridge ready.',
+          'Refund Policy applies and no schema changes are allowed.',
+          'Do not change seller UI.',
+          'Run a marker test.',
+          'shopbridge-marker.txt; shopbridge-marker.test.js',
+          '',
+          '',
+        ].join('\n'),
+        env,
+      );
 
-    const startResult = JSON.parse(started.stdout) as { topicDir: string };
-    const resolvedContext = JSON.parse(
-      await readFile(join(startResult.topicDir, 'resolved-context.json'), 'utf8'),
-    ) as { matches: Array<{ label: string }> };
+      assert.equal(started.code, 0, started.stderr);
 
-    assert.equal(resolvedContext.matches[0]?.label, 'Refund Policy');
+      const startResult = JSON.parse(started.stdout) as { topicDir: string };
+      const resolvedContext = JSON.parse(
+        await readFile(join(startResult.topicDir, 'resolved-context.json'), 'utf8'),
+      ) as { matches: Array<{ label: string }> };
+
+      assert.equal(resolvedContext.matches[0]?.label, 'Refund Policy');
+    });
   } finally {
     await rm(root, { recursive: true, force: true });
   }
