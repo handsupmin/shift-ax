@@ -29,6 +29,8 @@ test('renderCodexAgentsBootstrap references base-context and request-to-commit c
   assert.match(content, /resolveRepoRoot/);
   assert.match(content, /ensureCodexManagedWorktree/);
   assert.match(content, /natural language/i);
+  assert.match(content, /\/onboard/);
+  assert.match(content, /product-shell commands/);
 });
 
 test('renderClaudeCodeSessionStartContext references base-context and request-to-commit commands', () => {
@@ -48,6 +50,8 @@ test('renderClaudeCodeSessionStartContext references base-context and request-to
   assert.match(content, /getWorktreeRoot/);
   assert.match(content, /createClaudeManagedWorktree/);
   assert.match(content, /natural language/i);
+  assert.match(content, /\/onboard/);
+  assert.match(content, /product-shell commands/);
 });
 
 test('getPlatformBootstrapAssets returns expected assets for codex', () => {

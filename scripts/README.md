@@ -5,6 +5,7 @@ The `scripts/` directory is for top-level Shift AX entrypoints and operator-faci
 Currently implemented:
 
 - `ax.ts`
+- `ax-shell.ts`
 - `ax-bootstrap-topic.ts`
 - `ax-resolve-context.ts`
 - `ax-review.ts`
@@ -27,6 +28,8 @@ Currently implemented:
 
 Current request-to-commit behavior:
 
+- `ax --codex`, `ax --claude-code`, or plain `ax` now open a conversational platform shell. On first run, if onboarding artifacts are missing, Shift AX asks for language first, runs guided onboarding automatically, stores `.ax/project-settings.json`, safely writes platform bootstrap assets, and then launches the matching Codex or Claude Code interactive session.
+- Inside that shell, the agent is expected to understand `/onboard`, `$onboard`, `/doctor`, `/request <text>`, `/status`, `/topics`, `/resume <topic>`, and `/review <topic>` as Shift AX product-shell commands.
 - `ax onboard-context` now supports a guided interactive interview by default and still accepts `--input <file>` for scripted onboarding. It writes tracked domain/policy docs, regenerates `docs/base-context/index.md`, and persists the shared engineering profile.
 - `ax doctor [--root <dir>] [--topic <dir>] [--platform codex|claude-code]` prints a compact health report for the repo, base-context docs, shared profile, topic state, and optional launcher readiness.
 - `ax run-request --request <text>` bootstraps a topic/worktree, resolves base context, runs an interactive planning interview by default, writes brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pauses at the human planning-review gate.

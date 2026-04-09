@@ -74,6 +74,22 @@ npm run ax -- <command> --root /absolute/path/to/target-repo
 
 Use this mode unless there is a strong reason to expose a globally linked `ax` binary.
 
+### Recommended interactive entrypoint
+
+For conversational use, prefer launching the platform shell directly:
+
+```bash
+ax --codex --root /absolute/path/to/target-repo
+# or
+ax --claude-code --root /absolute/path/to/target-repo
+```
+
+If onboarding artifacts are missing, Shift AX will:
+
+1. ask for language first
+2. run guided onboarding automatically
+3. open the matching platform session
+
 ### Optional: global CLI exposure
 
 Only do this if the workflow explicitly benefits from `ax` as a direct shell command:

@@ -39,17 +39,15 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
 
       child.stdin.end(
         [
-          'Auth policy',
-          'Refresh token rotation is required.',
-          'n',
+          '1',
           'B2B fintech platform for wallet operations.',
+          'It handles auth refresh and wallet funding flows.',
           'auth, billing',
-          'Service boundaries around auth and ledger.',
           'payments, permissions',
-          '',
-          '',
-          '',
-          '',
+          'Service boundaries around auth and ledger.',
+          'apps/auth, services/ledger',
+          'LedgerX, WalletCore',
+          'npm test, npm run build',
         ].join('\n') + '\n',
       );
     });
@@ -57,14 +55,13 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
     const result = JSON.parse(stdout) as {
       documents: Array<{ label: string; path: string }>;
     };
-    const doc = await readFile(join(root, 'docs', 'base-context', 'auth-policy.md'), 'utf8');
+    const doc = await readFile(join(root, 'docs', 'base-context', 'domain-policy-guardrails.md'), 'utf8');
     const index = await readFile(join(root, 'docs', 'base-context', 'index.md'), 'utf8');
     const profile = await readProjectProfile(root);
 
-    assert.equal(result.documents.length, 1);
-    assert.equal(result.documents[0]?.label, 'Auth policy');
-    assert.match(doc, /Refresh token rotation is required/);
-    assert.match(index, /Auth policy -> docs\/base-context\/auth-policy.md/);
+    assert.ok(result.documents.length >= 4);
+    assert.match(doc, /auth/i);
+    assert.match(index, /Domain and Policy Guardrails -> docs\/base-context\/domain-policy-guardrails.md/);
     assert.equal(profile?.engineering_defaults.test_strategy, 'tdd');
     assert.equal(profile?.engineering_defaults.long_task_execution, 'tmux');
     assert.equal(profile?.onboarding_context?.policy_areas[0], 'auth');

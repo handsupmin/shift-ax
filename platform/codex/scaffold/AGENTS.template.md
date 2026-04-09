@@ -24,3 +24,4 @@ You are running inside a Shift AX Codex build.
 - Active imported worktree helpers currently include `resolveRepoRoot`, `ensureCodexManagedWorktree`, and `removeCodexManagedWorktree`.
 - Use `ax review --run` before finalization and `ax finalize-commit` only after the review gate allows commit.
 - Natural language is the primary user surface. Internal AX commands exist to support the flow, not replace the conversation.
+- In Shift AX shell sessions, interpret `/onboard`, `/doctor`, `/request <text>`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>`, `/help` and the same `$...` aliases as product-shell commands that map to the corresponding `ax` workflows.

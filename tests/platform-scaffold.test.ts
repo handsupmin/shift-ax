@@ -34,6 +34,7 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(prompt, /ax finalize-commit/);
     assert.match(agents, /platform\/codex\/upstream\/worktree\/provenance\.md/);
     assert.match(prompt, /ensureCodexManagedWorktree/);
+    assert.match(agents, /\/onboard/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -66,6 +67,7 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(hook, /ax finalize-commit/);
     assert.match(claude, /platform\/claude-code\/upstream\/worktree\/provenance\.md/);
     assert.match(hook, /createClaudeManagedWorktree/);
+    assert.match(claude, /\/onboard/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
