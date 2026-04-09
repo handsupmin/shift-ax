@@ -46,7 +46,7 @@
 권장 설치:
 
 ```bash
-npm install -g shift-ax
+npm install -g @handsupmin/shift-ax
 ```
 
 원커맨드 설치:

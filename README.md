@@ -71,7 +71,7 @@ That means Shift AX currently covers:
 Global install from npm:
 
 ```bash
-npm install -g shift-ax
+npm install -g @handsupmin/shift-ax
 ```
 
 One-command install:
