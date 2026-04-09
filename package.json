@@ -1,6 +1,6 @@
 {
   "name": "@handsupmin/shift-ax",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Agentic software delivery platform for teams that are not AX experts yet",
   "type": "module",
   "private": false,

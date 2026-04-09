@@ -224,7 +224,7 @@ function buildInShellOnboardingPrompt({
     'This repository is not onboarded for Shift AX yet.',
     'Handle onboarding **inside this platform session**. Do not hand control back to an external ax readline questionnaire.',
     locale
-      ? `Do not ask for language again. Continue onboarding in ${locale === 'ko' ? 'Korean' : 'English'}.`
+      ? `Do not ask for language again. Continue onboarding in ${locale === 'en' ? 'English' : 'Korean'}.`
       : 'Your first question must be language selection: `1. English (default)` or `2. Korean`. Then continue the rest of onboarding in the chosen language.',
     'Required onboarding fields:',
     '- business context',
