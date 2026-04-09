@@ -30,17 +30,30 @@ Treat the task as complete only when all of these are true:
 
 ## 2. Assumptions
 
-- You are running commands from the **Shift AX repository root** unless stated otherwise.
-- Shift AX is currently used **from source**.
+- You may run Shift AX either from:
+  - a global npm install, or
+  - a source checkout
 - The safest default is:
-  - run Shift AX from this repo
+  - run Shift AX from a known install
   - point `--root` at the target repository
 - Do not guess domain facts.
 - If the target repository already has useful docs, prefer `--discover` before inventing onboarding content manually.
 
 ## 3. Install Shift AX itself
 
-Run exactly:
+Preferred install:
+
+```bash
+npm install -g @handsupmin/shift-ax
+```
+
+One-command install:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/handsupmin/shift-ax/main/scripts/install-global.sh | bash
+```
+
+Source-checkout verification path:
 
 ```bash
 npm install
@@ -66,13 +79,17 @@ If any step fails:
 
 ### Recommended default
 
-Run Shift AX from the cloned Shift AX repository and point to the target repo:
+Run Shift AX and point to the target repo:
+
+```bash
+ax <command> --root /absolute/path/to/target-repo
+```
+
+If you are running from a source checkout instead of a global install, use:
 
 ```bash
 npm run ax -- <command> --root /absolute/path/to/target-repo
 ```
-
-Use this mode unless there is a strong reason to expose a globally linked `ax` binary.
 
 ### Recommended interactive entrypoint
 
@@ -92,7 +109,7 @@ If onboarding artifacts are missing, Shift AX will:
 
 ### Optional: global CLI exposure
 
-Only do this if the workflow explicitly benefits from `ax` as a direct shell command:
+Only do this if the workflow explicitly benefits from linking a source checkout into your global npm bin:
 
 ```bash
 npm run build

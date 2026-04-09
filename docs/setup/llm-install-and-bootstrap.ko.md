@@ -31,17 +31,31 @@
 
 ## 2. 기본 가정
 
-- 별도 언급이 없으면 **Shift AX repo root에서 명령을 실행**한다고 가정한다.
-- 현재 Shift AX는 **source에서 실행**하는 것이 기본 경로다.
+- Shift AX는
+  - npm 전역 설치 상태이거나
+  - source checkout 상태
+  둘 다 가능하다.
 - 가장 안전한 기본값은:
-  - Shift AX repo에서 실행하고
+  - 설치된 Shift AX에서 실행하고
   - `--root`로 target repo를 가리키는 방식
 - 도메인 사실을 추측하지 않는다.
 - target repo에 이미 문서가 있으면, 수동 onboarding 문서를 지어내기 전에 `--discover`를 우선 검토한다.
 
 ## 3. Shift AX 자체 설치
 
-정확히 다음 순서로 실행:
+권장 설치:
+
+```bash
+npm install -g @handsupmin/shift-ax
+```
+
+원커맨드 설치:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/handsupmin/shift-ax/main/scripts/install-global.sh | bash
+```
+
+source checkout 기준 검증 경로:
 
 ```bash
 npm install
@@ -67,13 +81,17 @@ npm run ax -- doctor
 
 ### 권장 기본 경로
 
-Shift AX repo에서 실행하면서 `--root`로 target repo를 지정:
+설치된 Shift AX에서 실행하면서 `--root`로 target repo를 지정:
+
+```bash
+ax <command> --root /absolute/path/to/target-repo
+```
+
+source checkout에서 실행 중이라면:
 
 ```bash
 npm run ax -- <command> --root /absolute/path/to/target-repo
 ```
-
-전역 `ax` 바이너리가 꼭 필요하지 않다면 이 방식을 유지한다.
 
 ### 권장 대화형 진입점
 
@@ -93,7 +111,7 @@ onboarding artifact가 없으면 Shift AX가:
 
 ### 선택 경로: global CLI 노출
 
-직접 `ax` 명령이 꼭 필요할 때만:
+source checkout을 전역 bin에 연결해야 할 때만:
 
 ```bash
 npm run build
