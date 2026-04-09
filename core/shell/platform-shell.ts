@@ -155,15 +155,25 @@ export async function launchPlatformShell({
   platform,
   locale,
   initialPrompt,
+  onboardingRequired = false,
 }: {
   rootDir: string;
   platform: ShiftAxPlatform;
-  locale: ShiftAxLocale;
+  locale?: ShiftAxLocale;
   initialPrompt?: string;
+  onboardingRequired?: boolean;
 }): Promise<number> {
   await ensurePlatformShellAssets({ platform, rootDir });
 
-  const promptBase = platform === 'codex' ? SHELL_COPY[locale].welcomeCodex : SHELL_COPY[locale].welcomeClaude;
+  const promptBase = onboardingRequired
+    ? buildInShellOnboardingPrompt({
+        rootDir,
+        platform,
+        ...(locale ? { locale } : {}),
+      })
+    : platform === 'codex'
+      ? SHELL_COPY[locale ?? 'en'].welcomeCodex
+      : SHELL_COPY[locale ?? 'en'].welcomeClaude;
   const prompt = [promptBase, initialPrompt?.trim()].filter(Boolean).join('\n\n');
 
   const child =
@@ -175,6 +185,65 @@ export async function launchPlatformShell({
     child.on('error', reject);
     child.on('exit', (code) => resolve(code ?? 0));
   });
+}
+
+function buildInShellOnboardingPrompt({
+  rootDir,
+  platform,
+  locale,
+}: {
+  rootDir: string;
+  platform: ShiftAxPlatform;
+  locale?: ShiftAxLocale;
+}): string {
+  const platformHint = platform === 'codex' ? 'codex' : 'claude-code';
+  const onboardingCommand = `ax onboard-context --root ${shellQuote(rootDir)} --input .ax/onboarding-input.json --platform ${platformHint}${locale ? ` --lang ${locale}` : ''}`;
+
+  if (locale === 'ko') {
+    return [
+      '이 저장소는 아직 Shift AX 온보딩이 끝나지 않았습니다.',
+      '지금부터 온보딩을 **이 대화 안에서** 진행하세요. 별도의 ax readline 인터뷰로 되돌아가지 마세요.',
+      '사용자에게 먼저 언어를 다시 묻지 말고, 지금부터 한국어로 온보딩을 진행하세요.',
+      '필수 수집 항목:',
+      '- business context',
+      '- primary workflow',
+      '- no-guessing policy areas',
+      '- risky domains',
+      '- architecture summary',
+      '- important paths',
+      '- internal terms / aliases',
+      '- default verification commands',
+      '모든 답변을 모은 뒤 `.ax/onboarding-input.json` 파일을 만들고 아래 명령으로 저장하세요:',
+      onboardingCommand,
+      '온보딩이 끝나면 docs-first 원칙을 지키면서 일반 Shift AX product-shell 세션처럼 계속 진행하세요.',
+      '셸 안에서는 `/onboard`, `/doctor`, `/request <요청>`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>` 와 같은 slash 명령과 동일한 `$...` alias를 Shift AX 제품 명령으로 해석하세요.',
+    ].join('\n');
+  }
+
+  return [
+    'This repository is not onboarded for Shift AX yet.',
+    'Handle onboarding **inside this platform session**. Do not hand control back to an external ax readline questionnaire.',
+    locale
+      ? `Do not ask for language again. Continue onboarding in ${locale === 'ko' ? 'Korean' : 'English'}.`
+      : 'Your first question must be language selection: `1. English (default)` or `2. Korean`. Then continue the rest of onboarding in the chosen language.',
+    'Required onboarding fields:',
+    '- business context',
+    '- primary workflow',
+    '- no-guessing policy areas',
+    '- risky domains',
+    '- architecture summary',
+    '- important paths',
+    '- internal terms / aliases',
+    '- default verification commands',
+    'After collecting the answers, create `.ax/onboarding-input.json` and persist onboarding with:',
+    onboardingCommand,
+    'Then continue as a normal Shift AX product-shell session with docs-first behavior.',
+    'Inside the shell, interpret `/onboard`, `/doctor`, `/request <text>`, `/status`, `/topics`, `/resume <topic>`, and `/review <topic>` plus the same `$...` aliases as Shift AX product-shell commands.',
+  ].join('\n');
+}
+
+function shellQuote(value: string): string {
+  return `'${String(value).replace(/'/g, `'\"'\"'`)}'`;
 }
 
 async function ensurePlatformShellAssets({
