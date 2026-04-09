@@ -12,7 +12,7 @@ export interface RunReviewLanesInput {
 }
 
 function containsPlaceholder(content: string): boolean {
-  return /\b(TBD|Pending\.)\b/i.test(content);
+  return /Shift AX placeholder/i.test(content);
 }
 
 async function readMaybe(path: string): Promise<string> {
