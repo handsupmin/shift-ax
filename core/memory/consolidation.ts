@@ -9,12 +9,59 @@ export interface ShiftAxMemoryConsolidationReport {
   glossary_candidates: string[];
 }
 
+const GLOSSARY_STOPWORDS = new Set([
+  'about',
+  'above',
+  'after',
+  'always',
+  'below',
+  'carry',
+  'entry',
+  'issue',
+  'migration',
+  'needs',
+  'notes',
+  'shared',
+  'should',
+  'summary',
+  'thread',
+  'track',
+]);
+
 async function readMaybe(path: string): Promise<string> {
   try {
     return await readFile(path, 'utf8');
   } catch {
     return '';
   }
+}
+
+function collectGlossaryTokens(content: string): string[] {
+  const counts = new Map<string, number>();
+  const relevantLines = content
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .filter((line) => !line.startsWith('#'))
+    .filter((line) => !line.startsWith('- updated_at:'));
+
+  for (const line of relevantLines) {
+    const normalized = line.replace(/^-\s*\d{4}-\d{2}-\d{2}T[^:]+:\s*/, '');
+    for (const token of normalized.match(/\b[a-zA-Z][a-zA-Z-]{5,}\b/g) ?? []) {
+      const lower = token.toLowerCase();
+      if (GLOSSARY_STOPWORDS.has(lower)) continue;
+      counts.set(lower, (counts.get(lower) ?? 0) + 1);
+    }
+  }
+
+  return [...counts.entries()]
+    .sort((left, right) => {
+      const countDiff = right[1] - left[1];
+      if (countDiff !== 0) return countDiff;
+      return left[0].localeCompare(right[0]);
+    })
+    .map(([token]) => token)
+    .slice(0, 10);
 }
 
 export async function consolidateMemory({
@@ -51,11 +98,9 @@ export async function consolidateMemory({
   const glossaryCandidates = new Set<string>();
   for (const thread of threads) {
     const content = await readMaybe(thread.path);
-    const matches = content.match(/\b[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*\b/g) ?? [];
-    for (const match of matches) {
-      if (match.length >= 6) {
-        glossaryCandidates.add(match);
-      }
+    for (const token of collectGlossaryTokens(content)) {
+      glossaryCandidates.add(token);
+      if (glossaryCandidates.size >= 10) break;
     }
   }
 

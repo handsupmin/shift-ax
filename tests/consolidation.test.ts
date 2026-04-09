@@ -64,6 +64,10 @@ test('consolidateMemory suggests duplicate decisions, repeated topic learnings, 
     assert.ok(result.duplicate_decisions.length >= 1);
     assert.ok(result.repeated_topics.length >= 1);
     assert.ok(result.glossary_candidates.length >= 1);
+    assert.ok(result.glossary_candidates.includes('traceability'));
+    assert.ok(result.glossary_candidates.includes('rollback'));
+    assert.ok(!result.glossary_candidates.includes('thread'));
+    assert.ok(!result.glossary_candidates.includes('summary'));
   } finally {
     await rm(root, { recursive: true, force: true });
   }
