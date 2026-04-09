@@ -101,8 +101,10 @@ export async function bootstrapTopic({
     null,
     2,
   )}\n`;
-  const brainstormContent = '# Brainstorm\n\nPending.\n';
-  const specContent = '# Topic Spec\n\n## Goal\n\nTBD\n';
+  const brainstormContent =
+    '# Brainstorm\n\n> Shift AX placeholder: planning interview notes must replace this section before review.\n';
+  const specContent =
+    '# Topic Spec\n\n## Goal\n\n> Shift AX placeholder: define the reviewed goal before implementation.\n';
   const planReviewContent = `${JSON.stringify({ version: 1, status: 'pending' }, null, 2)}\n`;
   const policyContextSyncContent = `${JSON.stringify(
     {
@@ -115,7 +117,8 @@ export async function bootstrapTopic({
     null,
     2,
   )}\n`;
-  const implementationPlanContent = '# Implementation Plan\n\nPending.\n';
+  const implementationPlanContent =
+    '# Implementation Plan\n\n> Shift AX placeholder: write the reviewed implementation steps before execution.\n';
   const executionHandoffContent = `${JSON.stringify(
     {
       version: 1,
@@ -150,9 +153,11 @@ export async function bootstrapTopic({
     null,
     2,
   )}\n`;
-  const commitMessageContent = '# Commit Message\n\nPending.\n';
+  const commitMessageContent =
+    '# Commit Message\n\n> Shift AX placeholder: generate or write the Lore commit message before finalization.\n';
   const commitStateContent = `${JSON.stringify({ version: 1, status: 'not_committed' }, null, 2)}\n`;
-  const verificationContent = '# Final Verification\n\nPending.\n';
+  const verificationContent =
+    '# Final Verification\n\n> Shift AX placeholder: record verification evidence before finalization.\n';
   const worktreePlan = buildWorktreePlan({
     rootDir,
     topicSlug,

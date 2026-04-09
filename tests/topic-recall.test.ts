@@ -71,7 +71,11 @@ test('searchPastTopics ignores uncommitted or incomplete topics by default', asy
     await mkdir(topicDir, { recursive: true });
     await writeFile(join(topicDir, 'request.md'), 'Build auth experiment\n', 'utf8');
     await writeFile(join(topicDir, 'request-summary.md'), 'Incomplete topic\n', 'utf8');
-    await writeFile(join(topicDir, 'spec.md'), '# Topic Spec\n\nPending\n', 'utf8');
+    await writeFile(
+      join(topicDir, 'spec.md'),
+      '# Topic Spec\n\n> Shift AX placeholder: waiting for reviewed goal.\n',
+      'utf8',
+    );
     await writeFile(
       join(topicDir, 'workflow-state.json'),
       JSON.stringify(
