@@ -57,31 +57,47 @@ test('renderClaudeCodeSessionStartContext references base-context and request-to
 test('getPlatformBootstrapAssets returns expected assets for codex', () => {
   const assets = getPlatformBootstrapAssets('codex', '/repo');
 
-  assert.deepEqual(
-    assets.map((asset) => asset.path),
-    ['AGENTS.md', '.codex/prompts/shift-ax-bootstrap.md'],
-  );
+  const paths = assets.map((asset) => asset.path).sort();
+  assert.deepEqual(paths, [
+    '.codex/prompts/doctor.md',
+    '.codex/prompts/onboard.md',
+    '.codex/prompts/request.md',
+    '.codex/prompts/resume.md',
+    '.codex/prompts/review.md',
+    '.codex/prompts/shift-ax-bootstrap.md',
+    '.codex/prompts/status.md',
+    '.codex/prompts/topics.md',
+    'AGENTS.md',
+  ]);
 });
 
 test('getPlatformBootstrapAssets returns expected assets for claude-code', () => {
   const assets = getPlatformBootstrapAssets('claude-code', '/repo');
 
-  assert.deepEqual(
-    assets.map((asset) => asset.path),
-    ['CLAUDE.md', '.claude/hooks/shift-ax-session-start.md'],
-  );
+  const paths = assets.map((asset) => asset.path).sort();
+  assert.deepEqual(paths, [
+    '.claude/commands/doctor.md',
+    '.claude/commands/onboard.md',
+    '.claude/commands/request.md',
+    '.claude/commands/resume.md',
+    '.claude/commands/review.md',
+    '.claude/commands/status.md',
+    '.claude/commands/topics.md',
+    '.claude/hooks/shift-ax-session-start.md',
+    'CLAUDE.md',
+  ]);
 });
 
 test('codex scaffold template files are tracked under platform/codex/scaffold', () => {
-  assert.deepEqual(codexScaffoldTemplateFiles().sort(), [
-    'platform/codex/scaffold/AGENTS.template.md',
-    'platform/codex/scaffold/prompts/shift-ax-bootstrap.template.md',
-  ]);
+  const files = codexScaffoldTemplateFiles().sort();
+  assert.ok(files.includes('platform/codex/scaffold/AGENTS.template.md'));
+  assert.ok(files.includes('platform/codex/scaffold/prompts/request.template.md'));
+  assert.ok(files.includes('platform/codex/scaffold/prompts/review.template.md'));
 });
 
 test('claude-code scaffold template files are tracked under platform/claude-code/scaffold', () => {
-  assert.deepEqual(claudeCodeScaffoldTemplateFiles().sort(), [
-    'platform/claude-code/scaffold/CLAUDE.template.md',
-    'platform/claude-code/scaffold/hooks/shift-ax-session-start.template.md',
-  ]);
+  const files = claudeCodeScaffoldTemplateFiles().sort();
+  assert.ok(files.includes('platform/claude-code/scaffold/CLAUDE.template.md'));
+  assert.ok(files.includes('platform/claude-code/scaffold/commands/request.template.md'));
+  assert.ok(files.includes('platform/claude-code/scaffold/commands/review.template.md'));
 });

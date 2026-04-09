@@ -17,11 +17,15 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     });
 
     assert.equal(result.platform, 'codex');
-    assert.equal(result.written.length, 2);
+    assert.equal(result.written.length, 9);
 
     const agents = await readFile(join(root, 'AGENTS.md'), 'utf8');
     const prompt = await readFile(
       join(root, '.codex', 'prompts', 'shift-ax-bootstrap.md'),
+      'utf8',
+    );
+    const requestCommand = await readFile(
+      join(root, '.codex', 'prompts', 'request.md'),
       'utf8',
     );
 
@@ -35,6 +39,7 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(agents, /platform\/codex\/upstream\/worktree\/provenance\.md/);
     assert.match(prompt, /ensureCodexManagedWorktree/);
     assert.match(agents, /\/onboard/);
+    assert.match(requestCommand, /ax run-request/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -50,11 +55,15 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     });
 
     assert.equal(result.platform, 'claude-code');
-    assert.equal(result.written.length, 2);
+    assert.equal(result.written.length, 9);
 
     const claude = await readFile(join(root, 'CLAUDE.md'), 'utf8');
     const hook = await readFile(
       join(root, '.claude', 'hooks', 'shift-ax-session-start.md'),
+      'utf8',
+    );
+    const requestCommand = await readFile(
+      join(root, '.claude', 'commands', 'request.md'),
       'utf8',
     );
 
@@ -68,6 +77,7 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(claude, /platform\/claude-code\/upstream\/worktree\/provenance\.md/);
     assert.match(hook, /createClaudeManagedWorktree/);
     assert.match(claude, /\/onboard/);
+    assert.match(requestCommand, /\$ARGUMENTS/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -112,7 +122,17 @@ test('ax scaffold-build writes bootstrap assets for a requested platform', async
 
     const result = JSON.parse(stdout) as { platform: string; written: string[] };
     assert.equal(result.platform, 'codex');
-    assert.deepEqual(result.written.sort(), ['.codex/prompts/shift-ax-bootstrap.md', 'AGENTS.md']);
+    assert.deepEqual(result.written.sort(), [
+      '.codex/prompts/doctor.md',
+      '.codex/prompts/onboard.md',
+      '.codex/prompts/request.md',
+      '.codex/prompts/resume.md',
+      '.codex/prompts/review.md',
+      '.codex/prompts/shift-ax-bootstrap.md',
+      '.codex/prompts/status.md',
+      '.codex/prompts/topics.md',
+      'AGENTS.md',
+    ]);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

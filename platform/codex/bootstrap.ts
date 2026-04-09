@@ -8,6 +8,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_FILES = [
   'platform/codex/scaffold/AGENTS.template.md',
   'platform/codex/scaffold/prompts/shift-ax-bootstrap.template.md',
+  'platform/codex/scaffold/prompts/onboard.template.md',
+  'platform/codex/scaffold/prompts/request.template.md',
+  'platform/codex/scaffold/prompts/doctor.template.md',
+  'platform/codex/scaffold/prompts/status.template.md',
+  'platform/codex/scaffold/prompts/topics.template.md',
+  'platform/codex/scaffold/prompts/resume.template.md',
+  'platform/codex/scaffold/prompts/review.template.md',
 ] as const;
 
 function templatePath(relativePath: (typeof TEMPLATE_FILES)[number]): string {
@@ -32,6 +39,20 @@ export function renderCodexPromptBootstrap(rootDir: string): string {
 }
 
 export function getCodexBootstrapAssets(rootDir: string): ShiftAxBootstrapAsset[] {
+  const commandAssets = [
+    'onboard',
+    'request',
+    'doctor',
+    'status',
+    'topics',
+    'resume',
+    'review',
+  ].map((name) => ({
+    path: `.codex/prompts/${name}.md`,
+    description: `Shift AX Codex product-shell command: /${name}`,
+    content: renderTemplate(`platform/codex/scaffold/prompts/${name}.template.md` as (typeof TEMPLATE_FILES)[number], rootDir),
+  }));
+
   return [
     {
       path: 'AGENTS.md',
@@ -43,5 +64,6 @@ export function getCodexBootstrapAssets(rootDir: string): ShiftAxBootstrapAsset[
       description: 'Codex bootstrap prompt fragment.',
       content: renderCodexPromptBootstrap(rootDir),
     },
+    ...commandAssets,
   ];
 }

@@ -8,6 +8,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_FILES = [
   'platform/claude-code/scaffold/CLAUDE.template.md',
   'platform/claude-code/scaffold/hooks/shift-ax-session-start.template.md',
+  'platform/claude-code/scaffold/commands/onboard.template.md',
+  'platform/claude-code/scaffold/commands/request.template.md',
+  'platform/claude-code/scaffold/commands/doctor.template.md',
+  'platform/claude-code/scaffold/commands/status.template.md',
+  'platform/claude-code/scaffold/commands/topics.template.md',
+  'platform/claude-code/scaffold/commands/resume.template.md',
+  'platform/claude-code/scaffold/commands/review.template.md',
 ] as const;
 
 function templatePath(relativePath: (typeof TEMPLATE_FILES)[number]): string {
@@ -35,6 +42,20 @@ export function renderClaudeCodeBootstrap(rootDir: string): string {
 }
 
 export function getClaudeCodeBootstrapAssets(rootDir: string): ShiftAxBootstrapAsset[] {
+  const commandAssets = [
+    'onboard',
+    'request',
+    'doctor',
+    'status',
+    'topics',
+    'resume',
+    'review',
+  ].map((name) => ({
+    path: `.claude/commands/${name}.md`,
+    description: `Shift AX Claude Code product-shell command: /${name}`,
+    content: renderTemplate(`platform/claude-code/scaffold/commands/${name}.template.md` as (typeof TEMPLATE_FILES)[number], rootDir),
+  }));
+
   return [
     {
       path: 'CLAUDE.md',
@@ -46,5 +67,6 @@ export function getClaudeCodeBootstrapAssets(rootDir: string): ShiftAxBootstrapA
       description: 'SessionStart hook payload guidance for Claude Code builds.',
       content: renderClaudeCodeSessionStartContext(rootDir),
     },
+    ...commandAssets,
   ];
 }
