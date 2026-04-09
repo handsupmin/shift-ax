@@ -21,28 +21,28 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 
 ## Next backlog — high priority
 
-- [ ] **Readable state / handoff files**
+- [x] **Readable state / handoff files**
   - Add `.ax/STATE.md` or topic-level handoff summaries for human-readable current state.
 - [ ] **Context-window monitor**
   - Warn before context rot becomes dangerous; add warning and critical thresholds.
-- [ ] **Pause-work / resume handoff**
+- [x] **Pause-work / resume handoff**
   - Add an explicit command that writes a safe resume bundle when work must stop mid-flight.
-- [ ] **Threads for cross-topic context**
+- [x] **Threads for cross-topic context**
   - Add `.ax/threads/` for long-running decisions, migrations, and rollout work that spans multiple topics.
-- [ ] **Token-budgeted context bundle builder**
+- [x] **Token-budgeted context bundle builder**
   - Generate compact execution/review context bundles that prioritize docs, plans, decisions, and topic recall under a size budget.
 
 ## Medium priority
 
 - [ ] **Hybrid ranking for topic / decision recall**
   - Blend lexical match, recency, and linked-artifact context to improve retrieval quality.
-- [ ] **Workflow init / context loader command**
+- [x] **Workflow init / context loader command**
   - Provide a compact command that assembles exactly the current context needed for a workflow step.
-- [ ] **Verification debt tracking**
+- [x] **Verification debt tracking**
   - Track deferred review issues and missing verification work across topics.
-- [ ] **Learned-debug history**
+- [x] **Learned-debug history**
   - Persist resolved failure patterns so repeated debugging gets faster and more consistent.
-- [ ] **Session summary checkpoints**
+- [x] **Session summary checkpoints**
   - Add summary checkpoints for long-running work instead of relying only on raw artifact growth.
 
 ## Lower priority / scale-up work
