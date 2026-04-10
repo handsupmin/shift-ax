@@ -3,11 +3,15 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 import type { ShiftAxBootstrapAsset } from '../index.js';
+import { buildProductShellAssets, SHIFT_AX_PRODUCT_SHELL_COMMANDS } from '../product-shell-commands.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TEMPLATE_FILES = [
   'platform/claude-code/scaffold/CLAUDE.template.md',
   'platform/claude-code/scaffold/hooks/shift-ax-session-start.template.md',
+  ...SHIFT_AX_PRODUCT_SHELL_COMMANDS.map(
+    (name) => `platform/claude-code/scaffold/commands/${name}.template.md` as const,
+  ),
 ] as const;
 
 function templatePath(relativePath: (typeof TEMPLATE_FILES)[number]): string {
@@ -35,6 +39,16 @@ export function renderClaudeCodeBootstrap(rootDir: string): string {
 }
 
 export function getClaudeCodeBootstrapAssets(rootDir: string): ShiftAxBootstrapAsset[] {
+  const commandAssets = buildProductShellAssets({
+    platform: 'claude-code',
+    commandBasePath: '.claude/commands',
+    renderTemplate: (name) =>
+      renderTemplate(
+        `platform/claude-code/scaffold/commands/${name}.template.md` as (typeof TEMPLATE_FILES)[number],
+        rootDir,
+      ),
+  });
+
   return [
     {
       path: 'CLAUDE.md',
@@ -46,5 +60,6 @@ export function getClaudeCodeBootstrapAssets(rootDir: string): ShiftAxBootstrapA
       description: 'SessionStart hook payload guidance for Claude Code builds.',
       content: renderClaudeCodeSessionStartContext(rootDir),
     },
+    ...commandAssets,
   ];
 }

@@ -118,6 +118,11 @@ ax --claude-code
 - `/resume <topic>`
 - `/review <topic>`
 
+플랫폼별 native command 파일도 같이 scaffold 됩니다.
+
+- Codex: `.codex/prompts/{onboard,request,doctor,status,topics,resume,review}.md`
+- Claude Code: `.claude/commands/{onboard,request,doctor,status,topics,resume,review}.md`
+
 대화형 온보딩:
 
 ```bash

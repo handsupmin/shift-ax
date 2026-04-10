@@ -121,6 +121,11 @@ Inside the shell, the agent should accept product-shell commands such as:
 - `/resume <topic>`
 - `/review <topic>`
 
+Platform-native command files are now scaffolded for both runtimes:
+
+- Codex: `.codex/prompts/{onboard,request,doctor,status,topics,resume,review}.md`
+- Claude Code: `.claude/commands/{onboard,request,doctor,status,topics,resume,review}.md`
+
 Interactive mode:
 
 ```bash

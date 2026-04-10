@@ -85,6 +85,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
     const launchedCwd = await readFile(join(root, 'codex-launch.cwd'), 'utf8');
     const launchedArgs = await readFile(join(root, 'codex-launch.args'), 'utf8');
     const agents = await readFile(join(root, 'AGENTS.md'), 'utf8');
+    const requestCommand = await readFile(join(root, '.codex', 'prompts', 'request.md'), 'utf8');
 
     assert.equal(settings?.locale, 'ko');
     assert.equal(settings?.preferred_platform, 'codex');
@@ -93,6 +94,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
     assert.match(launchedArgs, /Shift AX .*셸 모드|Shift AX shell mode/i);
     assert.match(agents, /\/onboard/);
     assert.match(agents, /product-shell commands/);
+    assert.match(requestCommand, /Start a new Shift AX request-to-commit flow/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -137,12 +139,14 @@ test('ax with no args asks only for platform, then launches in-shell onboarding 
 
     const codexArgs = await readFile(join(root, 'interactive-codex-launch.args'), 'utf8');
     const settings = await readProjectSettings(root);
+    const requestCommand = await readFile(join(root, '.codex', 'prompts', 'request.md'), 'utf8');
 
     assert.equal(settings, null);
     await assert.rejects(readFile(join(root, 'docs', 'base-context', 'business-context.md'), 'utf8'));
     assert.match(codexArgs, /first question must be language selection/i);
     assert.match(codexArgs, /ax onboard-context --root/);
     assert.match(codexArgs, /--platform codex/);
+    assert.match(requestCommand, /Start a new Shift AX request-to-commit flow/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -181,11 +185,13 @@ test('ax --claude-code without onboarding launches Claude shell mode with in-she
 
     const settings = await readProjectSettings(root);
     const launchedArgs = await readFile(join(root, 'claude-bootstrap-launch.args'), 'utf8');
+    const requestCommand = await readFile(join(root, '.claude', 'commands', 'request.md'), 'utf8');
 
     assert.equal(settings, null);
     await assert.rejects(readFile(join(root, 'docs', 'base-context', 'business-context.md'), 'utf8'));
     assert.match(launchedArgs, /first question must be language selection/i);
     assert.match(launchedArgs, /--platform claude-code/);
+    assert.match(requestCommand, /\$ARGUMENTS/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -256,11 +262,13 @@ test('ax --claude-code with explicit onboarding input launches Claude shell mode
     const launchedCwd = await readFile(join(root, 'claude-launch.cwd'), 'utf8');
     const launchedArgs = await readFile(join(root, 'claude-launch.args'), 'utf8');
     const claudeDoc = await readFile(join(root, 'CLAUDE.md'), 'utf8');
+    const reviewCommand = await readFile(join(root, '.claude', 'commands', 'review.md'), 'utf8');
 
     assert.ok(launchedCwd.trim().endsWith(root));
     assert.match(launchedArgs, /\/status/);
     assert.match(claudeDoc, /\/onboard/);
     assert.match(claudeDoc, /product-shell commands/);
+    assert.match(reviewCommand, /ax review --topic/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
