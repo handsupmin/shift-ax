@@ -10,6 +10,7 @@ export interface ShiftAxProjectSettings {
   updated_at: string;
   locale: ShiftAxLocale;
   preferred_language?: 'english' | 'korean';
+  default_full_auto?: boolean;
   preferred_platform?: ShiftAxPlatform;
 }
 
@@ -37,6 +38,7 @@ export async function readProjectSettings(
       updated_at: raw.updated_at ?? new Date(0).toISOString(),
       locale,
       preferred_language: raw.preferred_language ?? (locale === 'ko' ? 'korean' : 'english'),
+      ...(typeof raw.default_full_auto === 'boolean' ? { default_full_auto: raw.default_full_auto } : {}),
       ...(raw.preferred_platform ? { preferred_platform: raw.preferred_platform } : {}),
     };
   } catch {

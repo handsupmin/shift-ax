@@ -108,9 +108,10 @@ shift-ax --claude-code --root /absolute/path/to/target-repo
 onboarding artifact가 없으면 Shift AX가:
 
 1. `~/.shift-ax/settings.json`에 언어가 없으면 먼저 선호 언어를 묻고
-2. 맞는 플랫폼 세션을 열고
-3. Codex에서는 `$onboard`, Claude Code에서는 `/onboard` 를 실행하게 하고
-4. 재사용 가능한 지식을 `~/.shift-ax/` 아래에 기록한다
+2. full-auto 기본 모드 설정이 없으면 그 여부도 먼저 묻고
+3. 맞는 플랫폼 세션을 열고
+4. Codex에서는 `$onboard`, Claude Code에서는 `/onboard` 를 실행하게 하고
+5. 재사용 가능한 지식을 `~/.shift-ax/` 아래에 기록한다
 
 ### 선택 경로: global CLI 노출
 

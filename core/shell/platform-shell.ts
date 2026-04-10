@@ -19,15 +19,60 @@ import { getGlobalContextHome } from '../settings/global-context-home.js';
 const SHELL_COPY = {
   en: {
     chooseLanguage: 'Choose language:\n1. English (default)\n2. Korean\n> ',
+    chooseFullAuto:
+      'Enable full-auto mode by default?\n1. No (default)\n2. Yes\n> ',
     localeRule:
       'Preferred user language: English. Respond in English unless the user explicitly asks to switch.',
   },
   ko: {
     chooseLanguage: '언어를 선택하세요:\n1. English (default)\n2. Korean\n> ',
+    chooseFullAuto:
+      '기본으로 full-auto 모드를 켤까요?\n1. 아니오 (기본값)\n2. 예\n> ',
     localeRule:
       '선호 사용자 언어: 한국어. 사용자가 명시적으로 바꾸라고 하지 않으면 한국어로 응답하세요.',
   },
 } as const;
+
+let nonTtyAnswerLinesPromise: Promise<string[]> | null = null;
+let nonTtyAnswerIndex = 0;
+
+async function readNonTtyAnswers(): Promise<string[]> {
+  if (!nonTtyAnswerLinesPromise) {
+    nonTtyAnswerLinesPromise = new Promise<string[]>((resolve, reject) => {
+      let raw = '';
+      stdin.setEncoding('utf8');
+      stdin.on('data', (chunk) => {
+        raw += chunk;
+      });
+      stdin.on('end', () => resolve(raw.split(/\r?\n/)));
+      stdin.on('error', reject);
+      stdin.resume();
+    });
+  }
+  return nonTtyAnswerLinesPromise;
+}
+
+async function promptChoice({
+  question,
+  fallback,
+}: {
+  question: string;
+  fallback: string;
+}): Promise<string> {
+  if (stdin.isTTY) {
+    const rl = createInterface({ input: stdin, output: stdout });
+    try {
+      return (await rl.question(question)).trim() || fallback;
+    } finally {
+      rl.close();
+    }
+  }
+
+  const answers = await readNonTtyAnswers().catch(() => []);
+  const answer = answers[nonTtyAnswerIndex] ?? '';
+  nonTtyAnswerIndex += 1;
+  return answer.trim() || fallback;
+}
 
 async function pathExists(path: string): Promise<boolean> {
   try {
@@ -54,15 +99,11 @@ export async function resolveShellLocale({
   const settings = await readProjectSettings(rootDir);
   if (settings?.locale) return settings.locale;
 
-  const rl = createInterface({ input: stdin, output: stdout });
-  try {
-    const answer = (await rl.question(SHELL_COPY.en.chooseLanguage)).trim();
-    return answer === '2' ? 'ko' : 'en';
-  } catch {
-    return 'en';
-  } finally {
-    rl.close();
-  }
+  const answer = await promptChoice({
+    question: SHELL_COPY.en.chooseLanguage,
+    fallback: '1',
+  });
+  return answer === '2' ? 'ko' : 'en';
 }
 
 export async function resolveShellPlatform({
@@ -80,13 +121,34 @@ export async function resolveShellPlatform({
   return 'codex';
 }
 
+export async function resolveShellDefaultFullAuto({
+  rootDir,
+  locale,
+}: {
+  rootDir: string;
+  locale: ShiftAxLocale;
+}): Promise<boolean> {
+  const settings = await readProjectSettings(rootDir);
+  if (typeof settings?.default_full_auto === 'boolean') {
+    return settings.default_full_auto;
+  }
+
+  const answer = await promptChoice({
+    question: SHELL_COPY[locale].chooseFullAuto,
+    fallback: '1',
+  });
+  return answer === '2';
+}
+
 export async function persistShellSettings({
   rootDir,
   locale,
+  defaultFullAuto,
   platform,
 }: {
   rootDir: string;
   locale: ShiftAxLocale;
+  defaultFullAuto?: boolean;
   platform: ShiftAxPlatform;
 }): Promise<void> {
   const existing = (await readProjectSettings(rootDir)) as ShiftAxProjectSettings | null;
@@ -98,6 +160,11 @@ export async function persistShellSettings({
       updated_at: new Date().toISOString(),
       locale,
       preferred_language: locale === 'ko' ? 'korean' : 'english',
+      ...(typeof defaultFullAuto === 'boolean'
+        ? { default_full_auto: defaultFullAuto }
+        : typeof existing?.default_full_auto === 'boolean'
+          ? { default_full_auto: existing.default_full_auto }
+          : {}),
       preferred_platform: platform,
     },
   });
@@ -106,10 +173,12 @@ export async function persistShellSettings({
 export async function launchPlatformShell({
   rootDir,
   platform,
+  fullAuto = false,
   initialPrompt,
 }: {
   rootDir: string;
   platform: ShiftAxPlatform;
+  fullAuto?: boolean;
   initialPrompt?: string;
 }): Promise<number> {
   const locale = (await readProjectSettings(rootDir))?.locale ?? 'en';
@@ -117,8 +186,8 @@ export async function launchPlatformShell({
 
   const args =
     platform === 'codex'
-      ? ['-C', rootDir, ...(initialPrompt?.trim() ? [initialPrompt.trim()] : [])]
-      : [...(initialPrompt?.trim() ? [initialPrompt.trim()] : [])];
+      ? [...(fullAuto ? ['--yolo'] : []), '-C', rootDir, ...(initialPrompt?.trim() ? [initialPrompt.trim()] : [])]
+      : [...(fullAuto ? ['--dangerously-skip-permissions'] : []), ...(initialPrompt?.trim() ? [initialPrompt.trim()] : [])];
 
   const child =
     platform === 'codex'

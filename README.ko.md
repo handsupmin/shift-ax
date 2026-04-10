@@ -115,7 +115,16 @@ shift-ax --claude-code
 - `1. English (default)`
 - `2. Korean`
 
+그리고 최초 설정 때는 기본 full-auto 모드를 켤지도 같이 묻습니다.
+
 선택 결과는 `~/.shift-ax/settings.json`에 저장되고, 다음 실행부터 그대로 재사용됩니다.
+
+- 기본 full-auto가 켜져 있으면:
+  - Codex는 `--yolo`
+  - Claude Code는 `--dangerously-skip-permissions`
+  를 자동으로 붙여서 실행합니다.
+- 기본 full-auto가 꺼져 있으면:
+  - `--full-auto` 플래그를 줄 때만 그 옵션들을 붙입니다.
 
 `~/.shift-ax/index.md`가 아직 없다면 셸 안에서 바로 다음을 실행하면 됩니다.
 

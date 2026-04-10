@@ -118,7 +118,15 @@ Before the runtime opens, Shift AX asks for the preferred language once if it is
 - `1. English (default)`
 - `2. Korean`
 
+Then, on first setup, it also asks whether full-auto mode should be enabled by default.
+
 That preference is saved in `~/.shift-ax/settings.json` and reused on the next run.
+
+- If full-auto default is enabled:
+  - Codex launches with `--yolo`
+  - Claude Code launches with `--dangerously-skip-permissions`
+- If full-auto default is disabled:
+  - those flags are added only when you pass `--full-auto`
 
 If `~/.shift-ax/index.md` does not exist yet, open the shell and run:
 

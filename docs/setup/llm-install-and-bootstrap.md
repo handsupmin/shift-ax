@@ -106,9 +106,10 @@ shift-ax --claude-code --root /absolute/path/to/target-repo
 If onboarding artifacts are missing, Shift AX will:
 
 1. ask for the preferred language first if `~/.shift-ax/settings.json` does not already store it
-2. open the matching platform session
-3. in Codex, let the user run `$onboard`; in Claude Code, let the user run `/onboard`
-4. write the reusable knowledge base to `~/.shift-ax/`
+2. ask whether full-auto mode should be enabled by default if the setting is still missing
+3. open the matching platform session
+4. in Codex, let the user run `$onboard`; in Claude Code, let the user run `/onboard`
+5. write the reusable knowledge base to `~/.shift-ax/`
 
 ### Optional: global CLI exposure
 

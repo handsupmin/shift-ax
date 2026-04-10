@@ -102,6 +102,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
 
       assert.equal(settings?.locale, 'ko');
       assert.equal(settings?.preferred_language, 'korean');
+      assert.equal(settings?.default_full_auto, false);
       assert.equal(settings?.preferred_platform, 'codex');
       assert.equal(launchedCwd.trim(), REPO_ROOT);
       assert.doesNotMatch(launchedArgs, /\/request|Shift AX .*셸 모드|Shift AX shell mode/i);
@@ -146,7 +147,7 @@ test('ax with no args asks for language once, stores it globally, then launches 
           if (code === 0) resolve();
           else reject(new Error(error || `ax shell interactive exited ${code}`));
         });
-        child.stdin.end('2\n');
+        child.stdin.end('2\n2\n');
       });
 
       const codexArgs = await readFile(join(root, 'interactive-codex-launch.args'), 'utf8');
@@ -155,7 +156,9 @@ test('ax with no args asks for language once, stores it globally, then launches 
 
       assert.equal(settings?.locale, 'ko');
       assert.equal(settings?.preferred_language, 'korean');
+      assert.equal(settings?.default_full_auto, true);
       assert.equal(settings?.preferred_platform, 'codex');
+      assert.match(codexArgs, /--yolo/);
       assert.doesNotMatch(codexArgs, /No global Shift AX profile was found yet|\$onboard/i);
       assert.match(requestCommand, /allow-missing-global-context/);
     });
@@ -195,7 +198,7 @@ test('ax --claude-code asks for language before launch and starts cleanly', asyn
           if (code === 0) resolve();
           else reject(new Error(error || `ax claude bootstrap shell exited ${code}`));
         });
-        child.stdin.end('1\n');
+        child.stdin.end('1\n2\n');
       });
 
       const settings = await readProjectSettings(root);
@@ -204,8 +207,9 @@ test('ax --claude-code asks for language before launch and starts cleanly', asyn
 
       assert.equal(settings?.locale, 'en');
       assert.equal(settings?.preferred_language, 'english');
+      assert.equal(settings?.default_full_auto, true);
       assert.equal(settings?.preferred_platform, 'claude-code');
-      assert.equal(launchedArgs.trim(), '');
+      assert.match(launchedArgs, /--dangerously-skip-permissions/);
       assert.match(requestCommand, /\$ARGUMENTS/);
     });
   } finally {
@@ -298,6 +302,66 @@ test('ax --claude-code with explicit onboarding input launches Claude shell mode
       assert.match(claudeDoc, /Preferred user language: English/);
       assert.match(claudeDoc, /primary visible commands/);
       assert.match(reviewCommand, /shift-ax review --topic/);
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('shift-ax --full-auto enables runtime automation even when the saved default is disabled', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-full-auto-flag-'));
+  const binDir = join(root, 'bin');
+  await mkdir(binDir, { recursive: true });
+  await writeFakeLauncher(binDir, 'codex', join(root, 'codex-full-auto-launch'));
+
+  try {
+    await withTempGlobalHome('shift-ax-shell-full-auto-home-', async (home) => {
+      await writeFile(
+        join(home, 'settings.json'),
+        JSON.stringify(
+          {
+            version: 1,
+            updated_at: new Date().toISOString(),
+            locale: 'en',
+            preferred_language: 'english',
+            preferred_platform: 'codex',
+            default_full_auto: false,
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(
+          process.execPath,
+          ['--import', 'tsx', 'scripts/ax.ts', '--codex', '--root', root, '--full-auto'],
+          {
+            cwd: REPO_ROOT,
+            env: {
+              ...process.env,
+              SHIFT_AX_HOME: home,
+              PATH: `${binDir}:${process.env.PATH}`,
+            },
+            stdio: ['ignore', 'pipe', 'pipe'],
+          },
+        );
+
+        let error = '';
+        child.stderr.on('data', (chunk) => {
+          error += chunk.toString('utf8');
+        });
+        child.on('exit', (code) => {
+          if (code === 0) resolve();
+          else reject(new Error(error || `shift-ax full-auto shell exited ${code}`));
+        });
+      });
+
+      const settings = await readProjectSettings(root);
+      const launchedArgs = await readFile(join(root, 'codex-full-auto-launch.args'), 'utf8');
+      assert.equal(settings?.default_full_auto, false);
+      assert.match(launchedArgs, /--yolo/);
     });
   } finally {
     await rm(root, { recursive: true, force: true });

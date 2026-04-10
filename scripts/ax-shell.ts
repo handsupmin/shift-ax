@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import {
   isProjectOnboarded,
   launchPlatformShell,
+  resolveShellDefaultFullAuto,
   resolveShellLocale,
   persistShellSettings,
 } from '../core/shell/platform-shell.js';
@@ -22,8 +23,8 @@ function usage(): void {
   process.stderr.write(
     [
       'Usage:',
-      '  shift-ax --codex [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
-      '  shift-ax --claude-code [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
+      '  shift-ax --codex [--root DIR] [--lang en|ko] [--full-auto] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
+      '  shift-ax --claude-code [--root DIR] [--lang en|ko] [--full-auto] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
       '  shift-ax  # default product shell launcher (Codex unless global settings say otherwise)',
       '',
     ].join('\n'),
@@ -45,6 +46,7 @@ function collectPromptArgs(): string {
   const ignored = new Set([
     '--codex',
     '--claude-code',
+    '--full-auto',
     '--discover',
     '--overwrite',
     '--lang',
@@ -74,6 +76,7 @@ const requestedLocale = parseLocale();
 const onboardingInput = readArg('--onboarding-input');
 const discover = process.argv.includes('--discover');
 const overwrite = process.argv.includes('--overwrite');
+const requestedFullAuto = process.argv.includes('--full-auto');
 const prompt = collectPromptArgs();
 const existingSettings = await readProjectSettings(rootDir);
 const onboarded = await isProjectOnboarded(rootDir);
@@ -92,6 +95,11 @@ const platform =
   requestedPlatform ??
   existingSettings?.preferred_platform ??
   'codex';
+const defaultFullAuto = await resolveShellDefaultFullAuto({
+  rootDir,
+  locale,
+});
+const effectiveFullAuto = defaultFullAuto || requestedFullAuto;
 
 if (!onboarded) {
   if (onboardingInput) {
@@ -103,6 +111,7 @@ if (!onboarded) {
     await persistShellSettings({
       rootDir,
       locale,
+      defaultFullAuto,
       platform,
     });
   } else if (discover) {
@@ -114,6 +123,7 @@ if (!onboarded) {
     await persistShellSettings({
       rootDir,
       locale,
+      defaultFullAuto,
       platform,
     });
   }
@@ -122,12 +132,14 @@ if (!onboarded) {
 await persistShellSettings({
   rootDir,
   locale,
+  defaultFullAuto,
   platform,
 });
 
 const exitCode = await launchPlatformShell({
   rootDir,
   platform,
+  fullAuto: effectiveFullAuto,
   ...(prompt ? { initialPrompt: prompt } : {}),
 });
 process.exit(exitCode);
