@@ -98,7 +98,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
       const launchedCwd = await readFile(join(root, 'codex-launch.cwd'), 'utf8');
       const launchedArgs = await readFile(join(root, 'codex-launch.args'), 'utf8');
       const agents = await readFile(join(root, 'AGENTS.md'), 'utf8');
-      const requestCommand = await readFile(join(root, '.codex', 'prompts', 'request.md'), 'utf8');
+      const requestCommand = await readFile(join(root, '.codex', 'skills', 'request', 'SKILL.md'), 'utf8');
 
       assert.equal(settings?.locale, 'ko');
       assert.equal(settings?.preferred_language, 'korean');
@@ -151,7 +151,7 @@ test('ax with no args asks for language once, stores it globally, then launches 
 
       const codexArgs = await readFile(join(root, 'interactive-codex-launch.args'), 'utf8');
       const settings = await readProjectSettings(root);
-      const requestCommand = await readFile(join(root, '.codex', 'prompts', 'request.md'), 'utf8');
+      const requestCommand = await readFile(join(root, '.codex', 'skills', 'request', 'SKILL.md'), 'utf8');
 
       assert.equal(settings?.locale, 'ko');
       assert.equal(settings?.preferred_language, 'korean');

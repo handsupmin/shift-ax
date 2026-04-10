@@ -25,7 +25,7 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
       'utf8',
     );
     const requestCommand = await readFile(
-      join(root, '.codex', 'prompts', 'request.md'),
+      join(root, '.codex', 'skills', 'request', 'SKILL.md'),
       'utf8',
     );
 
@@ -123,17 +123,17 @@ test('ax scaffold-build writes bootstrap assets for a requested platform', async
     const result = JSON.parse(stdout) as { platform: string; written: string[] };
     assert.equal(result.platform, 'codex');
     assert.deepEqual(result.written.sort(), [
-      '.codex/prompts/doctor.md',
-      '.codex/prompts/export-context.md',
-      '.codex/prompts/onboard.md',
-      '.codex/prompts/request.md',
-      '.codex/prompts/resume.md',
-      '.codex/prompts/review.md',
+      '.codex/skills/doctor/SKILL.md',
+      '.codex/skills/export-context/SKILL.md',
+      '.codex/skills/onboard/SKILL.md',
+      '.codex/skills/request/SKILL.md',
+      '.codex/skills/resume/SKILL.md',
+      '.codex/skills/review/SKILL.md',
+      '.codex/skills/status/SKILL.md',
+      '.codex/skills/topics/SKILL.md',
       '.codex/prompts/shift-ax-bootstrap.md',
-      '.codex/prompts/status.md',
-      '.codex/prompts/topics.md',
       'AGENTS.md',
-    ]);
+    ].sort());
   } finally {
     await rm(root, { recursive: true, force: true });
   }

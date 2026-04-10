@@ -12,7 +12,7 @@ const TEMPLATE_FILES = [
   'platform/codex/scaffold/AGENTS.template.md',
   'platform/codex/scaffold/prompts/shift-ax-bootstrap.template.md',
   ...SHIFT_AX_PRODUCT_SHELL_COMMANDS.map(
-    (name) => `platform/codex/scaffold/prompts/${name}.template.md` as const,
+    (name) => `platform/codex/scaffold/skills/${name}/SKILL.template.md` as const,
   ),
 ] as const;
 
@@ -64,10 +64,10 @@ export function renderCodexPromptBootstrap(rootDir: string, locale: ShiftAxLocal
 export function getCodexBootstrapAssets(rootDir: string, locale: ShiftAxLocale = 'en'): ShiftAxBootstrapAsset[] {
   const commandAssets = buildProductShellAssets({
     platform: 'codex',
-    commandBasePath: '.codex/prompts',
+    commandBasePath: '.codex/skills',
     renderTemplate: (name) =>
       renderTemplate(
-        `platform/codex/scaffold/prompts/${name}.template.md` as (typeof TEMPLATE_FILES)[number],
+        `platform/codex/scaffold/skills/${name}/SKILL.template.md` as (typeof TEMPLATE_FILES)[number],
         rootDir,
         locale,
       ),
@@ -84,6 +84,9 @@ export function getCodexBootstrapAssets(rootDir: string, locale: ShiftAxLocale =
       description: 'Codex bootstrap prompt fragment.',
       content: renderCodexPromptBootstrap(rootDir, locale),
     },
-    ...commandAssets,
+    ...commandAssets.map((asset) => ({
+      ...asset,
+      path: asset.path.replace(/\.codex\/skills\/([^/]+)\.md$/, '.codex/skills/$1/SKILL.md'),
+    })),
   ];
 }

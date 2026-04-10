@@ -25,7 +25,7 @@ You are running inside a Shift AX Codex build.
 - Use `shift-ax review --run` before finalization and `shift-ax finalize-commit` only after the review gate allows commit.
 - Natural language is the primary user surface. Internal AX commands exist to support the flow, not replace the conversation.
 - In Shift AX Codex sessions, prefer `$onboard`, `$request <text>`, `$export-context`, `$doctor`, `$status`, `$topics`, `$resume <topic>`, `$review <topic>`, and `$help` as the visible product-shell commands.
-- Native product-shell prompt files are installed under `.codex/prompts/` for: `onboard`, `request`, `export-context`, `doctor`, `status`, `topics`, `resume`, and `review`.
+- Native product-shell skill files are installed under `.codex/skills/<name>/SKILL.md` for: `onboard`, `request`, `export-context`, `doctor`, `status`, `topics`, `resume`, and `review`.
 
 ## Product-shell aliases
 

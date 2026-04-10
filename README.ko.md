@@ -156,7 +156,7 @@ Shift AX는 먼저 아래 안내로 시작해야 합니다.
 
 플랫폼별 native command 파일도 같이 scaffold 됩니다.
 
-- Codex: `.codex/prompts/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
+- Codex: `.codex/skills/{onboard,request,export-context,doctor,status,topics,resume,review}/SKILL.md`
 - Claude Code: `.claude/commands/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
 
 대화형 온보딩:

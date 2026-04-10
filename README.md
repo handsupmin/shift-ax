@@ -159,7 +159,7 @@ Inside the shell, the agent should accept product-shell commands such as:
 
 Platform-native command files are now scaffolded for both runtimes:
 
-- Codex: `.codex/prompts/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
+- Codex: `.codex/skills/{onboard,request,export-context,doctor,status,topics,resume,review}/SKILL.md`
 - Claude Code: `.claude/commands/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
 
 Interactive mode:

@@ -73,7 +73,7 @@ test('getPlatformBootstrapAssets returns expected assets for codex', () => {
   const paths = assets.map((asset) => asset.path).sort();
   assert.deepEqual(
     paths,
-    ['AGENTS.md', '.codex/prompts/shift-ax-bootstrap.md', ...SHIFT_AX_PRODUCT_SHELL_COMMANDS.map((name) => `.codex/prompts/${name}.md`)].sort(),
+    ['AGENTS.md', '.codex/prompts/shift-ax-bootstrap.md', ...SHIFT_AX_PRODUCT_SHELL_COMMANDS.map((name) => `.codex/skills/${name}/SKILL.md`)].sort(),
   );
 });
 
@@ -90,10 +90,10 @@ test('getPlatformBootstrapAssets returns expected assets for claude-code', () =>
 test('codex scaffold template files are tracked under platform/codex/scaffold', () => {
   const files = codexScaffoldTemplateFiles().sort();
   assert.ok(files.includes('platform/codex/scaffold/AGENTS.template.md'));
-  assert.ok(files.includes('platform/codex/scaffold/prompts/request.template.md'));
-  assert.ok(files.includes('platform/codex/scaffold/prompts/onboard.template.md'));
-  assert.ok(files.includes('platform/codex/scaffold/prompts/export-context.template.md'));
-  assert.ok(files.includes('platform/codex/scaffold/prompts/review.template.md'));
+  assert.ok(files.includes('platform/codex/scaffold/skills/request/SKILL.template.md'));
+  assert.ok(files.includes('platform/codex/scaffold/skills/onboard/SKILL.template.md'));
+  assert.ok(files.includes('platform/codex/scaffold/skills/export-context/SKILL.template.md'));
+  assert.ok(files.includes('platform/codex/scaffold/skills/review/SKILL.template.md'));
 });
 
 test('claude-code scaffold template files are tracked under platform/claude-code/scaffold', () => {
