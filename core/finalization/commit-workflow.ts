@@ -16,6 +16,7 @@ import {
   getRootDirFromTopicDir,
   topicArtifactPath,
 } from '../topics/topic-artifacts.js';
+import { readProjectSettings } from '../settings/project-settings.js';
 
 export interface FinalizeTopicCommitInput {
   topicDir: string;
@@ -106,6 +107,11 @@ async function readTopicRequest(topicDir: string): Promise<{
   }
 }
 
+async function resolveCommitLocale(topicDir: string): Promise<'en' | 'ko'> {
+  const rootDir = getRootDirFromTopicDir(topicDir);
+  return (await readProjectSettings(rootDir))?.locale ?? 'en';
+}
+
 export async function ensureTopicCommitMessageArtifact({
   topicDir,
   verification,
@@ -121,10 +127,12 @@ export async function ensureTopicCommitMessageArtifact({
   }
 
   const topic = await readTopicRequest(topicDir);
+  const locale = await resolveCommitLocale(topicDir);
   const message = buildTopicLoreCommitMessage({
     request: topic.request,
     requestSummary: topic.requestSummary,
     topicSlug: topic.topicSlug,
+    locale,
     verificationCommands: (verification ?? topic.verification)
       .filter((item) => item.exit_code === 0)
       .map((item) => item.command),

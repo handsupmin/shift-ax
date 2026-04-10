@@ -53,3 +53,21 @@ test('buildTopicLoreCommitMessage produces a valid generated lore message', () =
   assert.match(message, /Shift AX review lanes; npm test; npm run build/);
   assert.match(message, /Related: topic:2026-04-08-build-safer-auth-refresh-flow/);
 });
+
+test('buildTopicLoreCommitMessage localizes intent and body for Korean while preserving lore trailers', () => {
+  const message = buildTopicLoreCommitMessage({
+    request: '결제 롤백 절차를 더 안전하게 만들기',
+    requestSummary: '검토된 결제 롤백 전달 흐름',
+    topicSlug: '2026-04-10-safer-payment-rollback',
+    verificationCommands: ['npm test'],
+    locale: 'ko',
+  });
+
+  const result = validateLoreCommitMessage(message);
+
+  assert.equal(result.valid, true);
+  assert.match(message, /검토된 변경 반영:/);
+  assert.match(message, /검토된 Shift AX 작업을 반영합니다/);
+  assert.match(message, /Constraint:/);
+  assert.match(message, /Tested: Shift AX review lanes; npm test/);
+});

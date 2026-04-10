@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import { topicArtifactPath } from '../core/topics/topic-artifacts.js';
+import { writeProjectSettings } from '../core/settings/project-settings.js';
 import { withTempGlobalHome } from './helpers/global-home.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
@@ -233,6 +234,113 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume wit
 
       assert.equal(resumedResult.finalization?.commit_sha, head);
       assert.equal(workflowState.phase, 'committed');
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('CLI automatic commit uses the saved locale for generated commit messages', async () => {
+  const root = await createGitRepo();
+
+  try {
+    await withTempGlobalHome('shift-ax-request-cli-home-', async (home) => {
+      const onboardingPath = join(root, 'onboarding.json');
+      await writeFile(onboardingPath, JSON.stringify(onboardingFixture(root), null, 2), 'utf8');
+      const env = { ...process.env, SHIFT_AX_HOME: home };
+
+      const onboarded = await runAx(['onboard-context', '--root', root, '--input', onboardingPath], '', env);
+      assert.equal(onboarded.code, 0, onboarded.stderr);
+
+      await writeProjectSettings({
+        rootDir: root,
+        settings: {
+          version: 1,
+          updated_at: new Date().toISOString(),
+          locale: 'ko',
+          preferred_language: 'korean',
+          preferred_platform: 'codex',
+        },
+      });
+
+      const started = await runAx(
+        [
+          'run-request',
+          '--root',
+          root,
+          '--request',
+          'Build safer auth refresh flow',
+        ],
+        [
+          'Users should stay signed in during refresh token rotation.',
+          'Auth policy applies and no schema changes are allowed.',
+          'Do not change billing or the session UI.',
+          'Verification needs auth refresh tests plus a clean build.',
+          'Auth refresh service, token store, and session middleware.',
+          'Token store migration analysis is the only long-running slice.',
+          '',
+        ].join('\n'),
+        env,
+      );
+      assert.equal(started.code, 0, started.stderr);
+
+      const startResult = JSON.parse(started.stdout) as {
+        topicDir: string;
+        worktree: { worktree_path: string };
+      };
+
+      const approved = await runAx([
+        'approve-plan',
+        '--topic',
+        startResult.topicDir,
+        '--reviewer',
+        'Alex Reviewer',
+        '--decision',
+        'approve',
+      ], '', env);
+      assert.equal(approved.code, 0, approved.stderr);
+
+      await writeFile(join(startResult.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+      await writeFile(
+        join(startResult.worktree.worktree_path, 'auth-refresh.test.ts'),
+        [
+          "import { test } from 'node:test';",
+          "test('auth refresh keeps users signed in without schema changes', () => {});",
+          '// Covers auth policy token rotation behavior',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+      await writeExecutionArtifacts({
+        topicDir: startResult.topicDir,
+        changedFiles: ['feature.txt', 'auth-refresh.test.ts'],
+        summary:
+          'Updated feature.txt and auth-refresh.test.ts for the auth policy token rotation flow.',
+      });
+
+      const resumed = await runAx([
+        'run-request',
+        '--topic',
+        startResult.topicDir,
+        '--resume',
+        '--verify-command',
+        'echo test',
+      ], '', env);
+      assert.equal(resumed.code, 0, resumed.stderr);
+
+      const commitMessage = await readFile(
+        topicArtifactPath(startResult.topicDir, 'commit_message'),
+        'utf8',
+      );
+      const gitLog = execFileSync('git', ['log', '-1', '--pretty=%B'], {
+        cwd: startResult.worktree.worktree_path,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      });
+
+      assert.match(commitMessage, /검토된 변경 반영:/);
+      assert.match(commitMessage, /검토된 Shift AX 작업을 반영합니다/);
+      assert.match(gitLog, /검토된 변경 반영:/);
     });
   } finally {
     await rm(root, { recursive: true, force: true });

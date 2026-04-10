@@ -11,4 +11,6 @@ Resume with:
 
 If extra verification commands are given, append them as `--verify-command`.
 
+If the resumed review passes, this path auto-writes the localized lore commit message and creates the local git commit unless `--no-auto-commit` was requested.
+
 Explain whether the topic is blocked by escalation or policy sync if resume cannot continue.
