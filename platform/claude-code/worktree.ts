@@ -24,7 +24,7 @@ import {
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 function command(name: 'worktree-plan' | 'worktree-create' | 'worktree-remove'): string[] {
-  return ['ax', name];
+  return ['shift-ax', name];
 }
 
 export function getClaudeCodeWorktreeRuntime(

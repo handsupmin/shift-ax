@@ -77,7 +77,7 @@ test('ax platform-manifest prints platform manifest for codex', async () => {
   assert.ok(manifest.core_commands.includes('launch-execution'));
   assert.equal(manifest.execution_runtime.support, 'available');
   assert.deepEqual(manifest.execution_runtime.operations.launch.command, [
-    'ax',
+    'shift-ax',
     'launch-execution',
   ]);
   assert.equal(manifest.tmux_runtime.support, 'imported-helpers');
@@ -96,7 +96,7 @@ test('ax platform-manifest prints platform manifest for codex', async () => {
     'src/team/tmux-session.ts',
   );
   assert.deepEqual(manifest.worktree_runtime.operations.create.command, [
-    'ax',
+    'shift-ax',
     'worktree-create',
   ]);
   assert.equal(manifest.worktree_runtime.upstream_boundary.active_imports.length, 2);

@@ -30,7 +30,7 @@ When you have enough information:
 1. write `.ax/onboarding-input.json`
 2. if `{{GLOBAL_CONTEXT_INDEX}}` or other global knowledge files already exist, ask whether to overwrite them first
 3. persist with:
-   - `ax onboard-context --root "<repo>" --input .ax/onboarding-input.json`
+   - `shift-ax onboard-context --root "<repo>" --input .ax/onboarding-input.json`
    - add `--overwrite` only if the user explicitly agreed
 
 Keep the top-level knowledge base in `~/.shift-ax/` with:

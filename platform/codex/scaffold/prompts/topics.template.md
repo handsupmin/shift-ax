@@ -5,6 +5,6 @@ argument_hint: "[--limit N]"
 
 List recent topics with:
 
-`ax topics-status`
+`shift-ax topics-status`
 
 If the user supplied a limit, include it.

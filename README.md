@@ -14,8 +14,6 @@ Its primary reusable knowledge base now lives in:
 
 It also supports a platform-specific conversational shell:
 
-- `ax --codex`
-- `ax --claude-code`
 - `shift-ax --codex`
 - `shift-ax --claude-code`
 
@@ -90,9 +88,9 @@ curl -fsSL https://raw.githubusercontent.com/handsupmin/shift-ax/main/scripts/in
 After install:
 
 ```bash
-ax --codex
+shift-ax --codex
 # or
-ax --claude-code
+shift-ax --claude-code
 ```
 
 From a source checkout:
@@ -101,7 +99,8 @@ From a source checkout:
 npm install
 npm test
 npm run build
-npm run ax -- doctor
+npm link
+shift-ax doctor
 ```
 
 ### 3. Run onboarding
@@ -109,9 +108,9 @@ npm run ax -- doctor
 Conversational shell mode:
 
 ```bash
-ax --codex
+shift-ax --codex
 # or
-ax --claude-code
+shift-ax --claude-code
 ```
 
 Before the runtime opens, Shift AX asks for the preferred language once if it is not already stored:
@@ -161,19 +160,19 @@ Platform-native command files are now scaffolded for both runtimes:
 Interactive mode:
 
 ```bash
-npm run ax -- onboard-context
+shift-ax onboard-context
 ```
 
 File-driven mode:
 
 ```bash
-npm run ax -- onboard-context --input ./onboarding.json
+shift-ax onboard-context --input ./onboarding.json
 ```
 
 Discovery-assisted mode:
 
 ```bash
-npm run ax -- onboard-context --discover
+shift-ax onboard-context --discover
 ```
 
 This writes or migrates knowledge into `~/.shift-ax/`, regenerates `~/.shift-ax/index.md`, creates linked detailed pages there, and stores shared engineering defaults in `~/.shift-ax/profile.json`.
@@ -181,7 +180,7 @@ This writes or migrates knowledge into `~/.shift-ax/`, regenerates `~/.shift-ax/
 ### 4. Start a request
 
 ```bash
-npm run ax -- run-request --request "Build safer auth refresh flow"
+shift-ax run-request --request "Build safer auth refresh flow"
 ```
 
 This creates:
@@ -197,7 +196,7 @@ If the global index is missing, `/request` should stop by default and recommend 
 ### 5. Record plan approval
 
 ```bash
-npm run ax -- approve-plan \
+shift-ax approve-plan \
   --topic .ax/topics/<topic-slug> \
   --reviewer "Alex" \
   --decision approve
@@ -208,7 +207,7 @@ npm run ax -- approve-plan \
 If the approved plan says shared domain or policy docs must be updated first, record that before implementation resumes:
 
 ```bash
-npm run ax -- sync-policy-context \
+shift-ax sync-policy-context \
   --topic .ax/topics/<topic-slug> \
   --summary "Updated shared auth policy docs before implementation" \
   --path docs/base-context/auth-policy.md
@@ -217,7 +216,7 @@ npm run ax -- sync-policy-context \
 Then resume:
 
 ```bash
-npm run ax -- run-request \
+shift-ax run-request \
   --topic .ax/topics/<topic-slug> \
   --resume \
   --verify-command "npm test" \
@@ -234,7 +233,7 @@ Artifacts include:
 Use `--no-auto-commit` only if a human explicitly wants to hold the final commit step:
 
 ```bash
-npm run ax -- run-request \
+shift-ax run-request \
   --topic .ax/topics/<topic-slug> \
   --resume \
   --no-auto-commit
@@ -243,7 +242,7 @@ npm run ax -- run-request \
 ### 7. Materialize platform launch commands when needed
 
 ```bash
-npm run ax -- launch-execution \
+shift-ax launch-execution \
   --platform codex \
   --topic .ax/topics/<topic-slug> \
   --dry-run
@@ -254,7 +253,7 @@ This reads `execution-handoff.json`, writes per-task execution prompts, and retu
 ### 8. Inspect compact topic status when needed
 
 ```bash
-npm run ax -- topic-status --topic .ax/topics/<topic-slug>
+shift-ax topic-status --topic .ax/topics/<topic-slug>
 ```
 
 ## Mandatory human-escalation triggers
@@ -268,7 +267,7 @@ Even after plan approval, Shift AX must stop and request human review if any of 
 Persist that stop in workflow state with:
 
 ```bash
-npm run ax -- run-request \
+shift-ax run-request \
   --topic .ax/topics/<topic-slug> \
   --resume \
   --escalation policy-conflict:"Auth policy conflicts with the proposed flow"
@@ -277,7 +276,7 @@ npm run ax -- run-request \
 Resume only after human review clears the stop:
 
 ```bash
-npm run ax -- run-request \
+shift-ax run-request \
   --topic .ax/topics/<topic-slug> \
   --resume \
   --clear-escalations \

@@ -22,9 +22,9 @@ function usage(): void {
   process.stderr.write(
     [
       'Usage:',
-      '  ax --codex [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
-      '  ax --claude-code [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
-      '  ax  # default product shell launcher (Codex unless global settings say otherwise)',
+      '  shift-ax --codex [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
+      '  shift-ax --claude-code [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
+      '  shift-ax  # default product shell launcher (Codex unless global settings say otherwise)',
       '',
     ].join('\n'),
   );

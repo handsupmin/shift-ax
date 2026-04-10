@@ -131,7 +131,7 @@ adapters/
   claude-code/
 
 scripts/
-  ax command surfaces
+  shift-ax command surfaces
 ```
 
 ## 4. 레이어별 아키텍처와 차용 개념
@@ -314,11 +314,11 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 **Shift AX에서의 번역**
 
-- `ax doctor`
-- `ax topic-status`
-- `ax topics-status`
-- `ax context-health`
-- `ax monitor-context`
+- `shift-ax doctor`
+- `shift-ax topic-status`
+- `shift-ax topics-status`
+- `shift-ax context-health`
+- `shift-ax monitor-context`
 - readable `.ax/STATE.md`
 
 dashboard가 꼭 필요하다는 운영 압력이 생기기 전까지는 **compact CLI observability**를 우선한다.

@@ -297,7 +297,7 @@ test('ax --claude-code with explicit onboarding input launches Claude shell mode
       assert.match(claudeDoc, /\/onboarding/);
       assert.match(claudeDoc, /Preferred user language: English/);
       assert.match(claudeDoc, /product-shell commands/);
-      assert.match(reviewCommand, /ax review --topic/);
+      assert.match(reviewCommand, /shift-ax review --topic/);
     });
   } finally {
     await rm(root, { recursive: true, force: true });

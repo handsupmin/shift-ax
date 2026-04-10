@@ -5,6 +5,6 @@ argument-hint: "<topic-dir>"
 
 Run:
 
-`ax review --topic $ARGUMENTS --run`
+`shift-ax review --topic $ARGUMENTS --run`
 
 Then summarize the review lanes, aggregate verdict, and remaining blockers.

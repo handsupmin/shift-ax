@@ -30,16 +30,16 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     );
 
     assert.match(agents, /Shift AX Codex Bootstrap/);
-    assert.match(prompt, /ax resolve-context/);
+    assert.match(prompt, /shift-ax resolve-context/);
     assert.match(agents, /\/onboarding/);
-    assert.match(agents, /ax run-request/);
-    assert.match(prompt, /ax approve-plan/);
-    assert.match(prompt, /ax launch-execution/);
-    assert.match(prompt, /ax finalize-commit/);
+    assert.match(agents, /shift-ax run-request/);
+    assert.match(prompt, /shift-ax approve-plan/);
+    assert.match(prompt, /shift-ax launch-execution/);
+    assert.match(prompt, /shift-ax finalize-commit/);
     assert.match(agents, /platform\/codex\/upstream\/worktree\/provenance\.md/);
     assert.match(prompt, /ensureCodexManagedWorktree/);
     assert.match(agents, /\/export-context/);
-    assert.match(requestCommand, /ax run-request/);
+    assert.match(requestCommand, /shift-ax run-request/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -70,10 +70,10 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(claude, /Shift AX Claude Code SessionStart Bootstrap/);
     assert.match(hook, /hook-driven context injection/);
     assert.match(claude, /\/onboarding/);
-    assert.match(claude, /ax run-request/);
-    assert.match(hook, /ax approve-plan/);
-    assert.match(hook, /ax launch-execution/);
-    assert.match(hook, /ax finalize-commit/);
+    assert.match(claude, /shift-ax run-request/);
+    assert.match(hook, /shift-ax approve-plan/);
+    assert.match(hook, /shift-ax launch-execution/);
+    assert.match(hook, /shift-ax finalize-commit/);
     assert.match(claude, /platform\/claude-code\/upstream\/worktree\/provenance\.md/);
     assert.match(hook, /createClaudeManagedWorktree/);
     assert.match(claude, /\/export-context/);
