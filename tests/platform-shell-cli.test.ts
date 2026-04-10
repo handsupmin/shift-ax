@@ -105,7 +105,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
       assert.equal(settings?.preferred_platform, 'codex');
       assert.equal(launchedCwd.trim(), REPO_ROOT);
       assert.doesNotMatch(launchedArgs, /\/request|Shift AX .*셸 모드|Shift AX shell mode/i);
-      assert.match(agents, /\/onboarding/);
+      assert.match(agents, /\$onboard/);
       assert.match(agents, /한국어로 응답하세요/);
       assert.match(agents, /product-shell commands/);
       assert.match(requestCommand, /Start a new Shift AX request-to-commit flow/);
@@ -156,7 +156,7 @@ test('ax with no args asks for language once, stores it globally, then launches 
       assert.equal(settings?.locale, 'ko');
       assert.equal(settings?.preferred_language, 'korean');
       assert.equal(settings?.preferred_platform, 'codex');
-      assert.doesNotMatch(codexArgs, /No global Shift AX profile was found yet|\/onboarding/i);
+      assert.doesNotMatch(codexArgs, /No global Shift AX profile was found yet|\$onboard/i);
       assert.match(requestCommand, /allow-missing-global-context/);
     });
   } finally {
@@ -294,9 +294,9 @@ test('ax --claude-code with explicit onboarding input launches Claude shell mode
 
       assert.ok(launchedCwd.trim().endsWith(root));
       assert.equal(launchedArgs.trim(), '');
-      assert.match(claudeDoc, /\/onboarding/);
+      assert.match(claudeDoc, /\/onboard/);
       assert.match(claudeDoc, /Preferred user language: English/);
-      assert.match(claudeDoc, /product-shell commands/);
+      assert.match(claudeDoc, /primary visible commands/);
       assert.match(reviewCommand, /shift-ax review --topic/);
     });
   } finally {

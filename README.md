@@ -123,7 +123,11 @@ That preference is saved in `~/.shift-ax/settings.json` and reused on the next r
 If `~/.shift-ax/index.md` does not exist yet, open the shell and run:
 
 ```text
-/onboarding
+# Codex
+$onboard
+
+# Claude Code
+/onboard
 ```
 
 Shift AX should begin with:
@@ -143,7 +147,8 @@ The shell should open cleanly. Shift AX should not inject a long startup monolog
 
 Inside the shell, the agent should accept product-shell commands such as:
 
-- `/onboarding` or `$onboarding`
+- Codex: `$onboard`
+- Claude Code: `/onboard`
 - `/doctor` or `$doctor`
 - `/request <text>` or `$request <text>`
 - `/export-context`
@@ -154,8 +159,8 @@ Inside the shell, the agent should accept product-shell commands such as:
 
 Platform-native command files are now scaffolded for both runtimes:
 
-- Codex: `.codex/prompts/{onboarding,request,export-context,doctor,status,topics,resume,review}.md`
-- Claude Code: `.claude/commands/{onboarding,request,export-context,doctor,status,topics,resume,review}.md`
+- Codex: `.codex/prompts/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
+- Claude Code: `.claude/commands/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
 
 Interactive mode:
 
@@ -191,7 +196,7 @@ This creates:
 
 By default, Shift AX now interviews for planning details before it writes the planning artifacts. The pipeline then pauses at the human plan-review gate.
 
-If the global index is missing, `/request` should stop by default and recommend `/onboarding` first. It may continue only after an explicit lower-accuracy confirmation.
+If the global index is missing, `/request` should stop by default and recommend `onboard` first. It may continue only after an explicit lower-accuracy confirmation.
 
 ### 5. Record plan approval
 

@@ -17,4 +17,4 @@ Mention that the most important file is:
 
 - `~/.shift-ax/index.md`
 
-If useful, remind them that `/onboarding` can refresh the profile before sharing.
+If useful, remind them that `$onboard` can refresh the profile before sharing.

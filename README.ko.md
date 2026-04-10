@@ -120,7 +120,11 @@ shift-ax --claude-code
 `~/.shift-ax/index.md`가 아직 없다면 셸 안에서 바로 다음을 실행하면 됩니다.
 
 ```text
-/onboarding
+# Codex
+$onboard
+
+# Claude Code
+/onboard
 ```
 
 Shift AX는 먼저 아래 안내로 시작해야 합니다.
@@ -140,7 +144,8 @@ Shift AX는 먼저 아래 안내로 시작해야 합니다.
 
 셸 안에서는 아래 같은 product-shell 명령을 사용할 수 있어야 합니다.
 
-- `/onboarding` 또는 `$onboarding`
+- Codex: `$onboard`
+- Claude Code: `/onboard`
 - `/doctor` 또는 `$doctor`
 - `/request <text>` 또는 `$request <text>`
 - `/export-context`
@@ -151,8 +156,8 @@ Shift AX는 먼저 아래 안내로 시작해야 합니다.
 
 플랫폼별 native command 파일도 같이 scaffold 됩니다.
 
-- Codex: `.codex/prompts/{onboarding,request,export-context,doctor,status,topics,resume,review}.md`
-- Claude Code: `.claude/commands/{onboarding,request,export-context,doctor,status,topics,resume,review}.md`
+- Codex: `.codex/prompts/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
+- Claude Code: `.claude/commands/{onboard,request,export-context,doctor,status,topics,resume,review}.md`
 
 대화형 온보딩:
 
@@ -188,7 +193,7 @@ shift-ax run-request --request "Build safer auth refresh flow"
 
 기본적으로 이 단계에서 planning interview를 먼저 수행한 뒤 planning 아티팩트를 쓰고, 이후 사람의 계획 리뷰 게이트에서 멈춥니다.
 
-글로벌 인덱스가 없으면 `/request`는 기본적으로 멈추고 먼저 `/onboarding` 을 권장해야 합니다. 사용자가 명시적으로 낮은 정확도로 진행하겠다고 할 때만 계속할 수 있습니다.
+글로벌 인덱스가 없으면 `/request`는 기본적으로 멈추고 먼저 `onboard` 를 권장해야 합니다. 사용자가 명시적으로 낮은 정확도로 진행하겠다고 할 때만 계속할 수 있습니다.
 
 ### 5. 계획 승인 기록
 

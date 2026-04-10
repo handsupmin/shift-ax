@@ -6,7 +6,7 @@ This build is expected to use SessionStart hook-driven context injection.
 
 - SessionStart should inject Shift AX bootstrap context.
 - Before planning or implementation, resolve context from {{GLOBAL_CONTEXT_INDEX}}.
-- If the global index is missing, recommend `/onboarding` before `/request`. Do not pretend the missing context does not matter.
+- If the global index is missing, recommend `/onboard` before `/request`. Do not pretend the missing context does not matter.
 - Use `shift-ax doctor` when setup, launcher availability, or topic state looks unhealthy.
 - Use `shift-ax resolve-context` before answering when relevant documents may exist.
 - Use `shift-ax run-request` to create the request-scoped topic/worktree, run the planning interview, write brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pause at the human planning-review gate.
@@ -24,8 +24,8 @@ This build is expected to use SessionStart hook-driven context injection.
 - Active imported worktree helpers currently include `getWorktreeRoot`, `createClaudeManagedWorktree`, and `removeClaudeManagedWorktree`.
 - Use `shift-ax review --run` before finalization and `shift-ax finalize-commit` only after the review gate allows commit.
 - Natural language is the primary user surface. Internal AX commands exist to support the flow, not replace the conversation.
-- In Shift AX shell sessions, interpret `/onboarding`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>`, `/help` and the same `$...` aliases as product-shell commands that map to the corresponding `shift-ax` workflows.
-- Native product-shell command files are installed under `.claude/commands/` for: `onboard`, `request`, `doctor`, `status`, `topics`, `resume`, and `review`.
+- In Shift AX Claude Code sessions, use `/onboard`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>`, `/help` as the primary visible commands. `$...` aliases may mirror them when useful.
+- Native product-shell command files are installed under `.claude/commands/` for: `onboard`, `request`, `export-context`, `doctor`, `status`, `topics`, `resume`, and `review`.
 
 ## Product-shell aliases
 

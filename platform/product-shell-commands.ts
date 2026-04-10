@@ -1,7 +1,7 @@
 import type { ShiftAxBootstrapAsset } from './index.js';
 
 export const SHIFT_AX_PRODUCT_SHELL_COMMANDS = [
-  'onboarding',
+  'onboard',
   'request',
   'export-context',
   'doctor',
@@ -25,7 +25,7 @@ export function buildProductShellAssets({
 }): ShiftAxBootstrapAsset[] {
   return SHIFT_AX_PRODUCT_SHELL_COMMANDS.map((name) => ({
     path: `${commandBasePath}/${name}.md`,
-    description: `Shift AX ${platform === 'codex' ? 'Codex' : 'Claude Code'} product-shell command: /${name}`,
+    description: `Shift AX ${platform === 'codex' ? 'Codex' : 'Claude Code'} product-shell command: ${platform === 'codex' ? '$' : '/'}${name}`,
     content: renderTemplate(name),
   }));
 }

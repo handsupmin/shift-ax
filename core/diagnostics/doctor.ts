@@ -119,7 +119,7 @@ async function checkProfile(rootDir: string): Promise<ShiftAxDoctorReport['profi
     status: profile ? 'ok' : 'fail',
     message: profile
       ? 'Global Shift AX profile is available.'
-      : 'Global Shift AX profile is missing. Run `/onboarding` or `ax onboard-context` first.',
+      : 'Global Shift AX profile is missing. Run `/onboarding` or `shift-ax onboard-context` first.',
     path,
   };
 }
