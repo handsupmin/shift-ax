@@ -1,3 +1,5 @@
+import type { ShiftAxLocale } from '../settings/project-settings.js';
+
 export interface LoreCommitMessageInput {
   intent: string;
   body: string;
@@ -22,6 +24,7 @@ export interface TopicLoreCommitMessageInput {
   requestSummary?: string;
   topicSlug?: string;
   verificationCommands?: string[];
+  locale?: ShiftAxLocale;
 }
 
 const REQUIRED_TRAILERS = [
@@ -101,6 +104,7 @@ export function buildTopicLoreCommitMessage({
   requestSummary,
   topicSlug,
   verificationCommands = [],
+  locale = 'en',
 }: TopicLoreCommitMessageInput): string {
   const normalizedSummary = normalizeOneLine(requestSummary) || normalizeOneLine(request);
   const normalizedRequest = normalizeOneLine(request) || normalizedSummary;
@@ -111,11 +115,20 @@ export function buildTopicLoreCommitMessage({
     .join('; ');
 
   return buildLoreCommitMessage({
-    intent: truncate(`Deliver reviewed change: ${intentSource}`, 72),
-    body: [
-      `This commit captures the reviewed Shift AX work for "${normalizedRequest || intentSource}".`,
-      'The request passed context resolution, human plan review, and review gates before local finalization.',
-    ].join(' '),
+    intent:
+      locale === 'ko'
+        ? truncate(`검토된 변경 반영: ${intentSource}`, 72)
+        : truncate(`Deliver reviewed change: ${intentSource}`, 72),
+    body:
+      locale === 'ko'
+        ? [
+            `"${normalizedRequest || intentSource}" 요청에 대한 검토된 Shift AX 작업을 반영합니다.`,
+            '로컬 마무리 전에 컨텍스트 해석, 사람 계획 리뷰, 리뷰 게이트를 통과했습니다.',
+          ].join(' ')
+        : [
+            `This commit captures the reviewed Shift AX work for "${normalizedRequest || intentSource}".`,
+            'The request passed context resolution, human plan review, and review gates before local finalization.',
+          ].join(' '),
     constraint: 'v1 finalization stops at a meaningful local git commit',
     confidence: 'high',
     scopeRisk: 'moderate',

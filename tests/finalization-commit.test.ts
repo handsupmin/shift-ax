@@ -9,6 +9,7 @@ import { buildLoreCommitMessage } from '../core/finalization/commit-message.js';
 import { finalizeTopicCommit } from '../core/finalization/commit-workflow.js';
 import { recordPlanReviewDecision } from '../core/planning/plan-review.js';
 import { resumeRequestPipeline, startRequestPipeline } from '../core/planning/request-pipeline.js';
+import { writeProjectSettings } from '../core/settings/project-settings.js';
 import { topicArtifactPath } from '../core/topics/topic-artifacts.js';
 import { seedSampleOnboarding } from './helpers/sample-onboarding.js';
 import { withTempGlobalHome } from './helpers/global-home.js';
@@ -147,6 +148,67 @@ test('finalizeTopicCommit creates a local git commit and records the sha', async
       assert.equal(state.commit_sha, head);
       assert.equal(state.status, 'committed');
       assert.match(log, /Deliver reviewed change:/);
+      assert.match(storedCommitMessage, /Constraint:/);
+    });
+  } finally {
+    await rm(repoRoot, { recursive: true, force: true });
+  }
+});
+
+test('finalizeTopicCommit uses the saved locale for generated commit title and body', async () => {
+  const repoRoot = await createGitRepo();
+
+  try {
+    await withTempGlobalHome('shift-ax-finalization-home-', async () => {
+      await seedSampleOnboarding(repoRoot);
+      await writeProjectSettings({
+        rootDir: repoRoot,
+        settings: {
+          version: 1,
+          updated_at: new Date().toISOString(),
+          locale: 'ko',
+          preferred_language: 'korean',
+        },
+      });
+
+      const started = await startRequestPipeline({
+        rootDir: repoRoot,
+        request: 'Build safer auth refresh flow',
+        summary: 'Need a reviewed auth-refresh delivery flow.',
+        brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
+        specContent: '# Topic Spec\n\n## Goal\n\nImplement auth refresh token rotation.\n',
+        implementationPlanContent:
+          '# Implementation Plan\n\nUse TDD first.\nKeep files small and respect architecture boundaries.\n',
+        baseBranch: 'main',
+      });
+
+      await recordPlanReviewDecision({
+        topicDir: started.topicDir,
+        reviewer: 'Alex Reviewer',
+        status: 'approved',
+        notes: 'Approved for implementation.',
+      });
+
+      await resumeRequestPipeline({
+        topicDir: started.topicDir,
+        verificationCommands: ['node --test auth-refresh.test.js'],
+        executionRunner: buildExecutionRunner(['src/feature.txt', 'auth-refresh.test.js']),
+      });
+
+      await finalizeTopicCommit({ topicDir: started.topicDir });
+
+      const log = execFileSync('git', ['log', '-1', '--pretty=%B'], {
+        cwd: started.worktree.worktree_path,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      });
+      const storedCommitMessage = await readFile(
+        topicArtifactPath(started.topicDir, 'commit_message'),
+        'utf8',
+      );
+
+      assert.match(log, /검토된 변경 반영:/);
+      assert.match(log, /검토된 Shift AX 작업을 반영합니다/);
       assert.match(storedCommitMessage, /Constraint:/);
     });
   } finally {

@@ -28,6 +28,10 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
       join(root, '.codex', 'skills', 'request', 'SKILL.md'),
       'utf8',
     );
+    const reviewCommand = await readFile(
+      join(root, '.codex', 'skills', 'review', 'SKILL.md'),
+      'utf8',
+    );
 
     assert.match(agents, /Shift AX Codex Bootstrap/);
     assert.match(prompt, /shift-ax resolve-context/);
@@ -40,6 +44,8 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(prompt, /ensureCodexManagedWorktree/);
     assert.match(agents, /\$export-context/);
     assert.match(requestCommand, /shift-ax run-request/);
+    assert.match(reviewCommand, /shift-ax finalize-commit --topic <topic-dir>/);
+    assert.match(reviewCommand, /localized lore commit message/i);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -66,6 +72,10 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
       join(root, '.claude', 'commands', 'request.md'),
       'utf8',
     );
+    const reviewCommand = await readFile(
+      join(root, '.claude', 'commands', 'review.md'),
+      'utf8',
+    );
 
     assert.match(claude, /Shift AX Claude Code SessionStart Bootstrap/);
     assert.match(hook, /hook-driven context injection/);
@@ -78,6 +88,8 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(hook, /createClaudeManagedWorktree/);
     assert.match(claude, /\/export-context/);
     assert.match(requestCommand, /\$ARGUMENTS/);
+    assert.match(reviewCommand, /shift-ax finalize-commit --topic \$ARGUMENTS/);
+    assert.match(reviewCommand, /localized lore commit message/i);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
