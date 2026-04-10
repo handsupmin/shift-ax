@@ -373,6 +373,6 @@ test('package bin exposes both ax and shift-ax for shell entry', async () => {
     bin: Record<string, string>;
   };
 
-  assert.equal(packageJson.bin.ax, './dist/scripts/ax.js');
-  assert.equal(packageJson.bin['shift-ax'], './dist/scripts/ax.js');
+  assert.equal(packageJson.bin.ax, 'dist/scripts/ax.js');
+  assert.equal(packageJson.bin['shift-ax'], 'dist/scripts/ax.js');
 });

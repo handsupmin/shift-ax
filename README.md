@@ -19,7 +19,7 @@ It is for teams that want a repeatable workflow, not prompt rituals.
 ## Install
 
 ```bash
-npm install -g @handsupmin/shift-ax
+npm install -g shift-ax
 ```
 
 Or:
@@ -116,7 +116,7 @@ Goal:
 
 Rules:
 - use `shift-ax`, not `ax`, in user-facing commands
-- if Shift AX is not installed, run `npm install -g @handsupmin/shift-ax`
+- if Shift AX is not installed, run `npm install -g shift-ax`
 - if working from a source checkout instead of a global install, run:
   - `npm install`
   - `npm run build`

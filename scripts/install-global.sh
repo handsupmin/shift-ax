@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PACKAGE="${1:-@handsupmin/shift-ax}"
+PACKAGE="${1:-shift-ax}"
 
 if ! command -v node >/dev/null 2>&1; then
   echo "Shift AX install requires Node.js >= 20." >&2
@@ -20,10 +20,6 @@ cat <<'EOF'
 Shift AX installed successfully.
 
 Start with:
-  ax --codex
-  ax --claude-code
-
-You can also use:
   shift-ax --codex
   shift-ax --claude-code
 

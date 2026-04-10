@@ -44,7 +44,7 @@ Treat the task as complete only when all of these are true:
 Preferred install:
 
 ```bash
-npm install -g @handsupmin/shift-ax
+npm install -g shift-ax
 ```
 
 One-command install:
