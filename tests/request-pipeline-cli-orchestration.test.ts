@@ -5,6 +5,7 @@ import { chmod, mkdtemp, readFile, rm, writeFile, mkdir } from 'node:fs/promises
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { withTempGlobalHome } from './helpers/global-home.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
@@ -96,109 +97,122 @@ printf '{\"changed_files\":[\"smoke-marker.txt\",\"smoke-marker.test.js\"],\"sum
     );
     await chmod(fakeCodex, 0o755);
 
-    const onboardingPath = join(root, 'onboarding.json');
-    await writeFile(
-      onboardingPath,
-      JSON.stringify(
-        {
-          documents: [
-            {
-              label: 'Auth policy',
-              content: '# Auth Policy\n\nRefresh token rotation is required.\n',
-            },
-          ],
-        },
-        null,
-        2,
-      ),
-      'utf8',
-    );
+    await withTempGlobalHome('shift-ax-orchestrate-home-', async (home) => {
+      const onboardingPath = join(root, 'onboarding.json');
+      await writeFile(
+        onboardingPath,
+        JSON.stringify(
+          {
+            primaryRoleSummary: 'I maintain smoke fixtures.',
+            workTypes: [
+              {
+                name: 'API development',
+                repositories: [
+                  {
+                    repository: 'sample-repo',
+                    repositoryPath: root,
+                    purpose: 'Fixture repo',
+                    directories: ['src', 'tests'],
+                    workflow: 'Update code and tests together.',
+                  },
+                ],
+              },
+            ],
+            domainLanguage: [{ term: 'Auth policy', definition: 'Fixture auth policy term.' }],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
 
-    const env = {
-      ...process.env,
-      PATH: `${binDir}:${process.env.PATH ?? ''}`,
-    };
+      const env = {
+        ...process.env,
+        SHIFT_AX_HOME: home,
+        PATH: `${binDir}:${process.env.PATH ?? ''}`,
+      };
 
-    assert.equal(
-      (await runAx(['onboard-context', '--root', root, '--input', onboardingPath], '', env)).code,
-      0,
-    );
+      assert.equal(
+        (await runAx(['onboard-context', '--root', root, '--input', onboardingPath], '', env)).code,
+        0,
+      );
 
-    const started = await runAx(
-      ['run-request', '--root', root, '--request', 'Create a smoke marker file'],
-      [
-        'Create smoke-marker.txt with the exact text codex orchestrator smoke complete.',
-        'No schema changes.',
-        'Do not add extra files.',
-        'Verification should prove smoke-marker.txt exists.',
-        'smoke-marker.txt',
-        '',
-        '',
-      ].join('\n'),
-      env,
-    );
-    assert.equal(started.code, 0, started.stderr);
-    const startResult = JSON.parse(started.stdout) as {
-      topicDir: string;
-      worktree: { worktree_path: string };
-    };
-
-    assert.equal(
-      (
-        await runAx(
-          [
-            'approve-plan',
-            '--topic',
-            startResult.topicDir,
-            '--reviewer',
-            'Alex Reviewer',
-            '--decision',
-            'approve',
-          ],
+      const started = await runAx(
+        ['run-request', '--root', root, '--request', 'Create a smoke marker file'],
+        [
+          'Create smoke-marker.txt with the exact text codex orchestrator smoke complete.',
+          'No schema changes.',
+          'Do not add extra files.',
+          'Verification should prove smoke-marker.txt exists.',
+          'smoke-marker.txt',
           '',
-          env,
-        )
-      ).code,
-      0,
-    );
+          '',
+        ].join('\n'),
+        env,
+      );
+      assert.equal(started.code, 0, started.stderr);
+      const startResult = JSON.parse(started.stdout) as {
+        topicDir: string;
+        worktree: { worktree_path: string };
+      };
 
-    await writeFile(
-      join(startResult.worktree.worktree_path, 'smoke-marker.test.js'),
-      [
-        "import test from 'node:test';",
-        "test('smoke marker exists for auth policy flow', () => {});",
+      assert.equal(
+        (
+          await runAx(
+            [
+              'approve-plan',
+              '--topic',
+              startResult.topicDir,
+              '--reviewer',
+              'Alex Reviewer',
+              '--decision',
+              'approve',
+            ],
+            '',
+            env,
+          )
+        ).code,
+        0,
+      );
+
+      await writeFile(
+        join(startResult.worktree.worktree_path, 'smoke-marker.test.js'),
+        [
+          "import test from 'node:test';",
+          "test('smoke marker exists for auth policy flow', () => {});",
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const resumed = await runAx(
+        [
+          'run-request',
+          '--topic',
+          startResult.topicDir,
+          '--resume',
+          '--platform',
+          'codex',
+          '--verify-command',
+          'test -f smoke-marker.txt',
+          '--no-auto-commit',
+        ],
         '',
-      ].join('\n'),
-      'utf8',
-    );
+        env,
+      );
+      assert.equal(resumed.code, 0, resumed.stderr);
 
-    const resumed = await runAx(
-      [
-        'run-request',
-        '--topic',
-        startResult.topicDir,
-        '--resume',
-        '--platform',
-        'codex',
-        '--verify-command',
-        'test -f smoke-marker.txt',
-        '--no-auto-commit',
-      ],
-      '',
-      env,
-    );
-    assert.equal(resumed.code, 0, resumed.stderr);
+      const executionState = JSON.parse(
+        await readFile(join(startResult.topicDir, 'execution-state.json'), 'utf8'),
+      ) as { overall_status: string; tasks: Array<{ status: string }> };
 
-    const executionState = JSON.parse(
-      await readFile(join(startResult.topicDir, 'execution-state.json'), 'utf8'),
-    ) as { overall_status: string; tasks: Array<{ status: string }> };
-
-    assert.equal(executionState.overall_status, 'completed');
-    assert.equal(executionState.tasks[0]?.status, 'completed');
-    assert.equal(
-      (await readFile(join(startResult.worktree.worktree_path, 'smoke-marker.txt'), 'utf8')).trim(),
-      'codex orchestrator smoke complete.',
-    );
+      assert.equal(executionState.overall_status, 'completed');
+      assert.equal(executionState.tasks[0]?.status, 'completed');
+      assert.equal(
+        (await readFile(join(startResult.worktree.worktree_path, 'smoke-marker.txt'), 'utf8')).trim(),
+        'codex orchestrator smoke complete.',
+      );
+    });
   } finally {
     await rm(root, { recursive: true, force: true });
     await rm(binDir, { recursive: true, force: true });

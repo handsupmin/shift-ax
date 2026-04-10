@@ -48,33 +48,33 @@ test('claude-code adapter uses hook bootstrap and core defaults', () => {
   );
 });
 
-test('platform adapters produce ax command routes for core flows', () => {
+test('platform adapters produce shift-ax command routes for core flows', () => {
   const codex = getPlatformAdapter('codex');
   const claude = getPlatformAdapter('claude-code');
 
-  assert.deepEqual(codex.commandFor('bootstrap-topic'), ['ax', 'bootstrap-topic']);
-  assert.deepEqual(codex.commandFor('resolve-context'), ['ax', 'resolve-context']);
-  assert.deepEqual(codex.commandFor('review'), ['ax', 'review']);
-  assert.deepEqual(codex.commandFor('worktree-plan'), ['ax', 'worktree-plan']);
-  assert.deepEqual(codex.commandFor('worktree-create'), ['ax', 'worktree-create']);
-  assert.deepEqual(codex.commandFor('worktree-remove'), ['ax', 'worktree-remove']);
-  assert.deepEqual(codex.commandFor('onboard-context'), ['ax', 'onboard-context']);
-  assert.deepEqual(codex.commandFor('run-request'), ['ax', 'run-request']);
-  assert.deepEqual(codex.commandFor('approve-plan'), ['ax', 'approve-plan']);
-  assert.deepEqual(codex.commandFor('finalize-commit'), ['ax', 'finalize-commit']);
-  assert.deepEqual(codex.commandFor('launch-execution'), ['ax', 'launch-execution']);
+  assert.deepEqual(codex.commandFor('bootstrap-topic'), ['shift-ax', 'bootstrap-topic']);
+  assert.deepEqual(codex.commandFor('resolve-context'), ['shift-ax', 'resolve-context']);
+  assert.deepEqual(codex.commandFor('review'), ['shift-ax', 'review']);
+  assert.deepEqual(codex.commandFor('worktree-plan'), ['shift-ax', 'worktree-plan']);
+  assert.deepEqual(codex.commandFor('worktree-create'), ['shift-ax', 'worktree-create']);
+  assert.deepEqual(codex.commandFor('worktree-remove'), ['shift-ax', 'worktree-remove']);
+  assert.deepEqual(codex.commandFor('onboard-context'), ['shift-ax', 'onboard-context']);
+  assert.deepEqual(codex.commandFor('run-request'), ['shift-ax', 'run-request']);
+  assert.deepEqual(codex.commandFor('approve-plan'), ['shift-ax', 'approve-plan']);
+  assert.deepEqual(codex.commandFor('finalize-commit'), ['shift-ax', 'finalize-commit']);
+  assert.deepEqual(codex.commandFor('launch-execution'), ['shift-ax', 'launch-execution']);
 
-  assert.deepEqual(claude.commandFor('bootstrap-topic'), ['ax', 'bootstrap-topic']);
-  assert.deepEqual(claude.commandFor('resolve-context'), ['ax', 'resolve-context']);
-  assert.deepEqual(claude.commandFor('review'), ['ax', 'review']);
-  assert.deepEqual(claude.commandFor('worktree-plan'), ['ax', 'worktree-plan']);
-  assert.deepEqual(claude.commandFor('worktree-create'), ['ax', 'worktree-create']);
-  assert.deepEqual(claude.commandFor('worktree-remove'), ['ax', 'worktree-remove']);
-  assert.deepEqual(claude.commandFor('onboard-context'), ['ax', 'onboard-context']);
-  assert.deepEqual(claude.commandFor('run-request'), ['ax', 'run-request']);
-  assert.deepEqual(claude.commandFor('approve-plan'), ['ax', 'approve-plan']);
-  assert.deepEqual(claude.commandFor('finalize-commit'), ['ax', 'finalize-commit']);
-  assert.deepEqual(claude.commandFor('launch-execution'), ['ax', 'launch-execution']);
+  assert.deepEqual(claude.commandFor('bootstrap-topic'), ['shift-ax', 'bootstrap-topic']);
+  assert.deepEqual(claude.commandFor('resolve-context'), ['shift-ax', 'resolve-context']);
+  assert.deepEqual(claude.commandFor('review'), ['shift-ax', 'review']);
+  assert.deepEqual(claude.commandFor('worktree-plan'), ['shift-ax', 'worktree-plan']);
+  assert.deepEqual(claude.commandFor('worktree-create'), ['shift-ax', 'worktree-create']);
+  assert.deepEqual(claude.commandFor('worktree-remove'), ['shift-ax', 'worktree-remove']);
+  assert.deepEqual(claude.commandFor('onboard-context'), ['shift-ax', 'onboard-context']);
+  assert.deepEqual(claude.commandFor('run-request'), ['shift-ax', 'run-request']);
+  assert.deepEqual(claude.commandFor('approve-plan'), ['shift-ax', 'approve-plan']);
+  assert.deepEqual(claude.commandFor('finalize-commit'), ['shift-ax', 'finalize-commit']);
+  assert.deepEqual(claude.commandFor('launch-execution'), ['shift-ax', 'launch-execution']);
 });
 
 test('platform adapters expose worktree capability metadata', () => {
@@ -88,15 +88,15 @@ test('platform adapters expose worktree capability metadata', () => {
   assert.equal(claudeManifest.worktree_support, 'available');
 
   assert.deepEqual(codexManifest.worktree_runtime.operations.plan.command, [
-    'ax',
+    'shift-ax',
     'worktree-plan',
   ]);
   assert.deepEqual(codexManifest.worktree_runtime.operations.create.command, [
-    'ax',
+    'shift-ax',
     'worktree-create',
   ]);
   assert.deepEqual(codexManifest.worktree_runtime.operations.remove.command, [
-    'ax',
+    'shift-ax',
     'worktree-remove',
   ]);
   assert.match(
@@ -116,7 +116,7 @@ test('platform adapters expose worktree capability metadata', () => {
   assert.equal(codexManifest.tmux_runtime.workspace_mode, 'leader-attached-layout');
   assert.equal(codexManifest.execution_runtime.support, 'available');
   assert.deepEqual(codexManifest.execution_runtime.operations.launch.command, [
-    'ax',
+    'shift-ax',
     'launch-execution',
   ]);
   assert.equal(codexManifest.tmux_runtime.upstream_boundary.active_imports.length, 3);
@@ -134,15 +134,15 @@ test('platform adapters expose worktree capability metadata', () => {
   );
 
   assert.deepEqual(claudeManifest.worktree_runtime.operations.plan.command, [
-    'ax',
+    'shift-ax',
     'worktree-plan',
   ]);
   assert.deepEqual(claudeManifest.worktree_runtime.operations.create.command, [
-    'ax',
+    'shift-ax',
     'worktree-create',
   ]);
   assert.deepEqual(claudeManifest.worktree_runtime.operations.remove.command, [
-    'ax',
+    'shift-ax',
     'worktree-remove',
   ]);
   assert.match(
@@ -162,7 +162,7 @@ test('platform adapters expose worktree capability metadata', () => {
   assert.equal(claudeManifest.tmux_runtime.workspace_mode, 'detached-sessions');
   assert.equal(claudeManifest.execution_runtime.support, 'available');
   assert.deepEqual(claudeManifest.execution_runtime.operations.launch.command, [
-    'ax',
+    'shift-ax',
     'launch-execution',
   ]);
   assert.equal(claudeManifest.tmux_runtime.upstream_boundary.active_imports.length, 2);

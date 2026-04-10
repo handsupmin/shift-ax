@@ -136,7 +136,7 @@ adapters/
   claude-code/
 
 scripts/
-  ax command surfaces
+  shift-ax command surfaces
 ```
 
 ## 4. Layer-by-layer architecture and borrowed ideas
@@ -319,11 +319,11 @@ They must never outrank:
 
 **How Shift AX translates those ideas**
 
-- `ax doctor`
-- `ax topic-status`
-- `ax topics-status`
-- `ax context-health`
-- `ax monitor-context`
+- `shift-ax doctor`
+- `shift-ax topic-status`
+- `shift-ax topics-status`
+- `shift-ax context-health`
+- `shift-ax monitor-context`
 - readable `.ax/STATE.md`
 
 Shift AX prefers **compact CLI observability** over a dashboard unless the team truly needs the extra surface area.

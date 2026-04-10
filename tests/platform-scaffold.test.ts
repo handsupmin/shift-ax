@@ -17,7 +17,7 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     });
 
     assert.equal(result.platform, 'codex');
-    assert.equal(result.written.length, 9);
+    assert.equal(result.written.length, 10);
 
     const agents = await readFile(join(root, 'AGENTS.md'), 'utf8');
     const prompt = await readFile(
@@ -25,21 +25,21 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
       'utf8',
     );
     const requestCommand = await readFile(
-      join(root, '.codex', 'prompts', 'request.md'),
+      join(root, '.codex', 'skills', 'request', 'SKILL.md'),
       'utf8',
     );
 
     assert.match(agents, /Shift AX Codex Bootstrap/);
-    assert.match(prompt, /ax resolve-context/);
-    assert.match(agents, /ax onboard-context/);
-    assert.match(agents, /ax run-request/);
-    assert.match(prompt, /ax approve-plan/);
-    assert.match(prompt, /ax launch-execution/);
-    assert.match(prompt, /ax finalize-commit/);
+    assert.match(prompt, /shift-ax resolve-context/);
+    assert.match(agents, /\$onboard/);
+    assert.match(agents, /shift-ax run-request/);
+    assert.match(prompt, /shift-ax approve-plan/);
+    assert.match(prompt, /shift-ax launch-execution/);
+    assert.match(prompt, /shift-ax finalize-commit/);
     assert.match(agents, /platform\/codex\/upstream\/worktree\/provenance\.md/);
     assert.match(prompt, /ensureCodexManagedWorktree/);
-    assert.match(agents, /\/onboard/);
-    assert.match(requestCommand, /ax run-request/);
+    assert.match(agents, /\$export-context/);
+    assert.match(requestCommand, /shift-ax run-request/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -55,7 +55,7 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     });
 
     assert.equal(result.platform, 'claude-code');
-    assert.equal(result.written.length, 9);
+    assert.equal(result.written.length, 10);
 
     const claude = await readFile(join(root, 'CLAUDE.md'), 'utf8');
     const hook = await readFile(
@@ -69,14 +69,14 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
 
     assert.match(claude, /Shift AX Claude Code SessionStart Bootstrap/);
     assert.match(hook, /hook-driven context injection/);
-    assert.match(claude, /ax onboard-context/);
-    assert.match(claude, /ax run-request/);
-    assert.match(hook, /ax approve-plan/);
-    assert.match(hook, /ax launch-execution/);
-    assert.match(hook, /ax finalize-commit/);
+    assert.match(claude, /\/onboard/);
+    assert.match(claude, /shift-ax run-request/);
+    assert.match(hook, /shift-ax approve-plan/);
+    assert.match(hook, /shift-ax launch-execution/);
+    assert.match(hook, /shift-ax finalize-commit/);
     assert.match(claude, /platform\/claude-code\/upstream\/worktree\/provenance\.md/);
     assert.match(hook, /createClaudeManagedWorktree/);
-    assert.match(claude, /\/onboard/);
+    assert.match(claude, /\/export-context/);
     assert.match(requestCommand, /\$ARGUMENTS/);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -123,16 +123,17 @@ test('ax scaffold-build writes bootstrap assets for a requested platform', async
     const result = JSON.parse(stdout) as { platform: string; written: string[] };
     assert.equal(result.platform, 'codex');
     assert.deepEqual(result.written.sort(), [
-      '.codex/prompts/doctor.md',
-      '.codex/prompts/onboard.md',
-      '.codex/prompts/request.md',
-      '.codex/prompts/resume.md',
-      '.codex/prompts/review.md',
+      '.codex/skills/doctor/SKILL.md',
+      '.codex/skills/export-context/SKILL.md',
+      '.codex/skills/onboard/SKILL.md',
+      '.codex/skills/request/SKILL.md',
+      '.codex/skills/resume/SKILL.md',
+      '.codex/skills/review/SKILL.md',
+      '.codex/skills/status/SKILL.md',
+      '.codex/skills/topics/SKILL.md',
       '.codex/prompts/shift-ax-bootstrap.md',
-      '.codex/prompts/status.md',
-      '.codex/prompts/topics.md',
       'AGENTS.md',
-    ]);
+    ].sort());
   } finally {
     await rm(root, { recursive: true, force: true });
   }

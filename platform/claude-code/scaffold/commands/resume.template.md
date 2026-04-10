@@ -7,6 +7,6 @@ Treat the first argument as the topic directory.
 
 Resume with:
 
-`ax run-request --topic $ARGUMENTS --resume`
+`shift-ax run-request --topic $ARGUMENTS --resume`
 
 Explain whether the topic is blocked by escalation or policy sync if resume cannot continue.

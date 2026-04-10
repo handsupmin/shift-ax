@@ -99,8 +99,8 @@ test('buildContextBundle keeps docs-first ordering ahead of decisions and topic 
       maxChars: 4000,
     });
 
-    assert.equal(bundle.sections[0]?.kind, 'base_context');
-    assert.equal(bundle.sections[1]?.kind, 'reviewed_artifacts');
+    assert.equal(bundle.sections[0]?.kind, 'reviewed_artifacts');
+    assert.equal(bundle.sections[1]?.kind, 'base_context');
     assert.equal(bundle.sections[2]?.kind, 'decision_memory');
     assert.equal(bundle.sections[3]?.kind, 'topic_recall');
     assert.match(bundle.rendered, /## Base Context/);
@@ -108,7 +108,7 @@ test('buildContextBundle keeps docs-first ordering ahead of decisions and topic 
     assert.match(bundle.rendered, /## Decision Memory/);
     assert.match(bundle.rendered, /## Past Topic Recall/);
     assert.ok(
-      bundle.rendered.indexOf('## Base Context') < bundle.rendered.indexOf('## Decision Memory'),
+      bundle.rendered.indexOf('## Reviewed Artifacts') < bundle.rendered.indexOf('## Base Context'),
     );
   } finally {
     await rm(root, { recursive: true, force: true });

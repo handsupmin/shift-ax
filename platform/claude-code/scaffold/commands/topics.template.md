@@ -5,6 +5,6 @@ argument-hint: "[--limit N]"
 
 List recent topics with:
 
-`ax topics-status $ARGUMENTS`
+`shift-ax topics-status $ARGUMENTS`
 
 If the user supplied a limit, include it.

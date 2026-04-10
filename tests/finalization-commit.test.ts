@@ -5,12 +5,13 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { onboardProjectContext } from '../core/context/onboarding.js';
 import { buildLoreCommitMessage } from '../core/finalization/commit-message.js';
 import { finalizeTopicCommit } from '../core/finalization/commit-workflow.js';
 import { recordPlanReviewDecision } from '../core/planning/plan-review.js';
 import { resumeRequestPipeline, startRequestPipeline } from '../core/planning/request-pipeline.js';
 import { topicArtifactPath } from '../core/topics/topic-artifacts.js';
+import { seedSampleOnboarding } from './helpers/sample-onboarding.js';
+import { withTempGlobalHome } from './helpers/global-home.js';
 
 async function createGitRepo(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-finalize-git-'));
@@ -96,64 +97,58 @@ test('finalizeTopicCommit creates a local git commit and records the sha', async
   const repoRoot = await createGitRepo();
 
   try {
-    await onboardProjectContext({
-      rootDir: repoRoot,
-      documents: [
-        {
-          label: 'Auth policy',
-          content: '# Auth Policy\n\nRefresh token rotation is required.\n',
-        },
-      ],
-    });
+    await withTempGlobalHome('shift-ax-finalization-home-', async () => {
+      await seedSampleOnboarding(repoRoot);
 
-    const started = await startRequestPipeline({
-      rootDir: repoRoot,
-      request: 'Build safer auth refresh flow',
-      summary: 'Need a reviewed auth-refresh delivery flow.',
-      brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
-      specContent: '# Topic Spec\n\n## Goal\n\nImplement auth refresh token rotation.\n',
-      implementationPlanContent:
-        '# Implementation Plan\n\nUse TDD first.\nKeep files small and respect architecture boundaries.\n',
-      baseBranch: 'main',
-    });
+      const started = await startRequestPipeline({
+        rootDir: repoRoot,
+        request: 'Build safer auth refresh flow',
+        summary: 'Need a reviewed auth-refresh delivery flow.',
+        brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
+        specContent: '# Topic Spec\n\n## Goal\n\nImplement auth refresh token rotation.\n',
+        implementationPlanContent:
+          '# Implementation Plan\n\nUse TDD first.\nKeep files small and respect architecture boundaries.\n',
+        baseBranch: 'main',
+      });
 
-    await recordPlanReviewDecision({
-      topicDir: started.topicDir,
-      reviewer: 'Alex Reviewer',
-      status: 'approved',
-      notes: 'Approved for implementation.',
-    });
+      await recordPlanReviewDecision({
+        topicDir: started.topicDir,
+        reviewer: 'Alex Reviewer',
+        status: 'approved',
+        notes: 'Approved for implementation.',
+      });
 
-    await resumeRequestPipeline({
-      topicDir: started.topicDir,
-      verificationCommands: ['node --test auth-refresh.test.js'],
-      executionRunner: buildExecutionRunner(['src/feature.txt', 'auth-refresh.test.js']),
-    });
+      await resumeRequestPipeline({
+        topicDir: started.topicDir,
+        verificationCommands: ['node --test auth-refresh.test.js'],
+        executionRunner: buildExecutionRunner(['src/feature.txt', 'auth-refresh.test.js']),
+      });
 
-    const result = await finalizeTopicCommit({ topicDir: started.topicDir });
-    const head = execFileSync('git', ['rev-parse', 'HEAD'], {
-      cwd: started.worktree.worktree_path,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    }).trim();
-    const log = execFileSync('git', ['log', '-1', '--pretty=%B'], {
-      cwd: started.worktree.worktree_path,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
-    const state = JSON.parse(
-      await readFile(topicArtifactPath(started.topicDir, 'commit_state'), 'utf8'),
-    ) as { commit_sha: string; status: string };
-    const storedCommitMessage = await readFile(
-      topicArtifactPath(started.topicDir, 'commit_message'),
-      'utf8',
-    );
+      const result = await finalizeTopicCommit({ topicDir: started.topicDir });
+      const head = execFileSync('git', ['rev-parse', 'HEAD'], {
+        cwd: started.worktree.worktree_path,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      }).trim();
+      const log = execFileSync('git', ['log', '-1', '--pretty=%B'], {
+        cwd: started.worktree.worktree_path,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      });
+      const state = JSON.parse(
+        await readFile(topicArtifactPath(started.topicDir, 'commit_state'), 'utf8'),
+      ) as { commit_sha: string; status: string };
+      const storedCommitMessage = await readFile(
+        topicArtifactPath(started.topicDir, 'commit_message'),
+        'utf8',
+      );
 
-    assert.equal(result.commit_sha, head);
-    assert.equal(state.commit_sha, head);
-    assert.equal(state.status, 'committed');
-    assert.match(log, /Deliver reviewed change:/);
-    assert.match(storedCommitMessage, /Constraint:/);
+      assert.equal(result.commit_sha, head);
+      assert.equal(state.commit_sha, head);
+      assert.equal(state.status, 'committed');
+      assert.match(log, /Deliver reviewed change:/);
+      assert.match(storedCommitMessage, /Constraint:/);
+    });
   } finally {
     await rm(repoRoot, { recursive: true, force: true });
   }
@@ -163,65 +158,59 @@ test('finalizeTopicCommit persists explicit commit messages before committing', 
   const repoRoot = await createGitRepo();
 
   try {
-    await onboardProjectContext({
-      rootDir: repoRoot,
-      documents: [
-        {
-          label: 'Auth policy',
-          content: '# Auth Policy\n\nRefresh token rotation is required.\n',
-        },
-      ],
-    });
+    await withTempGlobalHome('shift-ax-finalization-home-', async () => {
+      await seedSampleOnboarding(repoRoot);
 
-    const started = await startRequestPipeline({
-      rootDir: repoRoot,
-      request: 'Build safer auth refresh flow',
-      summary: 'Need a reviewed auth-refresh delivery flow.',
-      brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
-      specContent: '# Topic Spec\n\n## Goal\n\nImplement auth refresh token rotation.\n',
-      implementationPlanContent:
-        '# Implementation Plan\n\nUse TDD first.\nKeep files small and respect architecture boundaries.\n',
-      baseBranch: 'main',
-    });
+      const started = await startRequestPipeline({
+        rootDir: repoRoot,
+        request: 'Build safer auth refresh flow',
+        summary: 'Need a reviewed auth-refresh delivery flow.',
+        brainstormContent: '# Brainstorm\n\nClarified auth refresh rotation.\n',
+        specContent: '# Topic Spec\n\n## Goal\n\nImplement auth refresh token rotation.\n',
+        implementationPlanContent:
+          '# Implementation Plan\n\nUse TDD first.\nKeep files small and respect architecture boundaries.\n',
+        baseBranch: 'main',
+      });
 
-    await recordPlanReviewDecision({
-      topicDir: started.topicDir,
-      reviewer: 'Alex Reviewer',
-      status: 'approved',
-      notes: 'Approved for implementation.',
-    });
+      await recordPlanReviewDecision({
+        topicDir: started.topicDir,
+        reviewer: 'Alex Reviewer',
+        status: 'approved',
+        notes: 'Approved for implementation.',
+      });
 
-    await resumeRequestPipeline({
-      topicDir: started.topicDir,
-      verificationCommands: ['node --test auth-refresh.test.js'],
-      executionRunner: buildExecutionRunner(['src/feature.txt', 'auth-refresh.test.js']),
-    });
+      await resumeRequestPipeline({
+        topicDir: started.topicDir,
+        verificationCommands: ['node --test auth-refresh.test.js'],
+        executionRunner: buildExecutionRunner(['src/feature.txt', 'auth-refresh.test.js']),
+      });
 
-    const explicitMessage = buildLoreCommitMessage({
-      intent: 'Keep explicit finalization messages authoritative',
-      body: 'This commit verifies that explicit commit message overrides are persisted before git commit runs.',
-      constraint: 'finalization must commit the message selected by the operator',
-      confidence: 'high',
-      scopeRisk: 'narrow',
-      directive: 'Do not ignore the explicit commit message input path during finalization',
-      tested: 'finalizeTopicCommit explicit-message fixture',
-      notTested: 'GitHub push or PR integration',
-    });
+      const explicitMessage = buildLoreCommitMessage({
+        intent: 'Keep explicit finalization messages authoritative',
+        body: 'This commit verifies that explicit commit message overrides are persisted before git commit runs.',
+        constraint: 'finalization must commit the message selected by the operator',
+        confidence: 'high',
+        scopeRisk: 'narrow',
+        directive: 'Do not ignore the explicit commit message input path during finalization',
+        tested: 'finalizeTopicCommit explicit-message fixture',
+        notTested: 'GitHub push or PR integration',
+      });
 
-    await finalizeTopicCommit({
-      topicDir: started.topicDir,
-      message: explicitMessage,
-    });
+      await finalizeTopicCommit({
+        topicDir: started.topicDir,
+        message: explicitMessage,
+      });
 
-    const log = execFileSync('git', ['log', '-1', '--pretty=%B'], {
-      cwd: started.worktree.worktree_path,
-      encoding: 'utf8',
-      stdio: 'pipe',
-    });
-    const stored = await readFile(topicArtifactPath(started.topicDir, 'commit_message'), 'utf8');
+      const log = execFileSync('git', ['log', '-1', '--pretty=%B'], {
+        cwd: started.worktree.worktree_path,
+        encoding: 'utf8',
+        stdio: 'pipe',
+      });
+      const stored = await readFile(topicArtifactPath(started.topicDir, 'commit_message'), 'utf8');
 
-    assert.match(log, /Keep explicit finalization messages authoritative/);
-    assert.equal(stored, `${explicitMessage.trimEnd()}\n`);
+      assert.match(log, /Keep explicit finalization messages authoritative/);
+      assert.equal(stored, `${explicitMessage.trimEnd()}\n`);
+    });
   } finally {
     await rm(repoRoot, { recursive: true, force: true });
   }

@@ -5,6 +5,7 @@ import { join, relative } from 'node:path';
 import { promisify } from 'node:util';
 
 import { resolveContextFromIndex } from '../context/index-resolver.js';
+import { applyGlobalKnowledgeUpdatesFromArtifacts } from '../context/global-knowledge-updates.js';
 import { ensureTopicCommitMessageArtifact } from '../finalization/commit-workflow.js';
 import { finalizeTopicCommit, type FinalizeTopicCommitResult } from '../finalization/commit-workflow.js';
 import { readProjectProfile } from '../policies/project-profile.js';
@@ -47,6 +48,7 @@ import {
   type ShiftAxWorkflowState,
   type ShiftAxWorkflowVerification,
 } from './workflow-state.js';
+import { getGlobalContextHome } from '../settings/global-context-home.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -61,6 +63,7 @@ export interface StartRequestPipelineInput {
   specContent?: string;
   implementationPlanContent?: string;
   baseBranch?: string;
+  allowMissingGlobalIndex?: boolean;
   now?: Date;
 }
 
@@ -95,7 +98,7 @@ async function resolveRequestContext({
   rootDir,
   request,
   contextQuery,
-  indexPath = join(rootDir, 'docs', 'base-context', 'index.md'),
+  indexPath = getGlobalContextHome().indexPath,
   maxMatches = 5,
 }: {
   rootDir: string;
@@ -110,6 +113,7 @@ async function resolveRequestContext({
     return resolveContextFromIndex({
       rootDir,
       indexPath,
+      indexRootDir: getGlobalContextHome().root,
       query: effectiveQuery,
       maxMatches,
     });
@@ -136,7 +140,7 @@ function buildDefaultBrainstorm(request: string, matchedLabels: string[]): strin
     '',
     ...(matchedLabels.length > 0 ? matchedLabels.map((label) => `- ${label}`) : ['- No matched context documents yet.']),
     '',
-    '## Base-Context Policy Updates',
+    '## Global Knowledge Updates',
     '',
     '- None yet.',
     '',
@@ -155,7 +159,7 @@ function buildDefaultSpec(request: string, matchedLabels: string[]): string {
     '',
     ...(matchedLabels.length > 0 ? matchedLabels.map((label) => `- ${label}`) : ['- No matched context documents yet.']),
     '',
-    '## Base-Context Policy Updates',
+    '## Global Knowledge Updates',
     '',
     '- None yet.',
     '',
@@ -170,7 +174,7 @@ function buildDefaultImplementationPlan(testStrategy: string, architecture: stri
     `Respect ${architecture.replace(/-/g, ' ')}.`,
     'Add focused verification steps before commit finalization.',
     '',
-    '## Base-Context Policy Updates',
+    '## Global Knowledge Updates',
     '',
     '- None yet.',
     '',
@@ -278,6 +282,7 @@ export async function startRequestPipeline({
   specContent,
   implementationPlanContent,
   baseBranch = 'main',
+  allowMissingGlobalIndex = false,
   now = new Date(),
 }: StartRequestPipelineInput): Promise<StartRequestPipelineResult> {
   const topic = await bootstrapTopic({
@@ -295,6 +300,11 @@ export async function startRequestPipeline({
     maxMatches,
   });
   const matchedLabels = resolvedContext.matches.map((match) => match.label);
+  if (!existsSync(indexPath ?? getGlobalContextHome().indexPath) && !allowMissingGlobalIndex) {
+    throw new Error(
+      'global context index is missing. Run /onboarding first, or pass --allow-missing-global-context to continue with reduced accuracy.',
+    );
+  }
   if (resolvedContext.unresolved_paths.length > 0) {
     throw new Error('resolved context still has unresolved base-context paths');
   }
@@ -322,6 +332,16 @@ export async function startRequestPipeline({
     )}\n`,
     'utf8',
   );
+  await applyGlobalKnowledgeUpdatesFromArtifacts({
+    brainstormContent: brainstormContent ?? buildDefaultBrainstorm(request, matchedLabels),
+    specContent: specContent ?? buildDefaultSpec(request, matchedLabels),
+    implementationPlanContent:
+      implementationPlanContent ??
+      buildDefaultImplementationPlan(
+        profile?.engineering_defaults.test_strategy ?? 'tdd',
+        profile?.engineering_defaults.architecture ?? 'clean-boundaries',
+      ),
+  });
   await writePolicyContextSyncArtifact(
     topic.topicDir,
     inferPolicyContextSyncArtifact({

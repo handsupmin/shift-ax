@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 import { readFile } from 'node:fs/promises';
-import { createInterface } from 'node:readline/promises';
-import { stdin, stdout } from 'node:process';
 
 import {
   isProjectOnboarded,
   launchPlatformShell,
+  resolveShellDefaultFullAuto,
+  resolveShellLocale,
   persistShellSettings,
 } from '../core/shell/platform-shell.js';
 import type { ShiftAxPlatform } from '../adapters/contracts.js';
@@ -23,9 +23,9 @@ function usage(): void {
   process.stderr.write(
     [
       'Usage:',
-      '  ax --codex [--root DIR] [--lang en|ko] [--discover] [--onboarding-input FILE] [initial prompt]',
-      '  ax --claude-code [--root DIR] [--lang en|ko] [--discover] [--onboarding-input FILE] [initial prompt]',
-      '  ax  # interactive platform shell launcher',
+      '  shift-ax --codex [--root DIR] [--lang en|ko] [--full-auto] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
+      '  shift-ax --claude-code [--root DIR] [--lang en|ko] [--full-auto] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
+      '  shift-ax  # default product shell launcher (Codex unless global settings say otherwise)',
       '',
     ].join('\n'),
   );
@@ -46,7 +46,9 @@ function collectPromptArgs(): string {
   const ignored = new Set([
     '--codex',
     '--claude-code',
+    '--full-auto',
     '--discover',
+    '--overwrite',
     '--lang',
     '--root',
     '--onboarding-input',
@@ -68,135 +70,76 @@ function collectPromptArgs(): string {
 
   return result.join(' ').trim();
 }
-
-async function createPromptSession(): Promise<{
-  ask: (question: string) => Promise<string>;
-  close: () => void;
-}> {
-  const fallbackAnswers = !stdin.isTTY
-    ? (await new Promise<string>((resolve, reject) => {
-        let raw = '';
-        stdin.setEncoding('utf8');
-        stdin.on('data', (chunk) => {
-          raw += chunk;
-        });
-        stdin.on('end', () => resolve(raw));
-        stdin.on('error', reject);
-      }))
-        .split(/\r?\n/)
-    : null;
-  let fallbackIndex = 0;
-  const rl =
-    stdin.isTTY
-      ? createInterface({
-          input: stdin,
-          output: stdout,
-        })
-      : null;
-
-  return {
-    ask: async (question: string) => {
-      if (rl) {
-        return rl.question(question);
-      }
-      stdout.write(question);
-      const answer = fallbackAnswers?.[fallbackIndex] ?? '';
-      fallbackIndex += 1;
-      return answer;
-    },
-    close: () => rl?.close(),
-  };
-}
-
 const rootDir = readArg('--root') || process.cwd();
 const requestedPlatform = parsePlatform();
 const requestedLocale = parseLocale();
 const onboardingInput = readArg('--onboarding-input');
 const discover = process.argv.includes('--discover');
+const overwrite = process.argv.includes('--overwrite');
+const requestedFullAuto = process.argv.includes('--full-auto');
 const prompt = collectPromptArgs();
 const existingSettings = await readProjectSettings(rootDir);
 const onboarded = await isProjectOnboarded(rootDir);
-const prompts =
-  (!requestedPlatform && !existingSettings?.preferred_platform) ||
-  (!onboarded && !onboardingInput && !discover && !requestedPlatform)
-    ? await createPromptSession()
-    : null;
 
 if ((requestedLocale === undefined && process.argv.includes('--lang')) || process.argv.includes('--help')) {
   usage();
   process.exit(process.argv.includes('--help') ? 0 : 1);
 }
 
-const locale = requestedLocale ?? existingSettings?.locale;
+const locale = await resolveShellLocale({
+  rootDir,
+  requestedLocale,
+});
 
 const platform =
   requestedPlatform ??
   existingSettings?.preferred_platform ??
-  (prompts
-    ? await (async () => {
-        const answer = (await prompts.ask(
-          locale === 'ko'
-            ? '플랫폼을 선택하세요:\n1. Codex (default)\n2. Claude Code\n> '
-            : 'Choose platform:\n1. Codex (default)\n2. Claude Code\n> ',
-        ))
-          .trim()
-          .toLowerCase();
-        return (answer === '2' ? 'claude-code' : 'codex') as ShiftAxPlatform;
-      })()
-    : 'codex');
+  'codex';
+const defaultFullAuto = await resolveShellDefaultFullAuto({
+  rootDir,
+  locale,
+});
+const effectiveFullAuto = defaultFullAuto || requestedFullAuto;
 
 if (!onboarded) {
   if (onboardingInput) {
     await onboardProjectContext({
       ...(JSON.parse(await readFile(onboardingInput, 'utf8')) as Parameters<typeof onboardProjectContext>[0]),
       rootDir,
+      overwrite,
     });
     await persistShellSettings({
       rootDir,
-      locale: locale ?? 'en',
+      locale,
+      defaultFullAuto,
       platform,
     });
   } else if (discover) {
     await onboardProjectContextFromDiscovery({
       rootDir,
       includeGlossary: true,
+      overwrite,
     });
     await persistShellSettings({
       rootDir,
-      locale: locale ?? 'en',
+      locale,
+      defaultFullAuto,
       platform,
     });
   }
 }
 
-if (onboarded) {
-  const ensuredLocale =
-    locale ??
-    (prompts
-      ? ((await (async () => {
-          const answer = (await prompts.ask(
-            'Choose language / 언어를 선택하세요:\n1. English (default)\n2. Korean\n> ',
-          ))
-            .trim()
-            .toLowerCase();
-          return answer === '2' ? 'ko' : 'en';
-        })()) as ShiftAxLocale)
-      : 'en');
-
-  await persistShellSettings({
-    rootDir,
-    locale: ensuredLocale,
-    platform,
-  });
-}
+await persistShellSettings({
+  rootDir,
+  locale,
+  defaultFullAuto,
+  platform,
+});
 
 const exitCode = await launchPlatformShell({
   rootDir,
   platform,
-  ...(locale ? { locale } : {}),
-  onboardingRequired: !onboarded && !onboardingInput && !discover,
+  fullAuto: effectiveFullAuto,
   ...(prompt ? { initialPrompt: prompt } : {}),
 });
-
-prompts?.close();
 process.exit(exitCode);

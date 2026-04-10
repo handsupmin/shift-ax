@@ -9,6 +9,7 @@ import { onboardProjectContext } from '../core/context/onboarding.js';
 import { recordPlanReviewDecision } from '../core/planning/plan-review.js';
 import { runDoctor } from '../core/diagnostics/doctor.js';
 import { startRequestPipeline } from '../core/planning/request-pipeline.js';
+import { withTempGlobalHome } from './helpers/global-home.js';
 
 async function createGitRepo(): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-doctor-git-'));
@@ -22,22 +23,23 @@ async function createGitRepo(): Promise<string> {
   return root;
 }
 
-test('runDoctor fails when the base-context index points to a missing document', async () => {
+test('runDoctor fails when the global index points to a missing document', async () => {
   const root = await createGitRepo();
 
   try {
-    await mkdir(join(root, 'docs', 'base-context'), { recursive: true });
-    await writeFile(
-      join(root, 'docs', 'base-context', 'index.md'),
-      '# Base Context Index\n\n- Auth policy -> docs/base-context/auth-policy.md\n',
-      'utf8',
-    );
+    await withTempGlobalHome('shift-ax-doctor-home-', async (home) => {
+      await writeFile(
+        join(home, 'index.md'),
+        '# Shift AX Global Index\n\n## Work Types\n\n- API development -> work-types/api-development.md\n\n## Domain Language\n\n- None yet.\n',
+        'utf8',
+      );
 
-    const report = await runDoctor({ rootDir: root });
+      const report = await runDoctor({ rootDir: root });
 
-    assert.equal(report.overall_status, 'fail');
-    assert.equal(report.base_context.status, 'fail');
-    assert.match(report.base_context.message, /missing|unresolved/i);
+      assert.equal(report.overall_status, 'fail');
+      assert.equal(report.base_context.status, 'fail');
+      assert.match(report.base_context.message, /missing|unresolved/i);
+    });
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -47,45 +49,56 @@ test('runDoctor surfaces awaiting_policy_sync topics and launcher readiness as w
   const root = await createGitRepo();
 
   try {
-    await onboardProjectContext({
-      rootDir: root,
-      documents: [
-        {
-          label: 'Auth policy',
-          content: '# Auth Policy\n\nRefresh token rotation is required.\n',
-        },
-      ],
-    });
+    await withTempGlobalHome('shift-ax-doctor-topic-home-', async () => {
+      await onboardProjectContext({
+        rootDir: root,
+        primaryRoleSummary: 'I maintain auth APIs.',
+        workTypes: [
+          {
+            name: 'API development',
+            repositories: [
+              {
+                repository: 'auth-api',
+                repositoryPath: root,
+                purpose: 'Auth API',
+                directories: ['src'],
+                workflow: 'Change API code and tests together.',
+              },
+            ],
+          },
+        ],
+      });
 
-    const started = await startRequestPipeline({
-      rootDir: root,
-      request: 'Build safer auth refresh flow',
-      brainstormContent: '# Brainstorm\n\n## Base-Context Policy Updates\n\n- Update Auth policy before implementation.\n',
-      specContent: '# Topic Spec\n\n## Goal\n\nImplement auth refresh token rotation.\n',
-      implementationPlanContent:
-        '# Implementation Plan\n\n## Base-Context Policy Updates\n\n- Update Auth policy before implementation.\n',
-      baseBranch: 'main',
-    });
+      const started = await startRequestPipeline({
+        rootDir: root,
+        request: 'Build safer auth refresh flow',
+        brainstormContent: '# Brainstorm\n\n## Global Knowledge Updates\n\n- None yet.\n',
+        specContent: '# Topic Spec\n\n## Goal\n\nImplement auth refresh token rotation.\n',
+        implementationPlanContent:
+          '# Implementation Plan\n\n## Base-Context Policy Updates\n\n- Update Auth policy before implementation.\n',
+        baseBranch: 'main',
+      });
 
-    await recordPlanReviewDecision({
-      topicDir: started.topicDir,
-      reviewer: 'Alex Reviewer',
-      status: 'approved',
-    });
+      await recordPlanReviewDecision({
+        topicDir: started.topicDir,
+        reviewer: 'Alex Reviewer',
+        status: 'approved',
+      });
 
-    const report = await runDoctor({
-      rootDir: root,
-      topicDir: started.topicDir,
-      platform: 'codex',
-      commandExists: (command) => command === 'tmux',
-    });
+      const report = await runDoctor({
+        rootDir: root,
+        topicDir: started.topicDir,
+        platform: 'codex',
+        commandExists: (command) => command === 'tmux',
+      });
 
-    assert.equal(report.overall_status, 'warn');
-    assert.equal(report.topic?.status, 'warn');
-    assert.equal(report.topic?.phase, 'awaiting_policy_sync');
-    assert.match(report.topic?.message ?? '', /policy/i);
-    assert.equal(report.launchers?.status, 'warn');
-    assert.match(report.launchers?.message ?? '', /codex/i);
+      assert.equal(report.overall_status, 'warn');
+      assert.equal(report.topic?.status, 'warn');
+      assert.equal(report.topic?.phase, 'awaiting_policy_sync');
+      assert.match(report.topic?.message ?? '', /policy/i);
+      assert.equal(report.launchers?.status, 'warn');
+      assert.match(report.launchers?.message ?? '', /codex/i);
+    });
   } finally {
     await rm(root, { recursive: true, force: true });
   }

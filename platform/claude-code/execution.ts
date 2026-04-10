@@ -63,7 +63,7 @@ export function getClaudeCodeExecutionRuntime(): ShiftAxPlatformExecutionRuntime
     execution_handoff_artifact: 'execution-handoff.json',
     operations: {
       launch: {
-        command: ['ax', 'launch-execution'],
+        command: ['shift-ax', 'launch-execution'],
         topic_flag: '--topic',
         additional_flags: ['--platform', '--task-id', '--dry-run'],
       },

@@ -1,19 +1,43 @@
 ---
-description: Complete or repair Shift AX onboarding for the current repository.
-argument-hint: "[--discover | --input <file>]"
+description: Capture or refresh the user's global Shift AX knowledge base.
+argument-hint: "[optional note]"
 ---
 
-Use Shift AX onboarding for the current repository.
+This command is the most important setup step.
 
-- If arguments are present after the command, treat them as operator intent for the onboarding mode.
-- If no arguments are present, prefer guided onboarding that collects the required business, policy, architecture, path, glossary, and verification information.
-- Keep docs-first behavior.
+Start by saying:
 
-Primary shell commands:
+> This step matters most. Please invest 10 minutes so Shift AX can understand how you work.
 
-- guided onboarding: `ax onboard-context`
-- discovery onboarding: `ax onboard-context --discover`
-- file-driven onboarding: `ax onboard-context --input <file>`
-- health check after onboarding: `ax doctor`
+Then run a conversational interview that captures:
 
-If the user typed additional arguments, use them to choose the right onboarding path.
+1. primary role summary
+2. work types
+3. related repositories for each work type
+4. per-repository working methods
+5. company/domain language
+
+For each work type and repository:
+
+- ask which directories matter
+- inspect the repository when a path is available
+- infer likely workflow details from real files
+- present your inferred workflow back to the user
+- ask them to correct anything wrong or missing
+
+When you have enough information:
+
+1. write `.ax/onboarding-input.json`
+2. if `{{GLOBAL_CONTEXT_INDEX}}` or other global knowledge files already exist, ask whether to overwrite them first
+3. persist with:
+   - `shift-ax onboard-context --root "$PWD" --input .ax/onboarding-input.json`
+   - add `--overwrite` only if the user explicitly agreed
+
+Keep the top-level knowledge base in `~/.shift-ax/` with:
+
+- `index.md` listing only titles and linked pages
+- linked work type pages
+- linked repository/procedure pages
+- linked domain-language pages
+
+After completion, remind the user to share `~/.shift-ax/` with teammates who do similar work.

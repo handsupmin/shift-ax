@@ -9,6 +9,7 @@ import {
   resolveContextFromIndex,
   type ResolvedContextMatch,
 } from './index-resolver.js';
+import { getGlobalContextHome } from '../settings/global-context-home.js';
 
 export interface ShiftAxContextBundleItem {
   label: string;
@@ -99,67 +100,84 @@ async function loadBaseContextItems(rootDir: string, query: string): Promise<{
   items: ShiftAxContextBundleItem[];
   issues: string[];
 }> {
-  const indexPath = join(rootDir, 'docs', 'base-context', 'index.md');
-  const issues: string[] = [];
-  const rawIndex = await readMaybe(indexPath);
-  if (!rawIndex.trim()) {
-    return {
-      items: [],
-      issues: [`Base-context index is missing or unreadable: ${indexPath}`],
-    };
-  }
+  const home = getGlobalContextHome();
+  const localIndexPath = join(rootDir, 'docs', 'base-context', 'index.md');
+  const candidates = [
+    { indexPath: localIndexPath, indexRootDir: rootDir, kind: 'local' as const },
+    { indexPath: home.indexPath, indexRootDir: home.root, kind: 'global' as const },
+  ];
 
-  const resolved = await resolveContextFromIndex({
-    rootDir,
-    indexPath,
-    query,
-    maxMatches: 5,
-  }).catch(() => ({
-    matches: [],
-    unresolved_paths: [],
-  })) as { matches?: ResolvedContextMatch[]; unresolved_paths?: string[] };
+  const candidateResults: Array<{ items: ShiftAxContextBundleItem[]; issues: string[] }> = [];
 
-  const directMatches = (resolved.matches ?? []).map((match) => ({
-    label: match.label,
-    path: match.path,
-    score: match.score,
-    content: match.content.trim(),
-  }));
-  if ((resolved.unresolved_paths ?? []).length > 0) {
-    for (const path of resolved.unresolved_paths ?? []) {
-      issues.push(`Base-context path could not be resolved: ${path}`);
+  for (const candidate of candidates) {
+    const issues: string[] = [];
+    const rawIndex = await readMaybe(candidate.indexPath);
+    if (!rawIndex.trim()) {
+      candidateResults.push({
+        items: [],
+        issues: candidate.kind === 'global' ? [] : [`Base-context index is missing or unreadable: ${candidate.indexPath}`],
+      });
+      continue;
     }
-  }
-  if (directMatches.length > 0) {
-    return { items: directMatches, issues };
-  }
 
-  const queryTokens = tokenize(query);
-  const entries = parseIndexDocument(rawIndex);
-  const ranked: ShiftAxContextBundleItem[] = [];
+    const resolved = await resolveContextFromIndex({
+      rootDir,
+      indexPath: candidate.indexPath,
+      indexRootDir: candidate.indexRootDir,
+      query,
+      maxMatches: 5,
+    }).catch(() => ({
+      matches: [],
+      unresolved_paths: [],
+    })) as { matches?: ResolvedContextMatch[]; unresolved_paths?: string[] };
 
-  for (const entry of entries) {
-    const content = await readMaybe(join(rootDir, entry.path));
-    if (!content.trim()) continue;
-    const haystack = new Set(tokenize(content));
-    const score = queryTokens.reduce((sum, token) => sum + (haystack.has(token) ? 1 : 0), 0);
-    if (score <= 0) continue;
-    ranked.push({
-      label: entry.label,
-      path: entry.path,
-      score,
-      content: content.trim(),
+    const directMatches = (resolved.matches ?? []).map((match) => ({
+      label: match.label,
+      path: match.path,
+      score: match.score,
+      content: match.content.trim(),
+    }));
+    if ((resolved.unresolved_paths ?? []).length > 0) {
+      for (const path of resolved.unresolved_paths ?? []) {
+        issues.push(`Base-context path could not be resolved: ${path}`);
+      }
+    }
+    if (directMatches.length > 0) {
+      candidateResults.push({ items: directMatches, issues });
+      continue;
+    }
+
+    const queryTokens = tokenize(query);
+    const entries = parseIndexDocument(rawIndex);
+    const ranked: ShiftAxContextBundleItem[] = [];
+
+    for (const entry of entries) {
+      const content = await readMaybe(join(candidate.indexRootDir, entry.path));
+      if (!content.trim()) continue;
+      const haystack = new Set(tokenize(content));
+      const score = queryTokens.reduce((sum, token) => sum + (haystack.has(token) ? 1 : 0), 0);
+      if (score <= 0) continue;
+      ranked.push({
+        label: entry.label,
+        path: entry.path,
+        score,
+        content: content.trim(),
+      });
+    }
+
+    if (ranked.length === 0 && candidate.kind === 'local') {
+      issues.push('No matching base-context documents were found for the current query.');
+    }
+
+    candidateResults.push({
+      items: ranked.sort((left, right) => (right.score ?? 0) - (left.score ?? 0)).slice(0, 5),
+      issues,
     });
   }
 
-  if (ranked.length === 0) {
-    issues.push('No matching base-context documents were found for the current query.');
-  }
-
-  return {
-    items: ranked.sort((left, right) => (right.score ?? 0) - (left.score ?? 0)).slice(0, 5),
-    issues,
-  };
+  const firstUseful = candidateResults.find((result) => result.items.length > 0);
+  if (firstUseful) return firstUseful;
+  return candidateResults[candidateResults.length - 1] ?? { items: [], issues: [] };
 }
 
 async function loadReviewedArtifactItems(topicDir: string | undefined): Promise<ShiftAxContextBundleItem[]> {
@@ -272,8 +290,8 @@ export async function buildContextBundle({
   ]);
 
   const plannedSections: ShiftAxContextBundleSection[] = [
-    { kind: 'base_context', title: 'Base Context', items: baseContext.items },
     { kind: 'reviewed_artifacts', title: 'Reviewed Artifacts', items: reviewedItems },
+    { kind: 'base_context', title: 'Base Context', items: baseContext.items },
     { kind: 'decision_memory', title: 'Decision Memory', items: decisionItems },
     { kind: 'topic_recall', title: 'Past Topic Recall', items: topicRecallItems },
   ];
