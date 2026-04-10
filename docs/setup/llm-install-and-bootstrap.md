@@ -103,9 +103,10 @@ ax --claude-code --root /absolute/path/to/target-repo
 
 If onboarding artifacts are missing, Shift AX will:
 
-1. open the matching platform session first
-2. let the user run `/onboarding`
-3. write the reusable knowledge base to `~/.shift-ax/`
+1. ask for the preferred language first if `~/.shift-ax/settings.json` does not already store it
+2. open the matching platform session
+3. let the user run `/onboarding`
+4. write the reusable knowledge base to `~/.shift-ax/`
 
 ### Optional: global CLI exposure
 

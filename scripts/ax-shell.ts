@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import {
   isProjectOnboarded,
   launchPlatformShell,
+  resolveShellLocale,
   persistShellSettings,
 } from '../core/shell/platform-shell.js';
 import type { ShiftAxPlatform } from '../adapters/contracts.js';
@@ -82,7 +83,10 @@ if ((requestedLocale === undefined && process.argv.includes('--lang')) || proces
   process.exit(process.argv.includes('--help') ? 0 : 1);
 }
 
-const locale = requestedLocale ?? existingSettings?.locale;
+const locale = await resolveShellLocale({
+  rootDir,
+  requestedLocale,
+});
 
 const platform =
   requestedPlatform ??
@@ -98,7 +102,7 @@ if (!onboarded) {
     });
     await persistShellSettings({
       rootDir,
-      locale: locale ?? 'en',
+      locale,
       platform,
     });
   } else if (discover) {
@@ -109,24 +113,21 @@ if (!onboarded) {
     });
     await persistShellSettings({
       rootDir,
-      locale: locale ?? 'en',
+      locale,
       platform,
     });
   }
 }
 
-if (onboarded || onboardingInput || discover) {
-  await persistShellSettings({
-    rootDir,
-    locale: locale ?? existingSettings?.locale ?? 'en',
-    platform,
-  });
-}
+await persistShellSettings({
+  rootDir,
+  locale,
+  platform,
+});
 
 const exitCode = await launchPlatformShell({
   rootDir,
   platform,
-  ...(locale ? { locale } : {}),
   ...(prompt ? { initialPrompt: prompt } : {}),
 });
 process.exit(exitCode);

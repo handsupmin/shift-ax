@@ -2,7 +2,7 @@
 
 > Agentic software delivery for teams that want guardrails, not prompt rituals.
 
-**Default language:** English  
+**Default language:** English
 **한국어 문서:** [README.ko.md](./README.ko.md)
 
 Shift AX turns a raw development request into a document-aware, review-gated workflow that ends at a meaningful local git commit.
@@ -19,7 +19,7 @@ It also supports a platform-specific conversational shell:
 - `shift-ax --codex`
 - `shift-ax --claude-code`
 
-On first run, Shift AX opens the platform session first. The user can then run `/onboarding` inside that session to build the global `~/.shift-ax/` knowledge base instead of filling out a separate readline questionnaire.
+Before handing off to Codex or Claude Code, Shift AX asks for the user's preferred language once and stores it in `~/.shift-ax/settings.json`. After that, it launches the platform shell directly without spending the first assistant turn on a startup lecture.
 
 ## What Shift AX does
 
@@ -114,6 +114,13 @@ ax --codex
 ax --claude-code
 ```
 
+Before the runtime opens, Shift AX asks for the preferred language once if it is not already stored:
+
+- `1. English (default)`
+- `2. Korean`
+
+That preference is saved in `~/.shift-ax/settings.json` and reused on the next run.
+
 If `~/.shift-ax/index.md` does not exist yet, open the shell and run:
 
 ```text
@@ -132,6 +139,8 @@ The onboarding flow should capture:
 4. domain language
 
 The resulting knowledge is written under `~/.shift-ax/`, and `~/.shift-ax/index.md` stays lightweight by linking to detailed pages.
+
+The shell should open cleanly. Shift AX should not inject a long startup monologue into the first assistant turn just to explain its command surface.
 
 Inside the shell, the agent should accept product-shell commands such as:
 

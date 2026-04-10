@@ -105,9 +105,10 @@ ax --claude-code --root /absolute/path/to/target-repo
 
 onboarding artifact가 없으면 Shift AX가:
 
-1. 먼저 맞는 플랫폼 세션을 열고
-2. 사용자가 `/onboarding` 을 실행하게 하고
-3. 재사용 가능한 지식을 `~/.shift-ax/` 아래에 기록한다
+1. `~/.shift-ax/settings.json`에 언어가 없으면 먼저 선호 언어를 묻고
+2. 맞는 플랫폼 세션을 열고
+3. 사용자가 `/onboarding` 을 실행하게 하고
+4. 재사용 가능한 지식을 `~/.shift-ax/` 아래에 기록한다
 
 ### 선택 경로: global CLI 노출
 

@@ -101,11 +101,12 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
       const requestCommand = await readFile(join(root, '.codex', 'prompts', 'request.md'), 'utf8');
 
       assert.equal(settings?.locale, 'ko');
+      assert.equal(settings?.preferred_language, 'korean');
       assert.equal(settings?.preferred_platform, 'codex');
       assert.equal(launchedCwd.trim(), REPO_ROOT);
-      assert.match(launchedArgs, /\/request/);
-      assert.match(launchedArgs, /Shift AX .*셸 모드|Shift AX shell mode/i);
+      assert.doesNotMatch(launchedArgs, /\/request|Shift AX .*셸 모드|Shift AX shell mode/i);
       assert.match(agents, /\/onboarding/);
+      assert.match(agents, /한국어로 응답하세요/);
       assert.match(agents, /product-shell commands/);
       assert.match(requestCommand, /Start a new Shift AX request-to-commit flow/);
     });
@@ -114,7 +115,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
   }
 });
 
-test('ax with no args launches codex immediately and recommends /onboarding when global knowledge is missing', async () => {
+test('ax with no args asks for language once, stores it globally, then launches codex without a startup prompt', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-interactive-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -133,7 +134,7 @@ test('ax with no args launches codex immediately and recommends /onboarding when
               SHIFT_AX_HOME: home,
               PATH: `${binDir}:${process.env.PATH}`,
             },
-            stdio: ['ignore', 'pipe', 'pipe'],
+            stdio: ['pipe', 'pipe', 'pipe'],
           },
         );
 
@@ -145,15 +146,17 @@ test('ax with no args launches codex immediately and recommends /onboarding when
           if (code === 0) resolve();
           else reject(new Error(error || `ax shell interactive exited ${code}`));
         });
+        child.stdin.end('2\n');
       });
 
       const codexArgs = await readFile(join(root, 'interactive-codex-launch.args'), 'utf8');
       const settings = await readProjectSettings(root);
       const requestCommand = await readFile(join(root, '.codex', 'prompts', 'request.md'), 'utf8');
 
-      assert.equal(settings, null);
-      assert.match(codexArgs, /No global Shift AX profile was found yet/i);
-      assert.match(codexArgs, /\/onboarding/);
+      assert.equal(settings?.locale, 'ko');
+      assert.equal(settings?.preferred_language, 'korean');
+      assert.equal(settings?.preferred_platform, 'codex');
+      assert.doesNotMatch(codexArgs, /No global Shift AX profile was found yet|\/onboarding/i);
       assert.match(requestCommand, /allow-missing-global-context/);
     });
   } finally {
@@ -161,7 +164,7 @@ test('ax with no args launches codex immediately and recommends /onboarding when
   }
 });
 
-test('ax --claude-code without onboarding launches Claude shell mode with in-shell onboarding instructions', async () => {
+test('ax --claude-code asks for language before launch and starts cleanly', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-claude-bootstrap-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -180,7 +183,7 @@ test('ax --claude-code without onboarding launches Claude shell mode with in-she
               SHIFT_AX_HOME: home,
               PATH: `${binDir}:${process.env.PATH}`,
             },
-            stdio: ['ignore', 'pipe', 'pipe'],
+            stdio: ['pipe', 'pipe', 'pipe'],
           },
         );
 
@@ -192,14 +195,17 @@ test('ax --claude-code without onboarding launches Claude shell mode with in-she
           if (code === 0) resolve();
           else reject(new Error(error || `ax claude bootstrap shell exited ${code}`));
         });
+        child.stdin.end('1\n');
       });
 
       const settings = await readProjectSettings(root);
       const launchedArgs = await readFile(join(root, 'claude-bootstrap-launch.args'), 'utf8');
       const requestCommand = await readFile(join(root, '.claude', 'commands', 'request.md'), 'utf8');
 
-      assert.equal(settings, null);
-      assert.match(launchedArgs, /\/onboarding/);
+      assert.equal(settings?.locale, 'en');
+      assert.equal(settings?.preferred_language, 'english');
+      assert.equal(settings?.preferred_platform, 'claude-code');
+      assert.equal(launchedArgs.trim(), '');
       assert.match(requestCommand, /\$ARGUMENTS/);
     });
   } finally {
@@ -287,8 +293,9 @@ test('ax --claude-code with explicit onboarding input launches Claude shell mode
       const reviewCommand = await readFile(join(root, '.claude', 'commands', 'review.md'), 'utf8');
 
       assert.ok(launchedCwd.trim().endsWith(root));
-      assert.match(launchedArgs, /\/status/);
+      assert.equal(launchedArgs.trim(), '');
       assert.match(claudeDoc, /\/onboarding/);
+      assert.match(claudeDoc, /Preferred user language: English/);
       assert.match(claudeDoc, /product-shell commands/);
       assert.match(reviewCommand, /ax review --topic/);
     });

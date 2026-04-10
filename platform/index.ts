@@ -20,10 +20,11 @@ import { getCodexBootstrapAssets } from './codex/bootstrap.js';
 export function getPlatformBootstrapAssets(
   platform: 'codex' | 'claude-code',
   rootDir: string,
+  locale: 'en' | 'ko' = 'en',
 ): ShiftAxBootstrapAsset[] {
   if (platform === 'codex') {
-    return getCodexBootstrapAssets(rootDir);
+    return getCodexBootstrapAssets(rootDir, locale);
   }
 
-  return getClaudeCodeBootstrapAssets(rootDir);
+  return getClaudeCodeBootstrapAssets(rootDir, locale);
 }

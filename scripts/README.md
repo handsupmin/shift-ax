@@ -30,6 +30,8 @@ Currently implemented:
 Current request-to-commit behavior:
 
 - `ax --codex`, `ax --claude-code`, or plain `ax` now open a conversational platform shell. The reusable knowledge base lives under `~/.shift-ax/`, with `~/.shift-ax/index.md` as the main index.
+- Before runtime handoff, Shift AX asks for the preferred language once when `~/.shift-ax/settings.json` does not have one yet, then stores and reuses it globally.
+- The shell now opens cleanly without injecting a long startup prompt into the first assistant turn.
 - Inside that shell, the agent is expected to understand `/onboarding`, `$onboarding`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, `/resume <topic>`, and `/review <topic>` as Shift AX product-shell commands.
 - `ax onboard-context` still exists for explicit scripted or manual onboarding, but the preferred first-run UX is now in-shell onboarding through the platform wrapper.
 - `scripts/install-global.sh` is the one-command installer used by the public README and setup docs for global npm installation.

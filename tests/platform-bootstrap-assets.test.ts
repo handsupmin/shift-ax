@@ -35,6 +35,11 @@ test('renderCodexAgentsBootstrap references global index and request-to-commit c
   assert.match(content, /\$request <text>/);
 });
 
+test('renderCodexAgentsBootstrap localizes the preferred user language note', () => {
+  const content = renderCodexAgentsBootstrap('/repo', 'ko');
+  assert.match(content, /한국어로 응답하세요/);
+});
+
 test('renderClaudeCodeSessionStartContext references global index and request-to-commit commands', () => {
   const content = renderClaudeCodeSessionStartContext('/repo');
 
@@ -55,6 +60,11 @@ test('renderClaudeCodeSessionStartContext references global index and request-to
   assert.match(content, /\/onboarding/);
   assert.match(content, /product-shell commands/);
   assert.match(content, /\$request <text>/);
+});
+
+test('renderClaudeCodeSessionStartContext localizes the preferred user language note', () => {
+  const content = renderClaudeCodeSessionStartContext('/repo', 'ko');
+  assert.match(content, /한국어로 응답하세요/);
 });
 
 test('getPlatformBootstrapAssets returns expected assets for codex', () => {
