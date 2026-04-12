@@ -28,6 +28,10 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
       join(root, '.codex', 'skills', 'request', 'SKILL.md'),
       'utf8',
     );
+    const onboardCommand = await readFile(
+      join(root, '.codex', 'skills', 'onboard', 'SKILL.md'),
+      'utf8',
+    );
     const reviewCommand = await readFile(
       join(root, '.codex', 'skills', 'review', 'SKILL.md'),
       'utf8',
@@ -44,6 +48,9 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(prompt, /ensureCodexManagedWorktree/);
     assert.match(agents, /\$export-context/);
     assert.match(requestCommand, /shift-ax run-request/);
+    assert.match(onboardCommand, /ask one question at a time/i);
+    assert.match(onboardCommand, /Choose one:/);
+    assert.match(onboardCommand, /This step matters most\./);
     assert.match(reviewCommand, /shift-ax finalize-commit --topic <topic-dir>/);
     assert.match(reviewCommand, /localized lore commit message/i);
   } finally {
@@ -72,6 +79,10 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
       join(root, '.claude', 'commands', 'request.md'),
       'utf8',
     );
+    const onboardCommand = await readFile(
+      join(root, '.claude', 'commands', 'onboard.md'),
+      'utf8',
+    );
     const reviewCommand = await readFile(
       join(root, '.claude', 'commands', 'review.md'),
       'utf8',
@@ -88,6 +99,9 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(hook, /createClaudeManagedWorktree/);
     assert.match(claude, /\/export-context/);
     assert.match(requestCommand, /\$ARGUMENTS/);
+    assert.match(onboardCommand, /ask one question at a time/i);
+    assert.match(onboardCommand, /Choose one:/);
+    assert.match(onboardCommand, /This step matters most\./);
     assert.match(reviewCommand, /shift-ax finalize-commit --topic \$ARGUMENTS/);
     assert.match(reviewCommand, /localized lore commit message/i);
   } finally {

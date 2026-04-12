@@ -14,6 +14,7 @@ export interface ShiftAxGlobalRepositoryProcedureInput {
   purpose?: string;
   directories: string[];
   workflow: string;
+  hiddenConventions?: string[];
   inferredNotes?: string[];
   confirmationNotes?: string;
   volatility?: 'stable' | 'volatile';
@@ -78,6 +79,12 @@ function renderProcedurePage({
     repository.workflow.trim(),
     '',
   ];
+
+  if ((repository.hiddenConventions ?? []).length > 0) {
+    lines.push('## Hidden Conventions and Layer Intent', '');
+    lines.push(...(repository.hiddenConventions ?? []).map((note) => `- ${note}`));
+    lines.push('');
+  }
 
   if ((repository.inferredNotes ?? []).length > 0) {
     lines.push('## Inferred Workflow Notes', '');

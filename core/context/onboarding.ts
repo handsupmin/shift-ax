@@ -30,6 +30,7 @@ export interface ShiftAxGlobalOnboardingRepositoryInput {
   purpose?: string;
   directories: string[];
   workflow: string;
+  hiddenConventions?: string[];
   inferredNotes?: string[];
   confirmationNotes?: string;
   volatility?: 'stable' | 'volatile';

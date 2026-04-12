@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -15,8 +15,33 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboarding-cli-'));
 
   try {
+    await mkdir(join(root, 'docs', 'architecture'), { recursive: true });
+    await mkdir(join(root, 'src', 'controllers'), { recursive: true });
+    await mkdir(join(root, 'src', 'services'), { recursive: true });
+    await mkdir(join(root, 'src', 'dto'), { recursive: true });
+    await writeFile(
+      join(root, 'docs', 'architecture', 'system-overview.md'),
+      '# System Overview\n\nControllers delegate to services and DTOs.\n',
+      'utf8',
+    );
+    await writeFile(
+      join(root, 'src', 'controllers', 'wallet-controller.ts'),
+      'export async function walletController() { return "ok"; }\n',
+      'utf8',
+    );
+    await writeFile(
+      join(root, 'src', 'services', 'wallet-service.ts'),
+      'export async function walletService() { return "ok"; }\n',
+      'utf8',
+    );
+    await writeFile(
+      join(root, 'src', 'dto', 'wallet-dto.ts'),
+      'export interface WalletDto { id: string }\n',
+      'utf8',
+    );
+
     await withTempGlobalHome('shift-ax-onboarding-cli-home-', async (home) => {
-      const stdout = await new Promise<string>((resolve, reject) => {
+      const { stdout, stderr } = await new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
         const child = spawn(
           process.execPath,
           ['--import', 'tsx', 'scripts/ax-onboard-context.ts', '--root', root],
@@ -39,7 +64,7 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
           error += chunk.toString('utf8');
         });
         child.on('exit', (code) => {
-          if (code === 0) resolve(output);
+          if (code === 0) resolve({ stdout: output, stderr: error });
           else reject(new Error(error || `ax-onboard-context exited ${code}`));
         });
 
@@ -48,26 +73,21 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
             '1',
             '',
             'I build wallet APIs and auth flows.',
-            'API development, incident response',
-            'Create controller, service, dto, tests together.',
+            'API development',
+            'I change API boundaries and follow the architecture docs.',
             'wallet-api',
             '',
-            'Wallet operations API',
-            'src/controllers, src/services, src/dto',
-            'Looks right except Prisma migrations are handled elsewhere.',
-            'For API work I usually add controller/service/DTO changes and request tests first.',
-            'Triage alerts and patch risky endpoints quickly.',
-            'wallet-api',
             '',
-            'Wallet operations API',
-            'src/controllers, src/services',
-            'Looks mostly right.',
-            'For incidents I inspect impacted controllers/services, patch, then run focused regression checks.',
-            'LedgerX, WalletCore',
+            '',
+            '',
+            '',
+            '',
+            'n',
+            'n',
+            'LedgerX',
             'Internal append-only ledger service.',
-            'Core wallet bounded context.',
+            'n',
             'npm test, npm run build',
-            '',
           ].join('\n') + '\n',
         );
       });
@@ -77,15 +97,20 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
       };
       const index = await readFile(join(home, 'index.md'), 'utf8');
       const workTypeDoc = await readFile(join(home, 'work-types', 'api-development.md'), 'utf8');
+      const procedureDoc = await readFile(join(home, 'procedures', 'api-development--wallet-api.md'), 'utf8');
       const profile = await readProjectProfile(root);
 
       assert.ok(result.documents.length >= 4);
       assert.match(workTypeDoc, /wallet-api/i);
       assert.match(index, /API development -> work-types\/api-development.md/);
+      assert.match(procedureDoc, /Hidden Conventions and Layer Intent/);
+      assert.match(stderr, /This step matters most\./);
+      assert.match(stderr, /What is one core kind of work/i);
+      assert.match(stderr, /Choose one:/);
       assert.equal(profile?.engineering_defaults.test_strategy, 'tdd');
       assert.equal(profile?.engineering_defaults.long_task_execution, 'tmux');
       assert.equal(profile?.onboarding_context?.work_types[0], 'API development');
-      assert.equal(profile?.onboarding_context?.domain_language[1], 'WalletCore');
+      assert.equal(profile?.onboarding_context?.domain_language[0], 'LedgerX');
     });
   } finally {
     await rm(root, { recursive: true, force: true });
