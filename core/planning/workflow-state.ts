@@ -27,6 +27,7 @@ export type ShiftAxWorkflowPhase =
 
 export interface ShiftAxWorkflowVerification {
   command: string;
+  source?: 'local' | 'ci';
   exit_code: number;
   stdout: string;
   stderr: string;

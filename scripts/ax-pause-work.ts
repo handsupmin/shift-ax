@@ -4,7 +4,7 @@ import { pauseTopicWork } from '../core/observability/state-handoff.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-pause-work --topic DIR --summary "<text>" [--next-step "<text>"] [--command "<text>"]...\n',
+    'Usage: ax-pause-work --topic DIR --summary "<text>" [--next-step "<text>"] [--remaining-item "<text>"]... [--recommended-command "<text>"] [--command "<text>"]...\n',
   );
 }
 
@@ -36,6 +36,8 @@ const result = await pauseTopicWork({
   topicDir,
   summary,
   nextStep: readArg('--next-step'),
+  remainingItems: readArgs('--remaining-item'),
+  recommendedCommand: readArg('--recommended-command'),
   commands: readArgs('--command'),
 });
 

@@ -131,11 +131,17 @@ test('ax run-request interviews for planning details and writes structured artif
       assert.match(brainstorm, /Do not change billing/i);
       assert.match(spec, /Out of Scope/i);
       assert.match(spec, /session UI/i);
+      assert.match(plan, /## Acceptance Criteria/i);
+      assert.match(plan, /## Verification Commands/i);
+      assert.match(plan, /## Likely Files Touched/i);
+      assert.match(plan, /## Execution Tasks/i);
+      assert.match(plan, /## Anti-Rationalization Guardrails/i);
       assert.match(plan, /TDD/i);
       assert.match(plan, /tmux/i);
       assert.match(plan, /subagent/i);
       assert.match(handoff, /"execution_mode": "tmux"/);
       assert.match(handoff, /"execution_mode": "subagent"/);
+      assert.match(handoff, /"warnings": \[/);
     });
   } finally {
     await rm(root, { recursive: true, force: true });

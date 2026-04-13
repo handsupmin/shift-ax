@@ -90,6 +90,9 @@ test('bootstrapTopic creates topic artifacts from the initial request', async ()
     assert.match(brainstorm, /# Brainstorm/);
     assert.match(spec, /# Topic Spec/);
     assert.match(implementationPlan, /# Implementation Plan/);
+    assert.match(implementationPlan, /## Acceptance Criteria/);
+    assert.match(implementationPlan, /## Execution Tasks/);
+    assert.match(implementationPlan, /## Anti-Rationalization Guardrails/);
     assert.equal(executionHandoff.status, 'pending');
     assert.equal(executionState.overall_status, 'pending');
     assert.equal(planReview.status, 'pending');

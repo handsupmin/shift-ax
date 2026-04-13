@@ -28,8 +28,17 @@ export async function writeRootStateSummary({
       lines.push(`  - phase: ${topic.phase}`);
       lines.push(`  - review: ${topic.review_status}`);
       lines.push(`  - execution: ${topic.execution_status}`);
+      if (topic.readiness) {
+        lines.push(`  - readiness: ${topic.readiness}`);
+      }
       if (topic.last_failure_reason) {
         lines.push(`  - latest issue: ${topic.last_failure_reason}`);
+      }
+      if (topic.next_step) {
+        lines.push(`  - next step: ${topic.next_step}`);
+      }
+      if (topic.recommended_command) {
+        lines.push(`  - command: ${topic.recommended_command}`);
       }
     }
   }
@@ -45,11 +54,15 @@ export async function writeTopicHandoff({
   summary,
   nextStep,
   commands = [],
+  remainingItems = [],
+  recommendedCommand,
 }: {
   topicDir: string;
   summary: string;
   nextStep?: string;
   commands?: string[];
+  remainingItems?: string[];
+  recommendedCommand?: string;
 }): Promise<{ output_path: string }> {
   const status = await summarizeTopicStatus(topicDir);
   const lines = [
@@ -59,6 +72,12 @@ export async function writeTopicHandoff({
     `- phase: ${status.phase}`,
     `- review: ${status.review_status}`,
     `- execution: ${status.execution_status}`,
+    ...(status.readiness ? [`- readiness: ${status.readiness}`] : []),
+    ...(status.branch_name ? [`- branch: ${status.branch_name}`] : []),
+    ...(status.worktree_path ? [`- worktree: ${status.worktree_path}`] : []),
+    ...(status.plan_fingerprint_status
+      ? [`- plan_fingerprint: ${status.plan_fingerprint_status}`]
+      : []),
     '',
     '## Summary',
     '',
@@ -66,8 +85,21 @@ export async function writeTopicHandoff({
     '',
   ];
 
+  if (remainingItems.length > 0) {
+    lines.push('## Remaining Items', '');
+    for (const item of remainingItems) {
+      lines.push(`- ${item}`);
+    }
+    lines.push('');
+  }
+
   if (nextStep?.trim()) {
     lines.push('## Next Step', '', nextStep.trim(), '');
+  }
+
+  const effectiveRecommendedCommand = recommendedCommand?.trim() || commands[0]?.trim();
+  if (effectiveRecommendedCommand) {
+    lines.push('## Recommended Command', '', `\`${effectiveRecommendedCommand}\``, '');
   }
 
   if (commands.length > 0) {
@@ -76,6 +108,15 @@ export async function writeTopicHandoff({
       lines.push(`- \`${command}\``);
     }
     lines.push('');
+  }
+
+  if (status.latest_checkpoint?.summary) {
+    lines.push('## Latest Checkpoint', '');
+    if (status.latest_checkpoint.recorded_at) {
+      lines.push(`- recorded_at: ${status.latest_checkpoint.recorded_at}`);
+      lines.push('');
+    }
+    lines.push(status.latest_checkpoint.summary, '');
   }
 
   if (status.last_failure_reason) {
@@ -92,17 +133,23 @@ export async function pauseTopicWork({
   summary,
   nextStep,
   commands = [],
+  remainingItems = [],
+  recommendedCommand,
 }: {
   topicDir: string;
   summary: string;
   nextStep?: string;
   commands?: string[];
+  remainingItems?: string[];
+  recommendedCommand?: string;
 }): Promise<{ handoff_path: string; state_path: string }> {
   const handoff = await writeTopicHandoff({
     topicDir,
     summary,
     nextStep,
     commands,
+    remainingItems,
+    recommendedCommand,
   });
   const rootDir = getRootDirFromTopicDir(topicDir);
   const state = await writeRootStateSummary({ rootDir });

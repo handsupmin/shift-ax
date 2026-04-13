@@ -89,7 +89,7 @@ if (shellMode) {
       '  shift-ax init-context [--root DIR] [--topic DIR] --query "<text>" [--max-chars N] [--workflow-step NAME] [--output PATH]',
       '  shift-ax context-health [--root DIR] [--topic DIR] --query "<text>" [--max-chars N]',
       '  shift-ax refresh-state [--root DIR] [--limit N]',
-      '  shift-ax pause-work --topic DIR --summary "<text>" [--next-step "<text>"] [--command "<text>"]...',
+      '  shift-ax pause-work --topic DIR --summary "<text>" [--next-step "<text>"] [--remaining-item "<text>"]... [--recommended-command "<text>"] [--command "<text>"]...',
       '  shift-ax checkpoint-context --topic DIR --summary "<text>"',
       '  shift-ax thread-save --root DIR --name NAME [--summary "<text>"] --note "<text>"',
       '  shift-ax threads [--root DIR]',

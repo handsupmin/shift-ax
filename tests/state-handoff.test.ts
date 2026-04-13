@@ -24,6 +24,11 @@ async function seedTopic(root: string, slug: string, phase: string, reviewStatus
           commit_allowed: reviewStatus === 'approved',
           next_stage: reviewStatus === 'approved' ? 'finalization' : 'implementation',
         },
+        worktree: {
+          branch_name: `ax/${slug}`,
+          worktree_path: join(root, '.ax', 'worktrees', slug),
+          base_branch: 'main',
+        },
       },
       null,
       2,
@@ -53,6 +58,7 @@ test('writeRootStateSummary writes a readable .ax/STATE.md with active topics', 
     assert.match(content, /implementation_running/);
     assert.match(content, /2026-04-09-auth-fix/);
     assert.match(content, /commit_ready/);
+    assert.match(content, /readiness:/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -67,12 +73,18 @@ test('writeTopicHandoff writes a topic handoff with next step and operator comma
       topicDir,
       summary: 'Stopping at the end of the work day.',
       nextStep: 'Resume implementation and rerun review.',
+      remainingItems: ['Re-run auth refresh tests', 'Confirm review lane status'],
+      recommendedCommand: 'npm run ax -- topic-status --topic .ax/topics/2026-04-09-refund-fix',
       commands: ['npm run ax -- topic-status --topic .ax/topics/2026-04-09-refund-fix'],
     });
     const content = await readFile(result.output_path, 'utf8');
 
     assert.match(content, /Stopping at the end of the work day/);
     assert.match(content, /Resume implementation and rerun review/);
+    assert.match(content, /Remaining Items/);
+    assert.match(content, /Re-run auth refresh tests/);
+    assert.match(content, /Recommended Command/);
+    assert.match(content, /ax\/2026-04-09-refund-fix/);
     assert.match(content, /topic-status/);
     assert.match(content, /changes_requested/);
   } finally {

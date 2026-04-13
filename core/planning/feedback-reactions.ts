@@ -99,7 +99,18 @@ export async function applyFeedbackReaction({
     commit_allowed: false,
     next_stage: 'implementation',
   };
-  delete workflow.verification;
+  workflow.verification =
+    kind === 'ci-failed'
+      ? [
+          {
+            command: 'downstream-ci',
+            source: 'ci' as const,
+            exit_code: 1,
+            stdout: '',
+            stderr: summary.trim(),
+          },
+        ]
+      : [];
   await writeWorkflowState(topicDir, workflow);
 
   const verdict = buildFeedbackVerdict({

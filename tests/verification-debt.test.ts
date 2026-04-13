@@ -66,3 +66,43 @@ test('listVerificationDebt returns failing verification commands and non-approve
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('listVerificationDebt surfaces CI verification failures distinctly', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-verification-debt-ci-'));
+  const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+
+  try {
+    await mkdir(join(topicDir, 'review'), { recursive: true });
+    await writeFile(
+      join(topicDir, 'workflow-state.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          topic_slug: '2026-04-09-auth-fix',
+          phase: 'implementation_running',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          plan_review_status: 'approved',
+          verification: [
+            {
+              command: 'downstream-ci',
+              source: 'ci',
+              exit_code: 1,
+              stdout: '',
+              stderr: 'CI failed in smoke test job.',
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const debt = await listVerificationDebt({ rootDir: root });
+    assert.equal(debt.length, 1);
+    assert.match(debt[0]?.message ?? '', /CI verification failed/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

@@ -98,6 +98,16 @@ export interface ShiftAxExecutionTaskPlan {
   task_id: string;
   source_text: string;
   execution_mode: 'subagent' | 'tmux';
+  acceptance_criteria?: string[];
+  verification_commands?: string[];
+  dependencies?: string[];
+  likely_files_touched?: string[];
+  owner?: string;
+  allowed_paths?: string[];
+  parallelization_mode?: 'safe' | 'sequential' | 'coordination_required';
+  conflict_flag?: string;
+  contract_artifact?: string;
+  warnings?: string[];
   working_directory: string;
   prompt_path: string;
   output_path: string;

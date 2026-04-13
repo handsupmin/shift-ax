@@ -24,6 +24,11 @@ test('ax refresh-state writes .ax/STATE.md', async () => {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           plan_review_status: 'approved',
+          worktree: {
+            branch_name: 'ax/2026-04-09-auth-fix',
+            worktree_path: join(root, '.ax', 'worktrees', '2026-04-09-auth-fix'),
+            base_branch: 'main',
+          },
         },
         null,
         2,
@@ -58,6 +63,7 @@ test('ax refresh-state writes .ax/STATE.md', async () => {
 
     const content = await readFile(join(root, '.ax', 'STATE.md'), 'utf8');
     assert.match(content, /2026-04-09-auth-fix/);
+    assert.match(content, /readiness:/);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -83,6 +89,11 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
             overall_status: 'changes_requested',
             commit_allowed: false,
             next_stage: 'implementation',
+          },
+          worktree: {
+            branch_name: 'ax/2026-04-09-auth-fix',
+            worktree_path: join(root, '.ax', 'worktrees', '2026-04-09-auth-fix'),
+            base_branch: 'main',
           },
         },
         null,
@@ -110,6 +121,10 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
           'Pausing at the end of the day.',
           '--next-step',
           'Resume implementation tomorrow.',
+          '--remaining-item',
+          'Re-run auth refresh tests',
+          '--recommended-command',
+          'npm run ax -- topic-status --topic .ax/topics/2026-04-09-auth-fix',
           '--command',
           'npm run ax -- topic-status --topic .ax/topics/2026-04-09-auth-fix',
         ],
@@ -134,6 +149,8 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
 
     assert.match(handoff, /Pausing at the end of the day/);
     assert.match(handoff, /Resume implementation tomorrow/);
+    assert.match(handoff, /Remaining Items/);
+    assert.match(handoff, /Recommended Command/);
     assert.match(state, /2026-04-09-auth-fix/);
   } finally {
     await rm(root, { recursive: true, force: true });

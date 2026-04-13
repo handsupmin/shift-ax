@@ -20,7 +20,7 @@ async function readTopicDebt(topicDir: string): Promise<ShiftAxVerificationDebtI
   if (!workflowRaw) return [];
   const workflow = JSON.parse(workflowRaw) as {
     topic_slug?: string;
-    verification?: Array<{ command?: string; exit_code?: number }>;
+    verification?: Array<{ command?: string; source?: 'local' | 'ci'; exit_code?: number }>;
   };
   const topicSlug = workflow.topic_slug || topicDir.split('/').pop() || 'unknown-topic';
   const debt: ShiftAxVerificationDebtItem[] = [];
@@ -38,7 +38,9 @@ async function readTopicDebt(topicDir: string): Promise<ShiftAxVerificationDebtI
       debt.push({
         topic_slug: topicSlug,
         kind: 'verification_command',
-        message: `Verification command failed: ${item.command ?? 'unknown command'}`,
+        message: `${
+          item.source === 'ci' ? 'CI verification failed' : 'Verification command failed'
+        }: ${item.command ?? 'unknown command'}`,
       });
     }
   }

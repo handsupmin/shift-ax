@@ -4,6 +4,12 @@ import { join } from 'node:path';
 
 import type { ReviewVerdict } from './aggregate-reviews.js';
 import { readProjectProfile } from '../policies/project-profile.js';
+import {
+  extractExecutionTaskLines,
+  listMissingImplementationPlanSections,
+  parseMarkdownSections,
+  readPlanSection,
+} from '../planning/implementation-plan.js';
 import { readPlanReviewArtifact, verifyApprovedPlanFingerprint } from '../planning/plan-review.js';
 import { getRootDirFromTopicDir } from '../topics/topic-artifacts.js';
 
@@ -48,38 +54,71 @@ function tokenizeReviewWords(value: string): string[] {
     .filter((token) => !['that', 'this', 'with', 'from', 'into', 'when', 'then', 'keep'].includes(token));
 }
 
-function parseMarkdownSections(content: string): Map<string, string> {
-  const lines = String(content || '').split(/\r?\n/);
-  const sections = new Map<string, string>();
-  let current: string | null = null;
-  const buffer: string[] = [];
-
-  const flush = () => {
-    if (current) {
-      sections.set(current, buffer.join('\n').trim());
-      buffer.length = 0;
-    }
-  };
-
-  for (const line of lines) {
-    const match = line.match(/^##\s+(.+)$/);
-    if (match) {
-      flush();
-      current = match[1]!.trim();
-      continue;
-    }
-    if (current) {
-      buffer.push(line);
-    }
-  }
-
-  flush();
-  return sections;
-}
-
 function hasTokenOverlap(content: string, reference: string): boolean {
   const haystack = String(content || '').toLowerCase();
   return tokenizeReviewWords(reference).some((token) => haystack.includes(token));
+}
+
+function buildPlanCompletionAudit({
+  plan,
+  changedFiles,
+  executionResults,
+}: {
+  plan: string;
+  changedFiles: string[];
+  executionResults: string[];
+}): {
+  overall_status: 'not_started' | 'partial' | 'done';
+  summary: string;
+  items: Array<{
+    task_id: string;
+    task: string;
+    status: 'not_started' | 'missing' | 'done';
+    evidence_files: string[];
+  }>;
+} {
+  const tasks = extractExecutionTaskLines(plan);
+  const mentionedFiles = extractMentionedFilesFromExecutionResults(executionResults);
+  const evidenceText = [changedFiles.join('\n'), ...executionResults].join('\n');
+  const items: Array<{
+    task_id: string;
+    task: string;
+    status: 'not_started' | 'missing' | 'done';
+    evidence_files: string[];
+  }> = tasks.map((task, index) => {
+    const evidenceFiles = mentionedFiles.filter(
+      (file) => hasTokenOverlap(file, task) || hasTokenOverlap(task, file),
+    );
+    const matched = hasTokenOverlap(evidenceText, task) || evidenceFiles.length > 0;
+    return {
+      task_id: `task-${index + 1}`,
+      task,
+      status: matched
+        ? 'done'
+        : changedFiles.length === 0
+          ? 'not_started'
+          : 'missing',
+      evidence_files: evidenceFiles,
+    };
+  });
+  const doneCount = items.filter((item) => item.status === 'done').length;
+  const overallStatus =
+    items.length === 0 || doneCount === 0
+      ? changedFiles.length === 0
+        ? 'not_started'
+        : 'partial'
+      : doneCount === items.length
+        ? 'done'
+        : 'partial';
+
+  return {
+    overall_status: overallStatus,
+    summary:
+      items.length === 0
+        ? 'No execution tasks were recorded in the implementation plan.'
+        : `${doneCount}/${items.length} execution tasks have matching evidence in the current worktree or execution results.`,
+    items,
+  };
 }
 
 async function readWorkflowStateMaybe(topicDir: string): Promise<{
@@ -277,6 +316,19 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
     );
   }
 
+  const missingPlanSections = listMissingImplementationPlanSections(plan);
+  if (missingPlanSections.length > 0) {
+    return verdictBase(
+      'spec-conformance',
+      'changes_requested',
+      'Implementation plan is missing required execution sections.',
+      missingPlanSections.map((section) => ({
+        severity: 'high' as const,
+        message: `Required implementation-plan section is missing or empty: ${section}.`,
+      })),
+    );
+  }
+
   const worktreePath = workflow?.worktree?.worktree_path;
   if (worktreePath) {
     const changedFiles = listChangedFiles(worktreePath);
@@ -300,6 +352,12 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
       );
     }
 
+    const planCompletionAudit = buildPlanCompletionAudit({
+      plan,
+      changedFiles,
+      executionResults: await readExecutionResultArtifacts(topicDir),
+    });
+
     const outOfScopeTouched = changedFiles.find((file) => hasTokenOverlap(file, outOfScopeContent));
     if (outOfScopeTouched) {
       return verdictBase(
@@ -314,6 +372,15 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
         ],
       );
     }
+
+    return {
+      ...verdictBase(
+        'spec-conformance',
+        'approved',
+        `Spec and implementation plan are approved, fingerprint-matched, and free of unresolved placeholders. ${planCompletionAudit.summary}`,
+      ),
+      plan_completion_audit: planCompletionAudit,
+    };
   }
 
   return verdictBase(
@@ -402,7 +469,12 @@ async function runTestAdequacyLane(topicDir: string): Promise<ReviewVerdict> {
     }
   }
 
-  if (!/\b(test|tdd)\b/i.test(plan) || containsPlaceholder(plan)) {
+  const planSections = parseMarkdownSections(plan);
+  if (
+    !/\b(test|tdd)\b/i.test(plan) ||
+    containsPlaceholder(plan) ||
+    !readPlanSection(planSections, 'Verification Commands')
+  ) {
     return verdictBase(
       'test-adequacy',
       'changes_requested',
@@ -430,8 +502,10 @@ async function runEngineeringDisciplineLane(topicDir: string): Promise<ReviewVer
   const requiredArchitecture = profile?.engineering_defaults.architecture ?? 'clean-boundaries';
   const hasTdd = strategyPattern(requiredTestStrategy).test(plan);
   const hasArchitecture = architecturePattern(requiredArchitecture).test(plan);
+  const planSections = parseMarkdownSections(plan);
+  const hasGuardrails = Boolean(readPlanSection(planSections, 'Anti-Rationalization Guardrails'));
 
-  if (containsPlaceholder(plan) || !hasTdd || !hasArchitecture) {
+  if (containsPlaceholder(plan) || !hasTdd || !hasArchitecture || !hasGuardrails) {
     return verdictBase(
       'engineering-discipline',
       'changes_requested',
@@ -481,12 +555,29 @@ async function runConversationTraceLane(topicDir: string): Promise<ReviewVerdict
       return content && !hasTokenOverlap(spec, content);
     },
   );
-  const missingPlanSections = ['Verification Expectations', 'Implementation Areas', 'Long-running Work'].filter(
-    (section) => {
-      const content = brainstormSections.get(section);
-      return content && !hasTokenOverlap(plan, content);
+  const planSections = parseMarkdownSections(plan);
+  const missingPlanSections = [
+    {
+      source: 'Verification Expectations',
+      target:
+        readPlanSection(planSections, 'Verification Commands', 'Acceptance Criteria'),
     },
-  );
+    {
+      source: 'Implementation Areas',
+      target:
+        readPlanSection(planSections, 'Likely Files Touched', 'Execution Tasks'),
+    },
+    {
+      source: 'Long-running Work',
+      target:
+        readPlanSection(planSections, 'Optional Coordination Notes', 'Execution Lanes (Optional)'),
+    },
+  ]
+    .filter(({ source, target }) => {
+      const content = brainstormSections.get(source);
+      return content && !hasTokenOverlap(target, content);
+    })
+    .map(({ source }) => source);
 
   if (missingSpecSections.length > 0 || missingPlanSections.length > 0) {
     return verdictBase(
