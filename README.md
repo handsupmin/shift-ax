@@ -1,34 +1,88 @@
 # Shift AX
 
-> Request-to-commit guardrails for Codex and Claude Code.
+<div align="center">
 
-**한국어:** [README.ko.md](./README.ko.md)
+<img src="./logo.png" alt="Shift AX logo" width="260" />
 
-## What it is
+### An easy AX helper for work that lives above the project.
 
-Shift AX sits on top of coding-agent runtimes and makes them work in a safer delivery loop:
+Reduce repetitive context work across repositories, teach the tool your language once, and turn request-to-commit delivery into a guided loop.
 
-1. capture reusable work knowledge in `~/.shift-ax/`
-2. resolve context before planning
-3. create a request-scoped topic/worktree
-4. pause at human plan review
-5. resume through verification, review, and commit
+[![npm version](https://img.shields.io/npm/v/shift-ax)](https://www.npmjs.com/package/shift-ax)
+[![npm downloads](https://img.shields.io/npm/dm/shift-ax)](https://www.npmjs.com/package/shift-ax)
+[![GitHub stars](https://img.shields.io/github/stars/handsupmin/shift-ax)](https://github.com/handsupmin/shift-ax/stargazers)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/handsupmin/shift-ax/blob/main/LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 
-It is for teams that want a repeatable workflow, not prompt rituals.
+[English](https://github.com/handsupmin/shift-ax/blob/main/README.md) | [한국어](https://github.com/handsupmin/shift-ax/blob/main/README.ko.md) | [简体中文](https://github.com/handsupmin/shift-ax/blob/main/README.zh.md) | [日本語](https://github.com/handsupmin/shift-ax/blob/main/README.ja.md) | [Español](https://github.com/handsupmin/shift-ax/blob/main/README.es.md)
 
-## Install
+</div>
+
+Built for people who want AI to help with real delivery work, but do not want to become experts in prompt rituals first.
+
+`shift-ax` is an easy AX helper that sits **above any single project**. It keeps reusable context at the global level, learns your domain language over time, and gives coding-agent runtimes a guided request-to-commit loop.
+
+---
+
+## Why Shift AX?
+
+Most friction in AI-assisted development is not “can the model write code?”
+
+The real pain usually looks like this:
+
+- you keep re-injecting the same context across multiple projects
+- your domain terms and team language are not grounded anywhere durable
+- routine work still needs too much manual babysitting
+- you know the design matters, but the rest of delivery still feels fragile
+- you are not fully sure how to “use AI well,” so the whole thing feels harder than it should
+
+Shift AX exists to make that layer easier.
+
+If you can get the design and requirements into good shape, Shift AX is built to help the rest of the flow move forward with much less repeated prompting and much stronger process guidance.
+
+---
+
+## What you get
+
+- **Global reusable context**
+  Keep important context above the project level so you do not have to keep injecting it repo by repo.
+
+- **Domain language that gets learned over time**
+  Teach Shift AX your terms, policies, procedures, and recurring concepts once, then keep reusing them.
+
+- **A workflow tuned for routine delivery work**
+  Great for repeated engineering work where requests, plans, reviews, and verification need to happen the same way every time.
+
+- **Detailed onboarding with strong defaults**
+  Even if you are not already good at using AI coding tools, Shift AX is designed to get you into a usable path quickly.
+
+- **Request-to-commit guardrails**
+  Resolve context first, review the plan, then move through implementation, verification, review, and final commit with less ambiguity.
+
+---
+
+## Install & quick start
 
 ```bash
 npm install -g shift-ax
+shift-ax --codex
 ```
 
-Or:
+Or start Claude Code instead:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/handsupmin/shift-ax/main/scripts/install-global.sh | bash
+shift-ax --claude-code
 ```
 
-From a source checkout:
+That is enough to begin.
+On first run, Shift AX asks for your preferred language and whether full-auto should be enabled by default, then walks you into the right runtime flow.
+
+After that, run onboarding once, teach it your reusable context, and start requests from there.
+
+- **CLI command:** `shift-ax`
+- **Requirements:** Node.js 20+
+
+If you want to work from source instead of a global install:
 
 ```bash
 npm install
@@ -36,35 +90,11 @@ npm run build
 npm link
 ```
 
-## How to use it
+---
 
-### Start a shell
+## Common moves
 
-```bash
-shift-ax --codex
-```
-
-or
-
-```bash
-shift-ax --claude-code
-```
-
-On first run, Shift AX asks:
-
-1. preferred language
-2. whether full-auto should be enabled by default
-
-Those settings are stored in:
-
-- `~/.shift-ax/settings.json`
-
-If full-auto is enabled:
-
-- Codex gets `--yolo`
-- Claude Code gets `--dangerously-skip-permissions`
-
-### Onboard your reusable context
+### Onboard reusable context once
 
 Shift AX keeps reusable knowledge in:
 
@@ -78,21 +108,25 @@ Inside the runtime:
 - **Codex:** `$onboard`
 - **Claude Code:** `/onboard`
 
-### Start work
+This is where Shift AX starts learning how your work actually sounds and flows.
+
+### Start a request
 
 Inside the runtime:
 
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Other common commands:
+Shift AX resolves context first, creates a request-scoped topic/worktree, pauses for plan review, and then resumes through implementation, verification, review, and commit.
 
-- Codex: `$doctor`, `$status`, `$topics`, `$resume`, `$review`, `$export-context`
-- Claude Code: `/doctor`, `/status`, `/topics`, `/resume`, `/review`, `/export-context`
+### Resume, review, and inspect later
 
-### CLI mode
+Common runtime commands:
 
-You can also run the workflow directly:
+- **Codex:** `$doctor`, `$status`, `$topics`, `$resume`, `$review`, `$export-context`
+- **Claude Code:** `/doctor`, `/status`, `/topics`, `/resume`, `/review`, `/export-context`
+
+### Run the flow from CLI when needed
 
 ```bash
 shift-ax onboard-context --discover
@@ -100,6 +134,78 @@ shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax approve-plan --topic .ax/topics/<topic> --reviewer "Alex" --decision approve
 shift-ax run-request --topic .ax/topics/<topic> --resume
 ```
+
+---
+
+## Why it feels natural
+
+**Shift AX works above the project, but still fits into the tools you already use.**
+
+That matters because a lot of repeated AX pain is not tied to one repository.
+It lives in things like:
+
+- how your team names concepts
+- how your domain talks about policies and business rules
+- what “done” usually means
+- which review and verification steps always matter
+- which routine tasks come back again and again
+
+Shift AX keeps that context globally instead of forcing you to reteach it inside every repo.
+
+So instead of rebuilding the same context stack from scratch every time, you gradually accumulate a reusable operating layer:
+
+- global context
+- learned domain language
+- reusable procedures
+- repeatable request handling
+
+That is what makes it feel less like prompt juggling and more like an actual working system.
+
+---
+
+## A realistic workflow
+
+Imagine you work across:
+
+- multiple product repos
+- an internal platform repo
+- one or two customer-specific repos
+- a steady stream of recurring delivery tasks
+
+Without Shift AX, every new AI session tends to repeat the same overhead:
+
+- explain the domain again
+- restate the company language again
+- restate the review rules again
+- restate the expected delivery flow again
+
+With Shift AX, you onboard that reusable layer once, keep it globally, and let each new request start from a stronger default place.
+
+That is the core promise:
+
+> less repetitive context injection,
+> more guided delivery that compounds over time.
+
+---
+
+## Core concepts
+
+- **Global context**
+  Reusable work knowledge that lives above any single repository.
+
+- **Domain language**
+  The vocabulary, concepts, and policy terms your organization uses repeatedly.
+
+- **Topic/worktree**
+  A request-scoped working lane with its own artifacts and state.
+
+- **Plan review gate**
+  Shift AX pauses before implementation so a human can confirm the plan.
+
+- **Request-to-commit loop**
+  Context resolution, planning, implementation, verification, review, and commit as one guided flow.
+
+---
 
 ## Give this prompt to another LLM
 
@@ -136,8 +242,12 @@ Suggested first commands:
 3. run `$request <the user's task>`
 ```
 
-## More docs
+---
 
+## Documentation
+
+- Vision: [`docs/vision.md`](./docs/vision.md)
 - Architecture: [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md)
 - LLM setup details: [`docs/setup/llm-install-and-bootstrap.md`](./docs/setup/llm-install-and-bootstrap.md)
+- Operator guide: [`docs/operations/operator-guide.md`](./docs/operations/operator-guide.md)
 - Release notes: [`docs/release-notes/`](./docs/release-notes/)
