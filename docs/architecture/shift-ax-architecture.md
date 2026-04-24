@@ -43,8 +43,8 @@ Shift AX is intentionally different from “prompt kit” style agent setups.
 
 The primary source of truth is:
 
-1. `docs/base-context/index.md`
-2. linked markdown documents
+1. `~/.shift-ax/index.md` as the single global dictionary
+2. linked summary-first markdown documents under the global context home
 3. reviewed topic artifacts
 
 Long-term memory, topic recall, decision memory, and support summaries exist only **below** that layer.
@@ -178,8 +178,8 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
 
 **How Shift AX translates those ideas**
 
-- `docs/base-context/index.md` is the top-level routing surface
-- onboarding can create or discover shared docs
+- `~/.shift-ax/index.md` is the top-level routing surface and dictionary
+- onboarding can create or discover shared docs under the global context home
 - glossary seeding and discovery support the docs layer
 - `build-context-bundle` and `init-context` create compact, docs-first context bundles
 - support recall may be attached later, but never above shared docs
@@ -300,7 +300,7 @@ These tools are intentionally secondary. They exist to support:
 
 They must never outrank:
 
-1. base-context docs
+1. global dictionary and linked context docs
 2. reviewed spec / implementation plan
 3. execution / review artifacts
 

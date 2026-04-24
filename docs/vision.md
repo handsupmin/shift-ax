@@ -180,14 +180,14 @@ The intended end-to-end flow is:
    - commit only after gates pass
    - stop at a meaningful local git commit in v1
 
-### Base-context convention
+### Global Context Convention
 
-The current tracked context convention is:
+The current global context convention is:
 
-- one top-level index at `docs/base-context/index.md`
-- detailed files under `docs/base-context/`
+- one top-level dictionary at `~/.shift-ax/index.md`
+- summary-first markdown pages under `~/.shift-ax/role/`, `~/.shift-ax/work-types/`, `~/.shift-ax/repos/`, `~/.shift-ax/procedures/`, and `~/.shift-ax/domain-language/`
 
-This directory is intentionally broad enough to cover:
+The dictionary exposes search terms, aliases, repository names, workflow labels, and domain terms, while linked documents hold the durable details. This structure is intentionally broad enough to cover:
 
 - policy
 - domain

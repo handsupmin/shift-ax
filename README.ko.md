@@ -98,8 +98,10 @@ npm link
 
 Shift AX는 재사용 지식을 여기에 저장합니다.
 
-- `~/.shift-ax/index.md`
+- `~/.shift-ax/index.md`: 검색 가능한 label, alias, repository, workflow, domain term을 담는 단일 dictionary
+- `~/.shift-ax/role/`
 - `~/.shift-ax/work-types/`
+- `~/.shift-ax/repos/`
 - `~/.shift-ax/procedures/`
 - `~/.shift-ax/domain-language/`
 
@@ -108,7 +110,7 @@ Shift AX는 재사용 지식을 여기에 저장합니다.
 - **Codex:** `$onboard`
 - **Claude Code:** `/onboard`
 
-이 단계에서 Shift AX가 당신의 업무 언어와 흐름을 익히기 시작합니다.
+이 단계에서 Shift AX가 당신의 업무 언어와 흐름을 익히기 시작합니다. 온보딩은 완료로 보기 전에 dictionary가 실제 문서로 연결되는지, 저장된 컨텍스트가 사용 가능한지 검증합니다.
 
 ### 요청 시작하기
 

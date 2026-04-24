@@ -98,8 +98,10 @@ npm link
 
 Shift AX 会把可复用知识放在：
 
-- `~/.shift-ax/index.md`
+- `~/.shift-ax/index.md`：包含可搜索 label、alias、repository、workflow 和领域术语的单一 dictionary
+- `~/.shift-ax/role/`
 - `~/.shift-ax/work-types/`
+- `~/.shift-ax/repos/`
 - `~/.shift-ax/procedures/`
 - `~/.shift-ax/domain-language/`
 
@@ -108,7 +110,7 @@ Shift AX 会把可复用知识放在：
 - **Codex:** `$onboard`
 - **Claude Code:** `/onboard`
 
-这一步就是 Shift AX 开始学习你的工作语言和工作方式的地方。
+这一步就是 Shift AX 开始学习你的工作语言和工作方式的地方。在把 onboarding 视为完成之前，它会验证 dictionary 是否指向真实文档，以及保存下来的上下文是否可用。
 
 ### 开始一个请求
 

@@ -36,8 +36,8 @@ Shift AX는 프롬프트 묶음이나 느슨한 스킬 번들과는 의도적으
 
 가장 우선하는 source of truth는:
 
-1. `docs/base-context/index.md`
-2. 그 index가 가리키는 markdown 문서
+1. 단일 글로벌 dictionary인 `~/.shift-ax/index.md`
+2. 글로벌 컨텍스트 홈 아래의 summary-first markdown 문서
 3. review된 topic artifact
 
 장기 기억, topic recall, decision memory, support summary는 모두 그 아래에 위치합니다.
@@ -173,8 +173,8 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 **Shift AX에서의 번역**
 
-- `docs/base-context/index.md`가 최상위 routing surface
-- onboarding은 shared doc을 만들거나 발견한다
+- `~/.shift-ax/index.md`가 최상위 routing surface이자 dictionary
+- onboarding은 글로벌 컨텍스트 홈 아래에 shared doc을 만들거나 발견한다
 - glossary seeding / discovery는 docs 레이어를 보강한다
 - `build-context-bundle`, `init-context`는 docs-first bundle을 만든다
 - support recall은 붙일 수 있지만 shared docs 위로 올라갈 수는 없다
@@ -295,7 +295,7 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 하지만 절대 아래 우선순위를 넘어서지 못한다.
 
-1. base-context docs
+1. 글로벌 dictionary와 연결된 context docs
 2. reviewed spec / implementation plan
 3. execution / review artifacts
 

@@ -98,8 +98,10 @@ npm link
 
 Shift AX keeps reusable knowledge in:
 
-- `~/.shift-ax/index.md`
+- `~/.shift-ax/index.md` as the single dictionary of searchable labels, aliases, repositories, workflows, and domain terms
+- `~/.shift-ax/role/`
 - `~/.shift-ax/work-types/`
+- `~/.shift-ax/repos/`
 - `~/.shift-ax/procedures/`
 - `~/.shift-ax/domain-language/`
 
@@ -108,7 +110,7 @@ Inside the runtime:
 - **Codex:** `$onboard`
 - **Claude Code:** `/onboard`
 
-This is where Shift AX starts learning how your work actually sounds and flows.
+This is where Shift AX starts learning how your work actually sounds and flows. Onboarding verifies that the dictionary links to real docs and that the saved context is usable before treating onboarding as complete.
 
 ### Start a request
 
