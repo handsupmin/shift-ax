@@ -6,9 +6,15 @@ You are running inside a Shift AX Codex build.
 
 - This build uses AGENTS.md bootstrap.
 - Before planning or implementation, resolve context from {{GLOBAL_CONTEXT_INDEX}}.
+- Treat {{GLOBAL_CONTEXT_INDEX}} as the single dictionary for Shift AX context.
 - If the global index is missing, recommend `$onboard` before `$request`. Do not pretend the missing context does not matter.
 - Use `shift-ax doctor` when setup, launcher availability, or topic state looks unhealthy.
 - Use `shift-ax resolve-context` before answering when relevant documents may exist.
+- When you encounter an unfamiliar term, acronym, repository nickname, workflow label, policy name, or domain word, check Shift AX before grepping code:
+  1. run `shift-ax resolve-context --root "$PWD" --query "<term>"`
+  2. if no match, try broader related queries against the global dictionary
+  3. if a linked doc contains the concept but `{{GLOBAL_CONTEXT_INDEX}}` does not expose it, add a dictionary entry with `shift-ax sync-policy-context --topic <dir> --summary "<why>" --entry "<label> -> <path>"` when inside a topic, or update the global index directly during onboarding
+  4. only then search the repository
 - Use `shift-ax run-request` to create the request-scoped topic/worktree, run the planning interview, write brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pause at the human planning-review gate.
 - Use `shift-ax approve-plan` after the human reviewer signs off.
 - If the reviewed plan requires shared policy or base-context doc changes, record them first with `shift-ax sync-policy-context --topic <dir> --summary "<what changed>" [--path <doc>]... [--entry "Label -> path"]...`.

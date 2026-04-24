@@ -20,6 +20,8 @@ Rules:
 - infer likely repository role, architecture/layer boundaries, hidden conventions, and working files from real repo evidence
 - present your hypothesis before asking the user to type more
 - keep digging until uncertainty is low enough that you can say the role/work/repo/glossary picture is confirmed
+- prefer structured 1/2/3 confirmation choices over open-ended validation questions
+- when a concept, repository alias, workflow name, or domain term should be searchable later, make it a dictionary entry in `{{GLOBAL_CONTEXT_INDEX}}`
 
 Cover these knowledge areas gradually:
 
@@ -57,9 +59,16 @@ When you have enough information:
 
 Keep the top-level knowledge base in `~/.shift-ax/` with:
 
-- `index.md` listing only titles and linked pages
+- `index.md` as the single dictionary: labels are search terms, aliases, repository names, workflow names, and domain terms
 - linked work type pages
 - linked repository/procedure pages
 - linked domain-language pages
 
-After completion, remind the user to share `~/.shift-ax/` with teammates who do similar work.
+Before saying onboarding is complete:
+
+1. run `shift-ax doctor --root "<repo>"`
+2. inspect `{{GLOBAL_CONTEXT_INDEX}}` and the linked files under `~/.shift-ax/`
+3. if the doctor report has base-context `quality_issues`, missing paths, duplicate/path-like labels, or an index that is not dictionary-style, fix the saved files yourself and rerun doctor
+4. do not claim onboarding is complete until doctor reports the global index and profile are healthy, or until a real blocker remains
+
+After completion, tell the user onboarding is finished, tell them future shared-context corrections belong in `$onboard` or `shift-ax onboard-context --input ... --overwrite`, and remind them to share `~/.shift-ax/` with teammates who do similar work.

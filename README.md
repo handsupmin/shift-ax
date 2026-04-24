@@ -244,6 +244,44 @@ Suggested first commands:
 
 ---
 
+## Quality Metrics
+
+The following numbers are produced by the eval suite in `tests/eval/` and serve as the regression floor for every PR.
+
+| Metric | Value | Suite |
+|---|---|---|
+| Context Resolver Recall@5 | **100%** (10/10) | `eval` |
+| Context Resolver MRR | **1.000** | `eval` |
+| Context Resolver False Positive Rate | **0%** | `eval` |
+| Glossary Extraction Precision | **100%** (9/9) | `eval` |
+| Topic Recall Accuracy | **100%** (4/4) | `eval` |
+| Consistency (same input → same output) | **100%** (3/3) | `eval` |
+| Realistic Recall@5 (vocabulary-matched queries) | **70%** (7/10) | `eval:real-world` |
+| Realistic Topic History Recall | **100%** (6/6) | `eval:real-world` |
+| Realistic Glossary Precision (real codebases) | **100%** (7/7) | `eval:real-world` |
+| Edge Case Pass Rate | **100%** (33/33) | `eval:edge-cases` |
+| Context Resolver p50 Latency | **< 1ms** | `eval:performance` |
+| Context Resolver p95 Latency | **< 1ms** | `eval:performance` |
+| Sequential Throughput | **> 3000 q/s** | `eval:performance` |
+
+> **How to reproduce:** run `npm run eval:all` from the repository root. Every number in this table is recomputed from scratch each time — no hardcoded results.
+
+The 70% realistic recall reflects a known property of the lexical token-matching algorithm: queries that use different vocabulary than the index label (e.g. "bundle size jumped" vs "Frontend performance budget") will miss without semantic embedding. Queries that share key terms with the label score at 100%.
+
+### Running the eval suite
+
+```bash
+npm run eval               # golden path + core correctness
+npm run eval:edge-cases    # empty, malformed, adversarial inputs
+npm run eval:real-world    # realistic engineering-team fixtures
+npm run eval:performance   # latency (p50/p95) + throughput
+npm run eval:all           # full suite (CI gate)
+```
+
+Each script prints a per-scenario PASS/FAIL with the measured value, then a final scorecard. Any metric below its baseline floor causes exit code 1, which blocks CI.
+
+---
+
 ## Documentation
 
 - Vision: [`docs/vision.md`](./docs/vision.md)

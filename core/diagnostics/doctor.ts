@@ -25,6 +25,7 @@ export interface ShiftAxDoctorReport {
     index_path: string;
     entry_count: number;
     missing_paths: string[];
+    quality_issues: string[];
   };
   profile: ShiftAxDoctorCheck & {
     path: string;
@@ -90,6 +91,7 @@ async function checkBaseContext(rootDir: string): Promise<ShiftAxDoctorReport['b
       index_path: indexPath,
       entry_count: 0,
       missing_paths: [],
+      quality_issues: ['Global Shift AX index is missing.'],
     };
   }
 
@@ -98,17 +100,62 @@ async function checkBaseContext(rootDir: string): Promise<ShiftAxDoctorReport['b
   const missingPaths = entries
     .map((entry) => entry.path)
     .filter((path) => !existsSync(resolve(home.root, path)));
+  const qualityIssues = inspectGlobalIndexQuality(rawIndex, entries);
+  qualityIssues.push(
+    ...missingPaths.map((path) => `Index points to a missing document: ${path}.`),
+  );
 
   return {
-    status: missingPaths.length > 0 ? 'fail' : 'ok',
+    status: qualityIssues.some((issue) => /missing|must not|path-like|unresolved|duplicate/i.test(issue)) ? 'fail' : qualityIssues.length > 0 ? 'warn' : 'ok',
     message:
       missingPaths.length > 0
         ? 'Global index includes unresolved or missing document paths.'
+        : qualityIssues.length > 0
+        ? 'Global index has quality issues.'
         : 'Global index and linked documents are present.',
     index_path: indexPath,
     entry_count: entries.length,
     missing_paths: missingPaths,
+    quality_issues: qualityIssues,
   };
+}
+
+function inspectGlobalIndexQuality(rawIndex: string, entries: Array<{ label: string; path: string }>): string[] {
+  const issues: string[] = [];
+  const labels = new Set<string>();
+  const categories = new Set<string>();
+
+  for (const line of rawIndex.split(/\r?\n/)) {
+    const heading = line.trim().match(/^##\s+(.+)$/);
+    if (heading) categories.add(heading[1]!.trim());
+  }
+
+  if (entries.length === 0) {
+    issues.push('Global index has no dictionary entries.');
+  }
+
+  for (const entry of entries) {
+    const key = entry.label.toLowerCase();
+    if (labels.has(key)) issues.push(`Duplicate dictionary label: ${entry.label}.`);
+    labels.add(key);
+    if (/^\.?\/?[\w-]+\/.+\.md$/i.test(entry.label) || /\.md$/i.test(entry.label)) {
+      issues.push(`Dictionary label is path-like instead of a search term: ${entry.label}.`);
+    }
+    if (/^(repo|repository|domain|workflow|procedure|work type|role)\s*:/i.test(entry.label)) {
+      issues.push(`Dictionary label should not keep category prefixes: ${entry.label}.`);
+    }
+    if (!entry.path || !/\.md$/i.test(entry.path)) {
+      issues.push(`Dictionary entry must point to a markdown source doc: ${entry.label}.`);
+    }
+  }
+
+  const required = ['Role', 'Work Types', 'Repositories', 'Procedures', 'Domain Language'];
+  const missingCategories = required.filter((category) => !categories.has(category));
+  if (entries.length >= 3 && missingCategories.length > 0) {
+    issues.push(`Global index is missing dictionary sections: ${missingCategories.join(', ')}.`);
+  }
+
+  return [...new Set(issues)];
 }
 
 async function checkProfile(rootDir: string): Promise<ShiftAxDoctorReport['profile']> {

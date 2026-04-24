@@ -1,6 +1,6 @@
 {
   "name": "shift-ax",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Agentic software delivery platform for teams that are not AX experts yet",
   "type": "module",
   "private": false,
@@ -57,7 +57,12 @@
     "build": "tsc -p tsconfig.json && node scripts/copy-package-assets.mjs",
     "test": "node --import tsx --test tests/*.test.ts",
     "ax": "node --import tsx scripts/ax.ts",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "eval": "node --import tsx tests/eval/index.ts",
+    "eval:edge-cases": "node --import tsx tests/eval/edge-cases.ts",
+    "eval:real-world": "node --import tsx tests/eval/real-world.ts",
+    "eval:performance": "node --import tsx tests/eval/performance.ts",
+    "eval:all": "npm run eval && npm run eval:edge-cases && npm run eval:real-world && npm run eval:performance"
   },
   "engines": {
     "node": ">=20"

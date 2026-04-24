@@ -51,14 +51,25 @@ test('onboardProjectContext writes global docs, index, and profile', async () =>
 
       const workTypeDoc = await readFile(join(home, 'work-types', 'api-development.md'), 'utf8');
       const procedureDoc = await readFile(join(home, 'procedures', 'api-development--wallet-api.md'), 'utf8');
+      const roleDoc = await readFile(join(home, 'role', 'primary-role.md'), 'utf8');
       const glossaryDoc = await readFile(join(home, 'domain-language', 'ledgerx.md'), 'utf8');
       const index = await readFile(join(home, 'index.md'), 'utf8');
       const profile = await readProjectProfile(root);
 
+      assert.match(roleDoc, /## Summary/);
       assert.match(workTypeDoc, /wallet-api/);
+      assert.match(procedureDoc, /## Summary/);
       assert.match(procedureDoc, /controller\/service\/DTO/i);
+      assert.match(glossaryDoc, /## Summary/);
       assert.match(glossaryDoc, /append-only ledger service/i);
+      assert.match(index, /single Shift AX dictionary/);
+      assert.match(index, /## Role/);
+      assert.match(index, /Primary Role -> role\/primary-role.md/);
       assert.match(index, /API development -> work-types\/api-development.md/);
+      assert.match(index, /## Repositories/);
+      assert.match(index, /wallet-api -> repos\/wallet-api.md/);
+      assert.match(index, /## Procedures/);
+      assert.match(index, /API development .+ wallet-api -> procedures\/api-development--wallet-api.md/);
       assert.match(index, /LedgerX -> domain-language\/ledgerx.md/);
       assert.equal(result.documents.length >= 3, true);
       assert.ok(profile);

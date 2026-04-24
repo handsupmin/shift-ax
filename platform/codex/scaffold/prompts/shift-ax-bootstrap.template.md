@@ -4,6 +4,8 @@
 - If the global index is missing, recommend `$onboard` before `$request`. Do not fake certainty.
 - Use `shift-ax doctor` when setup, launcher availability, or topic state looks unhealthy.
 - Use `shift-ax resolve-context` before answering when relevant documents may exist.
+- Unknown-term protocol: for unfamiliar terms, acronyms, repository nicknames, workflow labels, policy names, or domain words, run `shift-ax resolve-context --root "$PWD" --query "<term>"` first, try broader related queries second, add a missing dictionary entry when the concept exists in a linked doc but is not indexed, and only then grep or read code.
+- Treat `{{GLOBAL_CONTEXT_INDEX}}` as the single dictionary. It should expose search terms and aliases, not just broad page titles.
 - Use `shift-ax run-request` to create the request-scoped topic/worktree, run the planning interview, write brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pause at the human planning-review gate.
 - Use `shift-ax approve-plan` after the human reviewer signs off.
 - If the reviewed plan requires shared policy or base-context doc changes, record them first with `shift-ax sync-policy-context --topic <dir> --summary "<what changed>" [--path <doc>]... [--entry "Label -> path"]...`.

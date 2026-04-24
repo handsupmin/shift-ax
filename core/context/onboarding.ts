@@ -244,6 +244,7 @@ export async function onboardProjectContext({
     home.indexPath,
     home.profilePath,
     home.settingsPath,
+    join(home.root, 'role', 'primary-role.md'),
     ...derivedWorkTypes.flatMap((workType) => [
       join(home.workTypesDir, `${slugify(workType.name)}.md`),
       ...workType.repositories.map((repository) =>

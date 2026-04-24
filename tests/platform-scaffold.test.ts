@@ -46,6 +46,8 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(agents, /\$onboard/);
     assert.match(agents, /shift-ax run-request/);
     assert.match(prompt, /shift-ax approve-plan/);
+    assert.match(prompt, /Unknown-term protocol/i);
+    assert.match(prompt, /single dictionary/i);
     assert.match(prompt, /shift-ax launch-execution/);
     assert.match(prompt, /shift-ax finalize-commit/);
     assert.match(prompt, /Welcome back \/ resume flow/i);
@@ -58,6 +60,8 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(onboardCommand, /ask one question at a time/i);
     assert.match(onboardCommand, /Choose one:/);
     assert.match(onboardCommand, /This step matters most\./);
+    assert.match(onboardCommand, /single dictionary/i);
+    assert.match(onboardCommand, /shift-ax doctor/);
     assert.match(reviewCommand, /shift-ax finalize-commit --topic <topic-dir>/);
     assert.match(reviewCommand, /localized lore commit message/i);
     assert.match(resumePromptTemplate, /Welcome back flow before resume/i);
@@ -109,6 +113,8 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(claude, /\/onboard/);
     assert.match(claude, /shift-ax run-request/);
     assert.match(hook, /shift-ax approve-plan/);
+    assert.match(hook, /Unknown-term protocol/i);
+    assert.match(hook, /single dictionary/i);
     assert.match(hook, /shift-ax launch-execution/);
     assert.match(hook, /shift-ax finalize-commit/);
     assert.match(hook, /Welcome back \/ resume flow/i);
@@ -121,6 +127,8 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(onboardCommand, /ask one question at a time/i);
     assert.match(onboardCommand, /Choose one:/);
     assert.match(onboardCommand, /This step matters most\./);
+    assert.match(onboardCommand, /single dictionary/i);
+    assert.match(onboardCommand, /shift-ax doctor/);
     assert.match(reviewCommand, /shift-ax finalize-commit --topic \$ARGUMENTS/);
     assert.match(reviewCommand, /localized lore commit message/i);
     assert.match(resumeCommand, /Welcome back flow before resume/i);

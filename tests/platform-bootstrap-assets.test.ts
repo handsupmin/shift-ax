@@ -19,6 +19,8 @@ test('renderCodexAgentsBootstrap references global index and request-to-commit c
 
   assert.match(content, /\.shift-ax\/index\.md/);
   assert.match(content, /shift-ax resolve-context/);
+  assert.match(content, /Unknown-term|unfamiliar term/i);
+  assert.match(content, /single dictionary/i);
   assert.match(content, /\$onboard/);
   assert.match(content, /shift-ax run-request/);
   assert.match(content, /shift-ax approve-plan/);
@@ -46,6 +48,8 @@ test('renderClaudeCodeSessionStartContext references global index and request-to
   assert.match(content, /\.shift-ax\/index\.md/);
   assert.match(content, /SessionStart|hook/i);
   assert.match(content, /shift-ax resolve-context/);
+  assert.match(content, /Unknown-term|unfamiliar term/i);
+  assert.match(content, /single dictionary/i);
   assert.match(content, /\/onboard/);
   assert.match(content, /shift-ax run-request/);
   assert.match(content, /shift-ax approve-plan/);

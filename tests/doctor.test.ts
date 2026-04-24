@@ -39,6 +39,39 @@ test('runDoctor fails when the global index points to a missing document', async
       assert.equal(report.overall_status, 'fail');
       assert.equal(report.base_context.status, 'fail');
       assert.match(report.base_context.message, /missing|unresolved/i);
+      assert.equal(report.base_context.quality_issues.some((issue) => /missing document/i.test(issue)), true);
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('runDoctor fails path-like or duplicate dictionary labels', async () => {
+  const root = await createGitRepo();
+
+  try {
+    await withTempGlobalHome('shift-ax-doctor-quality-home-', async (home) => {
+      await mkdir(join(home, 'work-types'), { recursive: true });
+      await writeFile(join(home, 'work-types', 'api-development.md'), '# API development\n', 'utf8');
+      await writeFile(
+        join(home, 'index.md'),
+        [
+          '# Shift AX Global Index',
+          '',
+          '## Work Types',
+          '',
+          '- docs/work-types/api-development.md -> work-types/api-development.md',
+          '- docs/work-types/api-development.md -> work-types/api-development.md',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const report = await runDoctor({ rootDir: root });
+
+      assert.equal(report.base_context.status, 'fail');
+      assert.equal(report.base_context.quality_issues.some((issue) => /path-like/i.test(issue)), true);
+      assert.equal(report.base_context.quality_issues.some((issue) => /Duplicate/i.test(issue)), true);
     });
   } finally {
     await rm(root, { recursive: true, force: true });

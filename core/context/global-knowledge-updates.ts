@@ -39,17 +39,39 @@ async function backupIfPresent(path: string): Promise<void> {
 
 async function upsertIndexEntry(entry: IndexEntry): Promise<void> {
   const home = getGlobalContextHome();
-  const raw = await readFile(home.indexPath, 'utf8').catch(() => '# Shift AX Global Index\n\n## Work Types\n\n- None yet.\n\n## Domain Language\n\n- None yet.\n');
+  const raw = await readFile(home.indexPath, 'utf8').catch(() => '# Shift AX Global Index\n\n## Role\n\n- None yet.\n\n## Work Types\n\n- None yet.\n\n## Repositories\n\n- None yet.\n\n## Procedures\n\n- None yet.\n\n## Domain Language\n\n- None yet.\n');
   const entries = parseIndexDocument(raw).filter((current) => current.label !== entry.label);
   entries.push(entry);
+  const roleEntries = entries.filter((current) => current.path.startsWith('role/'));
   const workTypeEntries = entries.filter((current) => current.path.startsWith('work-types/'));
+  const repoEntries = entries.filter((current) => current.path.startsWith('repos/'));
+  const procedureEntries = entries.filter((current) => current.path.startsWith('procedures/'));
   const domainEntries = entries.filter((current) => current.path.startsWith('domain-language/'));
   const rendered = [
     '# Shift AX Global Index',
     '',
+    'Notes:',
+    '',
+    '- This file is the single Shift AX dictionary.',
+    '- Labels are search terms, aliases, repository names, workflow names, and domain terms.',
+    '- Detailed procedures and repository notes live in linked markdown pages.',
+    '- Reviewed topic artifacts override repository evidence, which override global knowledge, when they conflict.',
+    '',
+    '## Role',
+    '',
+    ...(roleEntries.length > 0 ? roleEntries.map((item) => `- ${item.label} -> ${item.path}`) : ['- None yet.']),
+    '',
     '## Work Types',
     '',
     ...(workTypeEntries.length > 0 ? workTypeEntries.map((item) => `- ${item.label} -> ${item.path}`) : ['- None yet.']),
+    '',
+    '## Repositories',
+    '',
+    ...(repoEntries.length > 0 ? repoEntries.map((item) => `- ${item.label} -> ${item.path}`) : ['- None yet.']),
+    '',
+    '## Procedures',
+    '',
+    ...(procedureEntries.length > 0 ? procedureEntries.map((item) => `- ${item.label} -> ${item.path}`) : ['- None yet.']),
     '',
     '## Domain Language',
     '',

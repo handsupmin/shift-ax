@@ -56,13 +56,17 @@ export function parseIndexDocument(markdown: string): IndexEntry[] {
   return entries;
 }
 
-function scoreEntry(entry: IndexEntry, queryTokens: string[]): number {
+function scoreEntry(entry: IndexEntry, queryTokens: string[], query: string): number {
   const haystack = new Set([...tokenize(entry.label), ...tokenize(entry.path)]);
 
   let score = 0;
   for (const token of queryTokens) {
     if (haystack.has(token)) score += 1;
   }
+  const queryLower = String(query || '').toLowerCase();
+  const labelLower = entry.label.toLowerCase();
+  if (labelLower.length >= 3 && queryLower.includes(labelLower)) score += 5;
+  if (entry.path.startsWith('domain-language/')) score += 8;
   return score;
 }
 
@@ -79,10 +83,10 @@ export async function resolveContextFromIndex({
 
   const rawIndex = await readFile(indexPath, 'utf8');
   const entries = parseIndexDocument(rawIndex);
-  const queryTokens = tokenize(query);
+  const queryTokens = [...new Set(tokenize(query))];
 
   const scored = entries
-    .map((entry) => ({ entry, score: scoreEntry(entry, queryTokens) }))
+    .map((entry) => ({ entry, score: scoreEntry(entry, queryTokens, query) }))
     .filter((item) => item.score > 0)
     .sort((left, right) => right.score - left.score)
     .slice(0, maxMatches);
