@@ -254,11 +254,14 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 - review lane을 명시적으로 분리한다
   - domain-policy
+  - planning-readiness
   - spec-conformance
   - test-adequacy
   - engineering-discipline
   - conversation-trace
+  - independent-review
 - verification evidence를 artifact로 남긴다
+- independent review는 변경 파일, completed execution, passing verification evidence를 요구한다
 - gate가 통과되기 전까지 commit finalization을 막는다
 - final commit message는 Lore protocol을 따른다
 
@@ -340,7 +343,7 @@ Shift AX는 암묵적 chat state보다 명시적 파일을 선호한다.
 ### 5.4 구현 전과 구현 후 모두 사람 게이트가 있다
 
 - 구현 전: plan review
-- 구현 후: structured review lanes
+- 구현 후: structured review lanes와 독립 clean-context review gate
 
 ### 5.5 똑똑한 유연성보다 쉬운 기본값
 

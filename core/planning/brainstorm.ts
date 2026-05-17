@@ -1,3 +1,8 @@
+import {
+  assessPlanningReadiness,
+  renderPlanningReadinessMarkdown,
+} from './readiness-assessment.js';
+
 export interface ShiftAxPlanningInterviewAnswers {
   outcome: string;
   constraints: string;
@@ -194,9 +199,18 @@ export function buildPlanningArtifactsFromInterview({
     '',
   ].join('\n');
 
+  const assessment = assessPlanningReadiness({
+    request,
+    matchedContextLabels,
+    brainstormContent,
+    specContent,
+    implementationPlanContent,
+  });
+  const assessmentContent = renderPlanningReadinessMarkdown(assessment);
+
   return {
-    brainstormContent: `${brainstormContent.trimEnd()}\n`,
-    specContent: `${specContent.trimEnd()}\n`,
-    implementationPlanContent: `${implementationPlanContent.trimEnd()}\n`,
+    brainstormContent: `${brainstormContent.trimEnd()}\n\n${assessmentContent}\n`,
+    specContent: `${specContent.trimEnd()}\n\n${assessmentContent}\n`,
+    implementationPlanContent: `${implementationPlanContent.trimEnd()}\n\n${assessmentContent}\n`,
   };
 }

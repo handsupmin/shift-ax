@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { ReviewVerdict } from './aggregate-reviews.js';
+import { runIndependentReviewGate } from './independent-review.js';
 import { readProjectProfile } from '../policies/project-profile.js';
 import {
   extractExecutionTaskLines,
@@ -11,6 +12,10 @@ import {
   readPlanSection,
 } from '../planning/implementation-plan.js';
 import { readPlanReviewArtifact, verifyApprovedPlanFingerprint } from '../planning/plan-review.js';
+import {
+  assessTopicPlanningReadiness,
+  type ShiftAxPlanningReadinessAssessment,
+} from '../planning/readiness-assessment.js';
 import { getRootDirFromTopicDir } from '../topics/topic-artifacts.js';
 
 export interface RunReviewLanesInput {
@@ -265,6 +270,39 @@ async function runDomainPolicyLane(topicDir: string): Promise<ReviewVerdict> {
       ? 'Relevant base-context documents were resolved and no unresolved paths were recorded.'
       : 'No relevant base-context documents matched this topic, and no unresolved paths were recorded.',
   );
+}
+
+async function readOrBuildReadinessAssessment(
+  topicDir: string,
+): Promise<ShiftAxPlanningReadinessAssessment> {
+  return assessTopicPlanningReadiness({ topicDir });
+}
+
+async function runPlanningReadinessLane(topicDir: string): Promise<ReviewVerdict> {
+  const assessment = await readOrBuildReadinessAssessment(topicDir);
+
+  if (assessment.status !== 'ready') {
+    return verdictBase(
+      'planning-readiness',
+      'changes_requested',
+      `Planning ambiguity score ${assessment.ambiguity_score} exceeds readiness requirements.`,
+      (assessment.blockers.length > 0 ? assessment.blockers : ['Planning readiness assessment is not ready.']).map((blocker) => ({
+        severity: 'high' as const,
+        message: blocker,
+      })),
+    );
+  }
+
+  return {
+    ...verdictBase(
+      'planning-readiness',
+      'approved',
+      `Planning ambiguity score ${assessment.ambiguity_score} is at or below ${assessment.ambiguity_threshold}.`,
+    ),
+    ambiguity_score: assessment.ambiguity_score,
+    ambiguity_threshold: assessment.ambiguity_threshold,
+    dimensions: assessment.dimensions,
+  };
 }
 
 async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> {
@@ -631,13 +669,21 @@ async function runConversationTraceLane(topicDir: string): Promise<ReviewVerdict
 export async function runReviewLanes({
   topicDir,
 }: RunReviewLanesInput): Promise<ReviewVerdict[]> {
-  const verdicts = await Promise.all([
+  const upstreamVerdicts = await Promise.all([
     runDomainPolicyLane(topicDir),
+    runPlanningReadinessLane(topicDir),
     runSpecConformanceLane(topicDir),
     runTestAdequacyLane(topicDir),
     runEngineeringDisciplineLane(topicDir),
     runConversationTraceLane(topicDir),
   ]);
+  const verdicts = [
+    ...upstreamVerdicts,
+    await runIndependentReviewGate({
+      topicDir,
+      upstreamVerdicts,
+    }),
+  ];
 
   await Promise.all(
     verdicts.map((verdict) =>

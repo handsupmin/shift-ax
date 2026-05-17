@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -171,6 +172,111 @@ test('runReviewLanes can approve when artifacts become reviewable and connected'
       ),
       'utf8',
     );
+    const worktreePath = join(root, 'worktree');
+    await mkdir(join(worktreePath, 'src'), { recursive: true });
+    await mkdir(join(worktreePath, 'tests'), { recursive: true });
+    await mkdir(join(root, 'execution-results'), { recursive: true });
+    await mkdir(join(root, 'final'), { recursive: true });
+    execFileSync('git', ['init', '--initial-branch=main'], { cwd: worktreePath, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.name', 'Shift AX Test'], { cwd: worktreePath, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'shift-ax@example.com'], { cwd: worktreePath, stdio: 'pipe' });
+    await writeFile(join(worktreePath, 'README.md'), '# worktree\n', 'utf8');
+    execFileSync('git', ['add', 'README.md'], { cwd: worktreePath, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'init'], { cwd: worktreePath, stdio: 'pipe' });
+    await writeFile(join(worktreePath, 'src', 'auth-refresh.ts'), 'export const refresh = true;\n', 'utf8');
+    await writeFile(
+      join(worktreePath, 'tests', 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh rotation follows auth policy', () => {});",
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    execFileSync('git', ['add', 'src/auth-refresh.ts', 'tests/auth-refresh.test.ts'], {
+      cwd: worktreePath,
+      stdio: 'pipe',
+    });
+    await writeFile(
+      join(root, 'workflow-state.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          topic_slug: 'review-green',
+          phase: 'review_pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          plan_review_status: 'approved',
+          worktree: {
+            branch_name: 'ax/review-green',
+            worktree_path: worktreePath,
+            base_branch: 'main',
+          },
+          verification: [
+            {
+              command: 'npm test',
+              source: 'local',
+              exit_code: 0,
+              stdout: 'ok',
+              stderr: '',
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+    await writeFile(
+      join(root, 'worktree-state.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          status: 'created',
+          branch_name: 'ax/review-green',
+          worktree_path: worktreePath,
+          base_branch: 'main',
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+    const outputPath = join(root, 'execution-results', 'task-1.json');
+    await writeFile(
+      outputPath,
+      JSON.stringify(
+        {
+          changed_files: ['src/auth-refresh.ts', 'tests/auth-refresh.test.ts'],
+          summary: 'Updated src/auth-refresh.ts and tests/auth-refresh.test.ts for auth policy refresh rotation.',
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+    await writeFile(
+      join(root, 'execution-state.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          overall_status: 'completed',
+          tasks: [
+            {
+              task_id: 'task-1',
+              execution_mode: 'subagent',
+              status: 'completed',
+              output_path: outputPath,
+              started_at: new Date().toISOString(),
+              completed_at: new Date().toISOString(),
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
 
     const verdicts = await runReviewLanes({ topicDir: root });
     const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
@@ -180,6 +286,7 @@ test('runReviewLanes can approve when artifacts become reviewable and connected'
     assert.equal(byLane.get('test-adequacy')?.status, 'approved');
     assert.equal(byLane.get('engineering-discipline')?.status, 'approved');
     assert.equal(byLane.get('conversation-trace')?.status, 'approved');
+    assert.equal(byLane.get('independent-review')?.status, 'approved');
   } finally {
     await rm(root, { recursive: true, force: true });
   }

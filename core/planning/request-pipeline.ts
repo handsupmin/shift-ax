@@ -49,6 +49,10 @@ import {
   type ShiftAxWorkflowVerification,
 } from './workflow-state.js';
 import { getGlobalContextHome } from '../settings/global-context-home.js';
+import {
+  assessPlanningReadiness,
+  assessTopicPlanningReadiness,
+} from './readiness-assessment.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -351,50 +355,59 @@ export async function startRequestPipeline({
     throw new Error('resolved context still has unresolved base-context paths');
   }
 
+  const finalBrainstormContent = brainstormContent ?? buildDefaultBrainstorm(request, matchedLabels);
+  const finalSpecContent = specContent ?? buildDefaultSpec(request, matchedLabels);
+  const finalImplementationPlanContent =
+    implementationPlanContent ??
+    buildDefaultImplementationPlan(
+      profile?.engineering_defaults.test_strategy ?? 'tdd',
+      profile?.engineering_defaults.architecture ?? 'clean-boundaries',
+    );
+  const readinessAssessment = assessPlanningReadiness({
+    request,
+    matchedContextLabels: matchedLabels,
+    brainstormContent: finalBrainstormContent,
+    specContent: finalSpecContent,
+    implementationPlanContent: finalImplementationPlanContent,
+    now,
+  });
+
   await writeFile(
     topicArtifactPath(topic.topicDir, 'resolved_context'),
     `${JSON.stringify(resolvedContext, null, 2)}\n`,
     'utf8',
   );
   await writeFile(
+    topicArtifactPath(topic.topicDir, 'readiness_assessment'),
+    `${JSON.stringify(readinessAssessment, null, 2)}\n`,
+    'utf8',
+  );
+  await writeFile(
     topicArtifactPath(topic.topicDir, 'brainstorm'),
-    `${brainstormContent ?? buildDefaultBrainstorm(request, matchedLabels)}\n`,
+    `${finalBrainstormContent}\n`,
     'utf8',
   );
   await writeFile(
     topicArtifactPath(topic.topicDir, 'spec'),
-    `${specContent ?? buildDefaultSpec(request, matchedLabels)}\n`,
+    `${finalSpecContent}\n`,
     'utf8',
   );
   await writeFile(
     topicArtifactPath(topic.topicDir, 'implementation_plan'),
-    `${implementationPlanContent ?? buildDefaultImplementationPlan(
-      profile?.engineering_defaults.test_strategy ?? 'tdd',
-      profile?.engineering_defaults.architecture ?? 'clean-boundaries',
-    )}\n`,
+    `${finalImplementationPlanContent}\n`,
     'utf8',
   );
   await applyGlobalKnowledgeUpdatesFromArtifacts({
-    brainstormContent: brainstormContent ?? buildDefaultBrainstorm(request, matchedLabels),
-    specContent: specContent ?? buildDefaultSpec(request, matchedLabels),
-    implementationPlanContent:
-      implementationPlanContent ??
-      buildDefaultImplementationPlan(
-        profile?.engineering_defaults.test_strategy ?? 'tdd',
-        profile?.engineering_defaults.architecture ?? 'clean-boundaries',
-      ),
+    brainstormContent: finalBrainstormContent,
+    specContent: finalSpecContent,
+    implementationPlanContent: finalImplementationPlanContent,
   });
   await writePolicyContextSyncArtifact(
     topic.topicDir,
     inferPolicyContextSyncArtifact({
-      brainstormContent: brainstormContent ?? buildDefaultBrainstorm(request, matchedLabels),
-      specContent: specContent ?? buildDefaultSpec(request, matchedLabels),
-      implementationPlanContent:
-        implementationPlanContent ??
-        buildDefaultImplementationPlan(
-          profile?.engineering_defaults.test_strategy ?? 'tdd',
-          profile?.engineering_defaults.architecture ?? 'clean-boundaries',
-        ),
+      brainstormContent: finalBrainstormContent,
+      specContent: finalSpecContent,
+      implementationPlanContent: finalImplementationPlanContent,
       now,
     }),
   );
@@ -420,6 +433,12 @@ export async function startRequestPipeline({
       query: resolvedContext.query,
       matches: resolvedContext.matches.length,
       unresolved_paths: resolvedContext.unresolved_paths,
+    },
+    readiness: {
+      ambiguity_score: readinessAssessment.ambiguity_score,
+      ambiguity_threshold: readinessAssessment.ambiguity_threshold,
+      status: readinessAssessment.status,
+      blockers: readinessAssessment.blockers,
     },
     escalation: {
       status: 'clear',
@@ -503,6 +522,21 @@ export async function resumeRequestPipeline({
     await writeWorkflowState(topicDir, workflow);
     throw new Error(
       'policy context sync is required before implementation can start',
+    );
+  }
+  const readinessAssessment = await assessTopicPlanningReadiness({ topicDir, now });
+  workflow.readiness = {
+    ambiguity_score: readinessAssessment.ambiguity_score,
+    ambiguity_threshold: readinessAssessment.ambiguity_threshold,
+    status: readinessAssessment.status,
+    blockers: readinessAssessment.blockers,
+  };
+  if (readinessAssessment.status !== 'ready') {
+    workflow.phase = 'awaiting_plan_review';
+    workflow.updated_at = now.toISOString();
+    await writeWorkflowState(topicDir, workflow);
+    throw new Error(
+      `planning readiness needs clarification before implementation can start: ${readinessAssessment.blockers.join('; ')}`,
     );
   }
   workflow.phase = 'implementation_running';

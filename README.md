@@ -204,6 +204,12 @@ That is the core promise:
 - **Plan review gate**
   Shift AX pauses before implementation so a human can confirm the plan.
 
+- **Planning readiness**
+  Each topic records an ambiguity score and blocks review if the request is not clear enough to implement.
+
+- **Independent review gate**
+  Final review includes a clean-context gate that re-checks saved artifacts before commit.
+
 - **Request-to-commit loop**
   Context resolution, planning, implementation, verification, review, and commit as one guided flow.
 

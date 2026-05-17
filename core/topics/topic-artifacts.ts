@@ -4,6 +4,7 @@ export interface ShiftAxTopicArtifacts {
   request: string;
   request_summary: string;
   resolved_context: string;
+  readiness_assessment: string;
   brainstorm: string;
   spec: string;
   plan_review: string;
@@ -29,6 +30,7 @@ export function defaultTopicArtifacts(): ShiftAxTopicArtifacts {
     request: 'request.md',
     request_summary: 'request-summary.md',
     resolved_context: 'resolved-context.json',
+    readiness_assessment: 'readiness-assessment.json',
     brainstorm: 'brainstorm.md',
     spec: 'spec.md',
     plan_review: 'plan-review.json',

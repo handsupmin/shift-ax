@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { buildWorktreePlan } from './worktree.js';
 import { defaultTopicArtifacts } from './topic-artifacts.js';
+import { assessPlanningReadiness } from '../planning/readiness-assessment.js';
 
 export interface TopicBootstrapInput {
   rootDir: string;
@@ -14,6 +15,7 @@ export interface TopicBootstrapArtifacts {
   request: string;
   request_summary: string;
   resolved_context: string;
+  readiness_assessment: string;
   brainstorm: string;
   spec: string;
   plan_review: string;
@@ -164,6 +166,18 @@ export async function bootstrapTopic({
       '- None yet.',
       '',
     ].join('\n');
+  const readinessAssessmentContent = `${JSON.stringify(
+    assessPlanningReadiness({
+      request,
+      matchedContextLabels: [],
+      brainstormContent,
+      specContent,
+      implementationPlanContent,
+      now,
+    }),
+    null,
+    2,
+  )}\n`;
   const executionHandoffContent = `${JSON.stringify(
     {
       version: 1,
@@ -223,6 +237,7 @@ export async function bootstrapTopic({
     writeFile(join(topicDir, artifacts.request), requestContent, 'utf8'),
     writeFile(join(topicDir, artifacts.request_summary), requestSummaryContent, 'utf8'),
     writeFile(join(topicDir, artifacts.resolved_context), resolvedContextContent, 'utf8'),
+    writeFile(join(topicDir, artifacts.readiness_assessment), readinessAssessmentContent, 'utf8'),
     writeFile(join(topicDir, artifacts.brainstorm), brainstormContent, 'utf8'),
     writeFile(join(topicDir, artifacts.spec), specContent, 'utf8'),
     writeFile(join(topicDir, artifacts.plan_review), planReviewContent, 'utf8'),

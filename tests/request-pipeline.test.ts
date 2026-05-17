@@ -231,6 +231,59 @@ test('resumeRequestPipeline round-trips from approval to commit_ready when artif
   }
 });
 
+test('resumeRequestPipeline blocks implementation when planning readiness needs clarification', async () => {
+  const repoRoot = await createGitRepo();
+
+  try {
+    await withTempGlobalHome('shift-ax-pipeline-home-', async () => {
+      await seedSampleOnboarding(repoRoot);
+
+      const started = await startRequestPipeline({
+        rootDir: repoRoot,
+        request: 'Build safer auth refresh flow',
+        summary: 'Need a reviewed auth-refresh delivery flow.',
+        brainstormContent: '# Brainstorm\n\nMaybe improve auth.\n',
+        specContent: '# Topic Spec\n\n## Goal\n\nImprove auth.\n',
+        implementationPlanContent: [
+          '# Implementation Plan',
+          '',
+          '## Acceptance Criteria',
+          '',
+          '- Improve auth.',
+          '',
+          '## Verification Commands',
+          '',
+          '- npm test',
+          '',
+        ].join('\n'),
+        baseBranch: 'main',
+      });
+
+      await recordPlanReviewDecision({
+        topicDir: started.topicDir,
+        reviewer: 'Alex Reviewer',
+        status: 'approved',
+        notes: 'Approved before readiness enforcement rechecked the artifacts.',
+      });
+
+      await assert.rejects(
+        resumeRequestPipeline({
+          topicDir: started.topicDir,
+          verificationCommands: ['echo test'],
+          executionRunner: buildExecutionRunner(['feature.txt', 'auth-refresh.test.ts']),
+        }),
+        /planning readiness needs clarification/i,
+      );
+
+      const workflow = await readWorkflowState(started.topicDir);
+      assert.equal(workflow.phase, 'awaiting_plan_review');
+      assert.equal(workflow.readiness?.status, 'needs_clarification');
+    });
+  } finally {
+    await rm(repoRoot, { recursive: true, force: true });
+  }
+});
+
 test('resumeRequestPipeline records mandatory escalation triggers and blocks until cleared', async () => {
   const repoRoot = await createGitRepo();
 

@@ -259,11 +259,14 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
 
 - review lanes are explicit:
   - domain-policy
+  - planning-readiness
   - spec-conformance
   - test-adequacy
   - engineering-discipline
   - conversation-trace
+  - independent-review
 - verification evidence is written into topic artifacts
+- independent review requires changed files plus completed execution and passing verification evidence
 - commit finalization is blocked until gates pass
 - final commit messages follow a structured Lore protocol
 
@@ -347,7 +350,7 @@ Shift AX prefers an explicit file over an implied chat state.
 ### 5.4 Human review happens before and after implementation
 
 - before implementation: plan review
-- after implementation: structured review lanes
+- after implementation: structured review lanes plus an independent clean-context review gate
 
 ### 5.5 Easy defaults matter more than clever flexibility
 

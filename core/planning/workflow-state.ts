@@ -64,6 +64,12 @@ export interface ShiftAxWorkflowState {
     matches: number;
     unresolved_paths: string[];
   };
+  readiness?: {
+    ambiguity_score: number;
+    ambiguity_threshold: number;
+    status: 'ready' | 'needs_clarification';
+    blockers: string[];
+  };
   review?: {
     overall_status: 'approved' | 'changes_requested' | 'blocked';
     commit_allowed: boolean;

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
@@ -284,6 +284,171 @@ test('test-adequacy review fails when changed code lacks aligned test evidence',
     const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
 
     assert.equal(byLane.get('test-adequacy')?.status, 'changes_requested');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('planning-readiness review recomputes stale assessment artifacts', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir } = await writeReviewableTopic(root);
+    const vaguePlan = [
+      '# Implementation Plan',
+      '',
+      '## Acceptance Criteria',
+      '',
+      '- Improve it.',
+      '',
+      '## Verification Commands',
+      '',
+      '- npm test',
+      '',
+      '## Dependencies',
+      '',
+      '- None.',
+      '',
+      '## Likely Files Touched',
+      '',
+      '- TBD',
+      '',
+      '## Checkpoints',
+      '',
+      '- Decide later.',
+      '',
+      '## Execution Tasks',
+      '',
+      '1. Work on it.',
+      '',
+      '## Anti-Rationalization Guardrails',
+      '',
+      '- Do not widen scope.',
+      '',
+    ].join('\n');
+    await writeFile(join(topicDir, 'request.md'), 'Improve stuff\n', 'utf8');
+    await writeFile(join(topicDir, 'brainstorm.md'), '# Brainstorm\n\nMaybe improve it.\n', 'utf8');
+    await writeFile(join(topicDir, 'spec.md'), '# Topic Spec\n\n## Goal\n\nImprove it.\n', 'utf8');
+    await writeFile(join(topicDir, 'implementation-plan.md'), vaguePlan, 'utf8');
+    await writeFile(
+      join(topicDir, 'plan-review.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          status: 'approved',
+          reviewer: 'Alex Reviewer',
+          reviewed_at: new Date().toISOString(),
+          approved_plan_fingerprint: {
+            plan_path: 'implementation-plan.md',
+            sha256: createHash('sha256').update(vaguePlan).digest('hex'),
+          },
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+    await writeFile(
+      join(topicDir, 'readiness-assessment.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          generated_at: new Date().toISOString(),
+          ambiguity_threshold: 0.2,
+          ambiguity_score: 0,
+          status: 'ready',
+          dimensions: [],
+          blockers: [],
+          recommendations: ['stale fixture'],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+    const refreshed = JSON.parse(
+      await readFile(join(topicDir, 'readiness-assessment.json'), 'utf8'),
+    ) as { status: string };
+
+    assert.equal(byLane.get('planning-readiness')?.status, 'changes_requested');
+    assert.equal(refreshed.status, 'needs_clarification');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('independent review blocks topics without changed-file evidence', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir } = await writeReviewableTopic(root);
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+    const independent = byLane.get('independent-review');
+
+    assert.equal(independent?.status, 'changes_requested');
+    assert.match(JSON.stringify(independent?.issues ?? []), /No changed files/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('independent review blocks incomplete execution tasks', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir, worktreePath } = await writeReviewableTopic(root);
+    await writeFile(join(worktreePath, 'src', 'auth-refresh.ts'), 'export const refresh = true;\n', 'utf8');
+    await writeFile(
+      join(worktreePath, 'tests', 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    execFileSync('git', ['add', 'src/auth-refresh.ts', 'tests/auth-refresh.test.ts'], {
+      cwd: worktreePath,
+      stdio: 'pipe',
+    });
+    await writeFile(
+      join(topicDir, 'execution-state.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          overall_status: 'completed',
+          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
+          tasks: [
+            {
+              task_id: 'task-1',
+              execution_mode: 'subagent',
+              status: 'failed',
+              output_path: join(topicDir, 'execution-results', 'task-1.json'),
+              started_at: new Date().toISOString(),
+              completed_at: new Date().toISOString(),
+              error: 'task failed after writing partial output',
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+    const independent = byLane.get('independent-review');
+
+    assert.equal(independent?.status, 'changes_requested');
+    assert.match(JSON.stringify(independent?.issues ?? []), /incomplete task/i);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

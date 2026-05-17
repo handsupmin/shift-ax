@@ -37,10 +37,12 @@ export interface AggregateReviewsResult {
 
 export const REQUIRED_REVIEW_LANES = [
   'domain-policy',
+  'planning-readiness',
   'spec-conformance',
   'test-adequacy',
   'engineering-discipline',
   'conversation-trace',
+  'independent-review',
 ] as const;
 
 async function readVerdictFile(path: string): Promise<ReviewVerdict> {

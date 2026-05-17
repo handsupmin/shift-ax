@@ -33,6 +33,7 @@ Review-ready plans should also keep anti-rationalization guardrails explicit and
 ## Plan
 
 - turn clarified intent into a spec and implementation plan
+- write a readiness assessment with an ambiguity score, and do not treat the topic as implementation-ready above the threshold
 - keep task slices small, ordered, and testable
 - preserve out-of-scope boundaries
 - require a human plan-review gate before execution
@@ -49,10 +50,13 @@ Review-ready plans should also keep anti-rationalization guardrails explicit and
 ## Review
 
 - verify domain/policy alignment
+- verify planning readiness and ambiguity score
 - verify spec conformance
 - verify tests cover the agreed behavior
 - verify engineering-method discipline
 - verify conversation-trace and execution-result alignment
+- verify the final result through an independent clean-context review gate before commit finalization
+- require the independent gate to see changed files, completed execution-state tasks, and passing workflow verification
 - use the lane playbooks in `docs/review-playbooks/` as the compact review checklist surface
 
 ## Finalize
@@ -77,6 +81,7 @@ Shift AX workflows must explicitly block common shortcuts such as:
 - skipping the base-context index
 - guessing through ambiguity
 - starting implementation before plan review
+- finalizing without an independent file-backed review gate
 - weakening healthy tests instead of fixing logic
 - treating memory or prior transcripts as higher priority than authoritative docs
 
