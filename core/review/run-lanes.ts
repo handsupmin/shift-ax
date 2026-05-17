@@ -7,6 +7,7 @@ import { runIndependentReviewGate } from './independent-review.js';
 import { readProjectProfile } from '../policies/project-profile.js';
 import {
   extractExecutionTaskLines,
+  extractMarkdownBullets,
   listMissingImplementationPlanSections,
   parseMarkdownSections,
   readPlanSection,
@@ -62,6 +63,14 @@ function tokenizeReviewWords(value: string): string[] {
 function hasTokenOverlap(content: string, reference: string): boolean {
   const haystack = String(content || '').toLowerCase();
   return tokenizeReviewWords(reference).some((token) => haystack.includes(token));
+}
+
+function isExplicitlyInScopeFile(file: string, plan: string): boolean {
+  const sections = parseMarkdownSections(plan);
+  const likelyFiles = extractMarkdownBullets(readPlanSection(sections, 'Likely Files Touched'));
+  const executionLanes = readPlanSection(sections, 'Execution Lanes (Optional)');
+  const inScopeReference = [...likelyFiles, executionLanes].join('\n');
+  return hasTokenOverlap(file, inScopeReference);
 }
 
 function buildPlanCompletionAudit({
@@ -207,7 +216,11 @@ function listChangedFiles(worktreePath: string): string[] {
 }
 
 function isTestFile(path: string): boolean {
-  return /(^|\/)(tests?|__tests__)\//i.test(path) || /\.(test|spec)\.[cm]?[jt]sx?$/i.test(path);
+  return (
+    /(^|\/)(tests?|__tests__)\//i.test(path) ||
+    /\.(test|spec)\.[cm]?[jt]sx?$/i.test(path) ||
+    /(^|\/)(test_[^/]+|[^/]+_test)\.py$/i.test(path)
+  );
 }
 
 function strategyPattern(value: string): RegExp {
@@ -396,7 +409,9 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
       executionResults: await readExecutionResultArtifacts(topicDir),
     });
 
-    const outOfScopeTouched = changedFiles.find((file) => hasTokenOverlap(file, outOfScopeContent));
+    const outOfScopeTouched = changedFiles.find((file) =>
+      hasTokenOverlap(file, outOfScopeContent) && !isExplicitlyInScopeFile(file, plan),
+    );
     if (outOfScopeTouched) {
       return verdictBase(
         'spec-conformance',
@@ -435,7 +450,9 @@ async function runTestAdequacyLane(topicDir: string): Promise<ReviewVerdict> {
 
   if (worktreePath) {
     const successfulTestCommand = (workflow?.verification ?? []).some(
-      (item) => item.exit_code === 0 && /\b(test|jest|vitest|pytest|go test|cargo test|phpunit|rspec)\b/i.test(item.command),
+      (item) =>
+        item.exit_code === 0 &&
+        /\b(test|jest|vitest|pytest|unittest|go test|cargo test|phpunit|rspec)\b/i.test(item.command),
     );
     if (!successfulTestCommand) {
       return verdictBase(
