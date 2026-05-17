@@ -209,7 +209,7 @@ That is the core promise:
   Each topic records an ambiguity score and blocks review if the request is not clear enough to implement.
 
 - **Independent review gate**
-  Final review includes a clean-context gate that re-checks saved artifacts before commit.
+  Final review includes a clean-context gate that re-checks saved artifacts before commit, including path scope, side-effect risk, and test relevance evidence.
 
 - **Request-to-commit loop**
   Context resolution, planning, implementation, verification, review, and commit as one guided flow.

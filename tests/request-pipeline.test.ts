@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 import {
@@ -123,6 +123,7 @@ function buildExecutionRunner(
             '',
           ].join('\n')
         : 'done\n';
+      await mkdir(dirname(join(worktreePath, file)), { recursive: true });
       await writeFile(join(worktreePath, file), content, 'utf8');
     }
     await writeFile(
@@ -213,7 +214,7 @@ test('resumeRequestPipeline round-trips from approval to commit_ready when artif
       const resumed = await resumeRequestPipeline({
         topicDir: started.topicDir,
         verificationCommands: ['echo test'],
-        executionRunner: buildExecutionRunner(['feature.txt', 'auth-refresh.test.ts']),
+        executionRunner: buildExecutionRunner(['src/auth-refresh.ts', 'tests/auth-refresh.test.ts']),
       });
       const workflow = await readWorkflowState(started.topicDir);
       const commitMessage = await readFile(
@@ -270,7 +271,7 @@ test('resumeRequestPipeline blocks implementation when planning readiness needs 
         resumeRequestPipeline({
           topicDir: started.topicDir,
           verificationCommands: ['echo test'],
-          executionRunner: buildExecutionRunner(['feature.txt', 'auth-refresh.test.ts']),
+          executionRunner: buildExecutionRunner(['src/auth-refresh.ts', 'tests/auth-refresh.test.ts']),
         }),
         /planning readiness needs clarification/i,
       );
@@ -331,7 +332,7 @@ test('resumeRequestPipeline records mandatory escalation triggers and blocks unt
         clearEscalations: true,
         escalationResolution: 'Human reviewer accepted the policy change after follow-up.',
         verificationCommands: ['echo test'],
-        executionRunner: buildExecutionRunner(['feature.txt', 'auth-refresh.test.ts']),
+        executionRunner: buildExecutionRunner(['src/auth-refresh.ts', 'tests/auth-refresh.test.ts']),
       });
       const workflow = await readWorkflowState(started.topicDir);
 
@@ -371,12 +372,14 @@ test('resumeRequestPipeline can orchestrate execution tasks before verification 
 
       const resumed = await resumeRequestPipeline({
         topicDir: started.topicDir,
-        verificationCommands: ['test -f executed.txt'],
+        verificationCommands: ['test -f src/auth-refresh.ts'],
         executionRunner: async ({ topicDir, worktreePath }) => {
         await mkdir(join(topicDir, 'execution-results'), { recursive: true });
-        await writeFile(join(worktreePath, 'executed.txt'), 'done\n', 'utf8');
+        await mkdir(join(worktreePath, 'src'), { recursive: true });
+        await mkdir(join(worktreePath, 'tests'), { recursive: true });
+        await writeFile(join(worktreePath, 'src', 'auth-refresh.ts'), 'done\n', 'utf8');
         await writeFile(
-          join(worktreePath, 'executed.test.js'),
+          join(worktreePath, 'tests', 'auth-refresh.test.ts'),
           [
             "import test from 'node:test';",
             "test('auth refresh keeps users signed in without schema changes', () => {});",
@@ -389,7 +392,7 @@ test('resumeRequestPipeline can orchestrate execution tasks before verification 
           join(topicDir, 'execution-results', 'task-1.json'),
           JSON.stringify(
             {
-              changed_files: ['executed.txt', 'executed.test.js'],
+              changed_files: ['src/auth-refresh.ts', 'tests/auth-refresh.test.ts'],
               summary: 'Executed auth refresh work and added regression coverage.',
             },
             null,

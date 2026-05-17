@@ -39,6 +39,7 @@ export const REQUIRED_REVIEW_LANES = [
   'domain-policy',
   'planning-readiness',
   'spec-conformance',
+  'side-effect-risk',
   'test-adequacy',
   'engineering-discipline',
   'conversation-trace',

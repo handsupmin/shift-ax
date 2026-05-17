@@ -9,6 +9,7 @@ import {
   extractExecutionTaskLines,
   extractMarkdownBullets,
   listMissingImplementationPlanSections,
+  parseExecutionLaneMetadata,
   parseMarkdownSections,
   readPlanSection,
 } from '../planning/implementation-plan.js';
@@ -52,12 +53,47 @@ function verdictBase(
 }
 
 function tokenizeReviewWords(value: string): string[] {
+  const stopWords = new Set([
+    'that',
+    'this',
+    'with',
+    'from',
+    'into',
+    'when',
+    'then',
+    'keep',
+    'true',
+    'false',
+    'const',
+    'export',
+    'import',
+    'class',
+    'function',
+    'return',
+    'async',
+    'await',
+    'test',
+    'tests',
+    'describe',
+    'should',
+    'expect',
+    'assert',
+    'string',
+    'number',
+    'null',
+    'undefined',
+    'default',
+    'public',
+    'private',
+    'static',
+  ]);
+
   return String(value || '')
     .toLowerCase()
     .split(/[^a-z0-9]+/)
     .map((token) => token.trim())
     .filter((token) => token.length >= 4)
-    .filter((token) => !['that', 'this', 'with', 'from', 'into', 'when', 'then', 'keep'].includes(token));
+    .filter((token) => !stopWords.has(token));
 }
 
 function hasTokenOverlap(content: string, reference: string): boolean {
@@ -65,12 +101,76 @@ function hasTokenOverlap(content: string, reference: string): boolean {
   return tokenizeReviewWords(reference).some((token) => haystack.includes(token));
 }
 
-function isExplicitlyInScopeFile(file: string, plan: string): boolean {
+function countSharedReviewTokens(content: string, reference: string): number {
+  const referenceTokens = new Set(tokenizeReviewWords(reference));
+  const contentTokens = new Set(tokenizeReviewWords(content));
+  let count = 0;
+  for (const token of referenceTokens) {
+    if (contentTokens.has(token)) count += 1;
+  }
+  return count;
+}
+
+function normalizeReviewPath(path: string): string {
+  return path
+    .trim()
+    .replace(/^["'`]+|["'`,.;:]+$/g, '')
+    .replace(/\\/g, '/')
+    .replace(/^\.\//, '')
+    .replace(/\/+/g, '/');
+}
+
+function extractPathReferences(value: string): string[] {
+  const matches =
+    String(value || '').match(/[A-Za-z0-9_@./{}*-]+(?:\/[A-Za-z0-9_@./{}*-]+|\.[A-Za-z0-9]+)[A-Za-z0-9_@./{}*-]*/g) ?? [];
+  return matches
+    .map(normalizeReviewPath)
+    .filter(Boolean)
+    .filter((path) => !/^none$/i.test(path))
+    .filter((path) => !/^https?:\/\//i.test(path));
+}
+
+function extractPlannedPathReferences(plan: string): string[] {
   const sections = parseMarkdownSections(plan);
-  const likelyFiles = extractMarkdownBullets(readPlanSection(sections, 'Likely Files Touched'));
-  const executionLanes = readPlanSection(sections, 'Execution Lanes (Optional)');
-  const inScopeReference = [...likelyFiles, executionLanes].join('\n');
-  return hasTokenOverlap(file, inScopeReference);
+  const likelyFiles = readPlanSection(sections, 'Likely Files Touched');
+  const executionLanes = readPlanSection(sections, 'Execution Lanes (Optional)', 'Execution Lanes');
+  const laneMetadata = parseExecutionLaneMetadata(plan);
+  const references = [
+    ...extractMarkdownBullets(likelyFiles).flatMap(extractPathReferences),
+    ...extractPathReferences(executionLanes),
+    ...[...laneMetadata.values()].flatMap((metadata) => metadata.allowed_paths ?? []),
+  ];
+  return [...new Set(references.map(normalizeReviewPath).filter(Boolean))];
+}
+
+function wildcardPathToRegExp(path: string): RegExp {
+  const escaped = path
+    .split('*')
+    .map((part) => part.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&'))
+    .join('.*');
+  return new RegExp(`^${escaped}$`);
+}
+
+function plannedPathMatchesFile(file: string, reference: string): boolean {
+  const normalizedFile = normalizeReviewPath(file);
+  const normalizedReference = normalizeReviewPath(reference);
+  if (!normalizedReference) return false;
+  if (normalizedReference.includes('*')) {
+    return wildcardPathToRegExp(normalizedReference).test(normalizedFile);
+  }
+  return (
+    normalizedFile === normalizedReference ||
+    normalizedFile.startsWith(`${normalizedReference.replace(/\/$/, '')}/`) ||
+    (normalizedReference.startsWith('**/') && normalizedFile.endsWith(normalizedReference.slice(3)))
+  );
+}
+
+function isExplicitlyInScopeFile(file: string, plan: string): boolean {
+  const pathReferences = extractPlannedPathReferences(plan);
+  if (pathReferences.some((reference) => plannedPathMatchesFile(file, reference))) {
+    return true;
+  }
+  return hasTokenOverlap(file, pathReferences.join('\n'));
 }
 
 function buildPlanCompletionAudit({
@@ -220,6 +320,70 @@ function isTestFile(path: string): boolean {
     /(^|\/)(tests?|__tests__)\//i.test(path) ||
     /\.(test|spec)\.[cm]?[jt]sx?$/i.test(path) ||
     /(^|\/)(test_[^/]+|[^/]+_test)\.py$/i.test(path)
+  );
+}
+
+function needsChangedTestEvidence(path: string): boolean {
+  if (isTestFile(path)) return false;
+  if (/(^|\/)(docs?|readme|changelog)\//i.test(path) || /\.(md|mdx|txt|png|jpe?g|gif|svg|webp)$/i.test(path)) {
+    return false;
+  }
+  return /\.(cjs|cts|go|graphql|java|js|jsx|kt|mjs|mts|php|prisma|py|rb|rs|sql|swift|ts|tsx)$/i.test(path);
+}
+
+function classifySideEffectRisk(path: string): Array<{
+  category: string;
+  verificationPattern: RegExp;
+}> {
+  const normalized = normalizeReviewPath(path);
+  const risks: Array<{ category: string; verificationPattern: RegExp }> = [];
+
+  if (/(^|\/)(package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|bun\.lockb|requirements\.txt|poetry\.lock|pyproject\.toml)$/i.test(normalized)) {
+    risks.push({
+      category: 'dependency or package metadata',
+      verificationPattern: /\b(build|type-?check|tsc|lint|test|prepack)\b/i,
+    });
+  }
+  if (/(^|\/)(Dockerfile|docker-compose|tsconfig|vite\.config|webpack|rollup|eslint|prettier|babel|jest|vitest|next\.config)/i.test(normalized)) {
+    risks.push({
+      category: 'runtime or build configuration',
+      verificationPattern: /\b(build|type-?check|tsc|lint|test|prepack)\b/i,
+    });
+  }
+  if (/(^|\/)(\.github|k8s|helm|terraform|infra|deploy|charts|ops)\//i.test(normalized)) {
+    risks.push({
+      category: 'deployment or infrastructure surface',
+      verificationPattern: /\b(build|lint|test|plan|validate|dry[- ]?run)\b/i,
+    });
+  }
+  if (/(^|\/)(migration|migrations|schema|prisma)\//i.test(normalized) || /\.(prisma|sql)$/i.test(normalized) || /(^|\/)(model\.py|alembic\.ini)$/i.test(normalized)) {
+    risks.push({
+      category: 'database schema or migration surface',
+      verificationPattern: /\b(test|pytest|unittest|migration|prisma|schema|compile|py_compile|pg|dto)\b/i,
+    });
+  }
+  if (/(^|\/)(auth|security|permission|policy|role|payment|billing|wallet|ledger|cron|worker|queue)[A-Za-z0-9_.-]*/i.test(normalized)) {
+    risks.push({
+      category: 'security, money, scheduled, or background side-effect surface',
+      verificationPattern: /\b(build|type-?check|tsc|lint|test|pytest|unittest|vitest|jest)\b/i,
+    });
+  }
+
+  return risks;
+}
+
+function hasRiskMitigationLanguage(...values: string[]): boolean {
+  return /\b(side[- ]?effect|risk|risky|rollback|compatib|backward|forward|migration|schema|database|permission|auth|security|deploy|release|config|environment|generated|manual|staging|nullable|impact)\b|사이드|위험|리스크|롤백|호환|마이그레이션|스키마|권한|인증|보안|배포|환경|수동|스테이징|안전/i.test(
+    values.join('\n'),
+  );
+}
+
+function hasPassingVerificationMatching(
+  workflow: { verification?: Array<{ command: string; exit_code: number }> } | null,
+  pattern: RegExp,
+): boolean {
+  return (workflow?.verification ?? []).some(
+    (item) => item.exit_code === 0 && pattern.test(item.command),
   );
 }
 
@@ -443,6 +607,95 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
   );
 }
 
+async function runSideEffectRiskLane(topicDir: string): Promise<ReviewVerdict> {
+  const [plan, spec, brainstorm] = await Promise.all([
+    readMaybe(join(topicDir, 'implementation-plan.md')),
+    readMaybe(join(topicDir, 'spec.md')),
+    readMaybe(join(topicDir, 'brainstorm.md')),
+  ]);
+  const workflow = await readWorkflowStateMaybe(topicDir);
+  const worktreePath = workflow?.worktree?.worktree_path;
+  if (!worktreePath) {
+    return verdictBase(
+      'side-effect-risk',
+      'changes_requested',
+      'Worktree evidence is missing, so side-effect risk cannot be reviewed.',
+      [
+        {
+          severity: 'high',
+          message: 'Create or record the implementation worktree before side-effect review can pass.',
+        },
+      ],
+    );
+  }
+
+  const changedFiles = listChangedFiles(worktreePath);
+  if (changedFiles.length === 0) {
+    return verdictBase(
+      'side-effect-risk',
+      'changes_requested',
+      'No changed files are present, so side-effect risk cannot be reviewed.',
+      [
+        {
+          severity: 'high',
+          message: 'Review requires changed-file evidence before commit can be allowed.',
+        },
+      ],
+    );
+  }
+
+  const plannedPathReferences = extractPlannedPathReferences(plan);
+  const issues = plannedPathReferences.length > 0
+    ? changedFiles
+        .filter((file) => !plannedPathReferences.some((reference) => plannedPathMatchesFile(file, reference)))
+        .map((file) => ({
+          severity: 'high' as const,
+          message: `Changed file is not listed in the reviewed likely files or allowed paths: ${file}`,
+        }))
+    : [];
+
+  const riskEntries = changedFiles.flatMap((file) =>
+    classifySideEffectRisk(file).map((risk) => ({ file, ...risk })),
+  );
+  const reviewText = [plan, spec, brainstorm].join('\n');
+  if (riskEntries.length > 0 && !hasRiskMitigationLanguage(reviewText)) {
+    issues.push({
+      severity: 'high',
+      message: `Side-effect-sensitive files changed without explicit risk, rollback, compatibility, deployment, or verification language: ${riskEntries.map((risk) => risk.file).join(', ')}`,
+    });
+  }
+
+  for (const risk of riskEntries) {
+    if (!hasPassingVerificationMatching(workflow, risk.verificationPattern)) {
+      issues.push({
+        severity: 'high',
+        message: `Side-effect-sensitive change needs a passing verification command for ${risk.category}: ${risk.file}`,
+      });
+    }
+  }
+
+  if (issues.length > 0) {
+    return verdictBase(
+      'side-effect-risk',
+      'changes_requested',
+      'Changed files include unplanned or side-effect-sensitive surfaces that are not sufficiently proven safe.',
+      issues,
+    );
+  }
+
+  return {
+    ...verdictBase(
+      'side-effect-risk',
+      'approved',
+      riskEntries.length > 0
+        ? 'Changed files stay inside the reviewed path set, and side-effect-sensitive surfaces have mitigation language plus passing verification evidence.'
+        : 'Changed files stay inside the reviewed path set and no side-effect-sensitive surfaces were detected.',
+    ),
+    planned_path_count: plannedPathReferences.length,
+    side_effect_sensitive_files: [...new Set(riskEntries.map((risk) => risk.file))],
+  };
+}
+
 async function runTestAdequacyLane(topicDir: string): Promise<ReviewVerdict> {
   const plan = await readMaybe(join(topicDir, 'implementation-plan.md'));
   const workflow = await readWorkflowStateMaybe(topicDir);
@@ -469,7 +722,7 @@ async function runTestAdequacyLane(topicDir: string): Promise<ReviewVerdict> {
     }
 
     const changedFiles = listChangedFiles(worktreePath);
-    const changedCodeFiles = changedFiles.filter((file) => !isTestFile(file));
+    const changedCodeFiles = changedFiles.filter(needsChangedTestEvidence);
     const changedTestFiles = changedFiles.filter((file) => isTestFile(file));
 
     if (changedCodeFiles.length > 0 && changedTestFiles.length === 0) {
@@ -502,10 +755,13 @@ async function runTestAdequacyLane(topicDir: string): Promise<ReviewVerdict> {
       })();
       const desiredCoverage = [spec, brainstorm, contextLabels].join('\n');
       const testContents = await Promise.all(
-        changedTestFiles.map((file) => readMaybe(join(worktreePath, file))),
+        changedTestFiles.map(async (file) => ({
+          file,
+          content: await readMaybe(join(worktreePath, file)),
+        })),
       );
-      const hasRelevantCoverage = testContents.some((content) =>
-        hasTokenOverlap(content, desiredCoverage),
+      const hasRelevantCoverage = testContents.some((test) =>
+        hasTokenOverlap(test.content, desiredCoverage),
       );
 
       if (!hasRelevantCoverage) {
@@ -519,6 +775,33 @@ async function runTestAdequacyLane(topicDir: string): Promise<ReviewVerdict> {
               message: 'Make the changed tests reference the agreed outcome, constraints, or domain-policy terms more explicitly.',
             },
           ],
+        );
+      }
+
+      const codeEvidence = await Promise.all(
+        changedCodeFiles.map(async (file) => ({
+          file,
+          reference: [file, await readMaybe(join(worktreePath, file))].join('\n'),
+        })),
+      );
+      const uncoveredCodeFiles = codeEvidence
+        .filter((code) =>
+          !testContents.some((test) =>
+            hasTokenOverlap(test.content, desiredCoverage) &&
+            countSharedReviewTokens([test.file, test.content].join('\n'), code.reference) > 0,
+          ),
+        )
+        .map((code) => code.file);
+
+      if (uncoveredCodeFiles.length > 0) {
+        return verdictBase(
+          'test-adequacy',
+          'changes_requested',
+          'Changed tests do not clearly map back to every changed implementation file.',
+          uncoveredCodeFiles.map((file) => ({
+            severity: 'high' as const,
+            message: `No changed test evidence appears aligned with implementation file: ${file}`,
+          })),
         );
       }
     }
@@ -690,6 +973,7 @@ export async function runReviewLanes({
     runDomainPolicyLane(topicDir),
     runPlanningReadinessLane(topicDir),
     runSpecConformanceLane(topicDir),
+    runSideEffectRiskLane(topicDir),
     runTestAdequacyLane(topicDir),
     runEngineeringDisciplineLane(topicDir),
     runConversationTraceLane(topicDir),

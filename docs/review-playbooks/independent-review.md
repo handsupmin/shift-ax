@@ -7,6 +7,7 @@
 
 ## Approve when
 - Upstream lanes are approved.
+- The side-effect-risk lane has approved changed-file scope and risk evidence.
 - Plan review is approved and fingerprint-matched.
 - Planning readiness is `ready`.
 - The implementation worktree has changed files to review.

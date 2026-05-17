@@ -283,6 +283,7 @@ test('runReviewLanes can approve when artifacts become reviewable and connected'
 
     assert.equal(byLane.get('domain-policy')?.status, 'approved');
     assert.equal(byLane.get('spec-conformance')?.status, 'approved');
+    assert.equal(byLane.get('side-effect-risk')?.status, 'approved');
     assert.equal(byLane.get('test-adequacy')?.status, 'approved');
     assert.equal(byLane.get('engineering-discipline')?.status, 'approved');
     assert.equal(byLane.get('conversation-trace')?.status, 'approved');

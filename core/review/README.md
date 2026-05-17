@@ -6,6 +6,7 @@ The intended review lanes are:
 
 - domain and policy review
 - spec-conformance review
+- side-effect-risk review
 - test adequacy review
 - engineering-discipline review
 - conversation-trace review

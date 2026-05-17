@@ -5,6 +5,7 @@ Use these lane playbooks during review. They are compact checklists, not extra w
 - `domain-policy.md`
 - `planning-readiness.md`
 - `spec-conformance.md`
+- `side-effect-risk.md`
 - `test-adequacy.md`
 - `engineering-discipline.md`
 - `conversation-trace.md`
