@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -10,6 +10,23 @@ import { readProjectProfile } from '../core/policies/project-profile.js';
 import { withTempGlobalHome } from './helpers/global-home.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
+
+test('ax-onboard-context --help exits without starting guided onboarding', () => {
+  const result = spawnSync(
+    process.execPath,
+    ['--import', 'tsx', 'scripts/ax.ts', 'onboard-context', '--help'],
+    {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      input: '',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    },
+  );
+
+  assert.equal(result.status, 0);
+  assert.match(result.stderr, /Usage: ax-onboard-context/);
+  assert.doesNotMatch(result.stderr, /What kind of work do you usually own or lead/);
+});
 
 test('ax-onboard-context prompts interactively when no input file is provided', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboarding-cli-'));

@@ -100,7 +100,7 @@ if (shellMode) {
       '  shift-ax worktree-plan --topic DIR',
       '  shift-ax worktree-create --topic DIR [--base BRANCH]',
       '  shift-ax worktree-remove --topic DIR',
-      '  shift-ax onboard-context [--input FILE] [--discover] [--overwrite] [--lang en|ko] [--platform <codex|claude-code>] [--root DIR]',
+      '  shift-ax onboard-context [--input FILE] [--discover] [--gctree-reference DIR] [--overwrite] [--lang en|ko] [--platform <codex|claude-code>] [--root DIR]',
       '  shift-ax export-context',
       '  shift-ax doctor [--root DIR] [--topic DIR] [--platform <codex|claude-code>]',
       '  shift-ax run-request --request "<text>" [--summary "<text>"] [--brainstorm-file PATH] [--spec-file PATH] [--plan-file PATH] [--index PATH] [--allow-missing-global-context] [--root DIR] [--base BRANCH]  # interactive planning by default',

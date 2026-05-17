@@ -8,13 +8,14 @@ import {
   onboardProjectContext,
   onboardProjectContextFromDiscovery,
 } from '../core/context/onboarding.js';
+import { onboardProjectContextFromGctreeReference } from '../core/context/gctree-reference-import.js';
 import { runGuidedOnboarding } from '../core/context/guided-onboarding.js';
 import { readProjectSettings, writeProjectSettings, type ShiftAxLocale } from '../core/settings/project-settings.js';
 import type { ShiftAxPlatform } from '../adapters/contracts.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-onboard-context [--input FILE] [--discover] [--no-glossary] [--overwrite] [--lang en|ko] [--platform codex|claude-code] [--root DIR]\n',
+    'Usage: ax-onboard-context [--input FILE] [--discover] [--gctree-reference DIR] [--no-glossary] [--overwrite] [--lang en|ko] [--platform codex|claude-code] [--root DIR]\n',
   );
 }
 
@@ -74,22 +75,28 @@ async function promptLocaleSelection(ask: (question: string) => Promise<string>)
 }
 
 async function main(): Promise<void> {
+  if (process.argv.includes('--help')) {
+    usage();
+    return;
+  }
+
   const inputPath = readArg('--input');
   const rootDir = readArg('--root') || process.cwd();
   const discover = process.argv.includes('--discover');
+  const gctreeReferenceDir = readArg('--gctree-reference');
   const includeGlossary = !process.argv.includes('--no-glossary');
   const overwrite = process.argv.includes('--overwrite');
   const localeArg = readArg('--lang');
   const platformArg = readArg('--platform');
   const prompts =
-    inputPath || discover || localeArg
+    inputPath || discover || gctreeReferenceDir || localeArg
       ? null
       : await createPromptSession();
 
   const locale =
     localeArg === 'ko' || localeArg === 'en'
       ? localeArg
-      : inputPath || discover
+      : inputPath || discover || gctreeReferenceDir
         ? 'en'
         : await promptLocaleSelection(prompts!.ask);
 
@@ -102,6 +109,12 @@ async function main(): Promise<void> {
           rootDir,
           overwrite,
         })
+      : gctreeReferenceDir
+        ? await onboardProjectContextFromGctreeReference({
+            rootDir,
+            referenceDir: gctreeReferenceDir,
+            overwrite,
+          })
       : discover
         ? await onboardProjectContextFromDiscovery({ rootDir, includeGlossary, overwrite })
         : await runGuidedOnboarding({

@@ -66,7 +66,7 @@ function scoreEntry(entry: IndexEntry, queryTokens: string[], query: string): nu
   const queryLower = String(query || '').toLowerCase();
   const labelLower = entry.label.toLowerCase();
   if (labelLower.length >= 3 && queryLower.includes(labelLower)) score += 5;
-  if (entry.path.startsWith('domain-language/')) score += 8;
+  if (score > 0 && entry.path.startsWith('domain-language/')) score += 8;
   return score;
 }
 

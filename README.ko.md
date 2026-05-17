@@ -132,6 +132,7 @@ Shift AX는 먼저 컨텍스트를 해석하고, 요청 전용 topic/worktree를
 
 ```bash
 shift-ax onboard-context --discover
+shift-ax onboard-context --gctree-reference /path/to/reference
 shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
 shift-ax run-request --topic .shift-ax/topics/<topic> --resume

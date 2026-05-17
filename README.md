@@ -132,6 +132,7 @@ Common runtime commands:
 
 ```bash
 shift-ax onboard-context --discover
+shift-ax onboard-context --gctree-reference /path/to/reference
 shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
 shift-ax run-request --topic .shift-ax/topics/<topic> --resume

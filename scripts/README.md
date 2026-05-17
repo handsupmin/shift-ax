@@ -41,6 +41,7 @@ Current request-to-commit behavior:
 - `shift-ax onboard-context` still exists for explicit scripted or manual onboarding, but the preferred first-run UX is now in-shell onboarding through the platform wrapper.
 - `scripts/install-global.sh` is the one-command installer used by the public README and setup docs for global npm installation.
 - `shift-ax onboard-context` now supports a guided interactive interview by default and still accepts `--input <file>` for scripted onboarding. It writes or migrates knowledge into `~/.shift-ax/`, regenerates `~/.shift-ax/index.md`, and persists the shared engineering profile.
+- `shift-ax onboard-context --gctree-reference <dir>` imports an existing gc-tree style reference bundle into `~/.shift-ax/` while preserving linked markdown docs as Shift AX dictionary sources.
 - `shift-ax export-context` prints sharing guidance for the global `~/.shift-ax/` profile.
 - `shift-ax doctor [--root <dir>] [--topic <dir>] [--platform codex|claude-code]` prints a compact health report for the repo, global index, shared profile, topic state, and optional launcher readiness.
 - `shift-ax run-request --request <text>` bootstraps a topic/worktree, resolves the global index first, runs an interactive planning interview by default, writes brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pauses at the human planning-review gate.
