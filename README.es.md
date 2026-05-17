@@ -59,6 +59,9 @@ Si consigues dejar bien aterrizados el diseño y los requisitos, Shift AX está 
 - **Guardrails de request-to-commit**
   Primero resuelve contexto, luego revisa el plan y solo después pasa a implementación, verificación, review y commit con menos ambigüedad.
 
+- **Harness determinista de agentes**
+  Ejecuta trabajo de agentes dentro de rieles controlados por scripts: FSM, SQLite queue, DAG readiness, retry e idempotency, en vez de dejar la orquestación a la improvisación del LLM.
+
 ---
 
 ## Instalación y arranque rápido
@@ -209,7 +212,7 @@ La promesa central es esta:
   El review final incluye una puerta de clean-context que solo lee artefactos guardados y vuelve a comprobar onboarding compliance, evidencia de PRD, alcance de paths, riesgo de side effects y relevancia de tests antes del commit.
 
 - **Bucle request-to-commit**
-  Context resolution, planificación, implementación, verificación, review y commit como un solo flujo guiado.
+  Context resolution, planificación, orquestación determinista, implementación, verificación, review y commit como un solo flujo guiado.
 
 ---
 

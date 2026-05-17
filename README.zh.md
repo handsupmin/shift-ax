@@ -59,6 +59,9 @@ Shift AX 的目标，就是把这一层变简单。
 - **request-to-commit 护栏**
   先解上下文，再审计划，然后再进入实现、验证、评审和提交，减少整条链路里的模糊地带。
 
+- **确定性的 agent harness**
+  不把编排交给 LLM 即兴处理，而是在脚本拥有的 FSM、SQLite queue、DAG readiness、retry、idempotency 轨道里运行 agent 工作。
+
 ---
 
 ## 安装与快速开始
@@ -209,7 +212,7 @@ Shift AX 不会要求你在每个仓库里一遍遍重建这些上下文，而�
   最终评审包含一个只读取已保存工件的 clean-context 关卡，在提交前重新检查 onboarding compliance、PRD 证据、路径范围、副作用风险以及测试相关性。
 
 - **request-to-commit 闭环**
-  把上下文解析、计划、实现、验证、评审和提交组织成一条有引导的流程。
+  把上下文解析、计划、确定性编排、实现、验证、评审和提交组织成一条有引导的流程。
 
 ---
 

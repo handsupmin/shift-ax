@@ -59,6 +59,9 @@ If you can get the design and requirements into good shape, Shift AX is built to
 - **Request-to-commit guardrails**
   Resolve context first, review the plan, then move through implementation, verification, review, and final commit with less ambiguity.
 
+- **Deterministic agent harness**
+  Run agent work inside script-owned FSM, SQLite queue, DAG readiness, retry, and idempotency rails instead of letting the LLM improvise orchestration.
+
 ---
 
 ## Install & quick start
@@ -212,7 +215,7 @@ That is the core promise:
   Final review includes a clean-context gate that re-checks saved artifacts before commit, including onboarding compliance, PRD evidence, path scope, side-effect risk, and test relevance.
 
 - **Request-to-commit loop**
-  Context resolution, planning, implementation, verification, review, and commit as one guided flow.
+  Context resolution, planning, deterministic orchestration, implementation, verification, review, and commit as one guided flow.
 
 ---
 

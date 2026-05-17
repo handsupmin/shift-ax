@@ -222,6 +222,9 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 **Shift AX 철학**
 
+- 실행 오케스트레이션은 전통적인 시스템 문제다
+- finite-state machine, queue, DAG readiness, retry, idempotency, durable state는 스크립트가 소유해야 한다
+- LLM은 claim된 task 안에서 판단하거나 구현할 수 있지만 task routing, failure policy, commit readiness를 소유하지 않는다
 - 짧은 작업과 긴 작업은 같은 실행 형태가 아니다
 - 실행은 관측 가능하고 재개 가능해야 한다
 
@@ -229,10 +232,15 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 - **OMX / OMC**: subagent vs tmux execution split
 - **agent-orchestrator**: lifecycle / session 개념
+- **traditional CS control plane**: priority queue, DAG, retry policy, idempotency guard
 
 **Shift AX에서의 번역**
 
 - execution handoff / execution state를 파일로 기록한다
+- execution task는 topic 아래 local SQLite `harness.sqlite` queue에 저장된다
+- deterministic finite-state machine이 잘못된 workflow jump를 거부한다
+- priority DAG queue는 dependency가 완료된 task만 claim한다
+- retry scheduling과 idempotency key는 prompt discipline이 아니라 코드가 처리한다
 - 짧은 작업은 subagent에 매핑할 수 있다
 - 긴 작업은 tmux-backed 실행에 매핑할 수 있다
 - downstream feedback 후 implementation 재개도 workflow state로 표현한다

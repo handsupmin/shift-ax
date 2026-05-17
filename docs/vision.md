@@ -164,7 +164,8 @@ The intended end-to-end flow is:
    - check for internal consistency, policy conflicts, and missing requirements
 
 5. **Implementation**
-   - use subagents for short, bounded tasks
+   - use a deterministic FSM/SQLite harness for task state, queueing, DAG readiness, retries, and idempotency
+   - use subagents for short, bounded tasks only after the harness claims the task
    - use tmux-backed workers for longer or more durable tasks
    - apply engineering methods such as TDD and architecture constraints
 

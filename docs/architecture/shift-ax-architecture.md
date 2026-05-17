@@ -227,6 +227,9 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
 
 **Shift AX philosophy**
 
+- execution orchestration is a classical systems problem
+- finite-state machines, queues, DAG readiness, retries, idempotency, and durable state must be script-owned
+- LLMs can judge or implement inside a claimed task, but they do not own task routing, failure policy, or commit readiness
 - short work and long work do not have the same execution shape
 - execution should be resumable and observable
 
@@ -234,10 +237,15 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
 
 - **OMX / OMC**: subagent vs tmux execution split
 - **agent-orchestrator**: lifecycle/session concepts
+- **traditional CS control plane**: priority queues, DAGs, retry policy, idempotency guards
 
 **How Shift AX translates those ideas**
 
 - execution handoff and execution state are file-backed
+- execution tasks are persisted in a local SQLite `harness.sqlite` queue under the topic
+- a deterministic finite-state machine rejects invalid workflow jumps
+- a priority DAG queue claims only tasks whose dependencies are complete
+- retry scheduling and idempotency keys are handled by code, not prompt discipline
 - short slices can map to subagent execution
 - long slices can map to tmux-backed execution
 - workflow state records execution progress and reopening after downstream feedback
