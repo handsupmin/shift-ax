@@ -254,8 +254,10 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 - review lane을 명시적으로 분리한다
   - domain-policy
+  - onboarding-compliance
   - planning-readiness
   - spec-conformance
+  - prd-conformance
   - test-adequacy
   - engineering-discipline
   - conversation-trace

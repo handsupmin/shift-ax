@@ -259,8 +259,10 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
 
 - review lanes are explicit:
   - domain-policy
+  - onboarding-compliance
   - planning-readiness
   - spec-conformance
+  - prd-conformance
   - test-adequacy
   - engineering-discipline
   - conversation-trace

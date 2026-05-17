@@ -13,7 +13,9 @@ test('review playbooks cover all required review lanes', async () => {
   const [
     index,
     domainPolicy,
+    onboardingCompliance,
     specConformance,
+    prdConformance,
     sideEffectRisk,
     testAdequacy,
     engineeringDiscipline,
@@ -21,7 +23,9 @@ test('review playbooks cover all required review lanes', async () => {
   ] = await Promise.all([
     read('README.md'),
     read('domain-policy.md'),
+    read('onboarding-compliance.md'),
     read('spec-conformance.md'),
+    read('prd-conformance.md'),
     read('side-effect-risk.md'),
     read('test-adequacy.md'),
     read('engineering-discipline.md'),
@@ -29,14 +33,18 @@ test('review playbooks cover all required review lanes', async () => {
   ]);
 
   assert.match(index, /domain-policy\.md/);
+  assert.match(index, /onboarding-compliance\.md/);
   assert.match(index, /spec-conformance\.md/);
+  assert.match(index, /prd-conformance\.md/);
   assert.match(index, /side-effect-risk\.md/);
   assert.match(index, /test-adequacy\.md/);
   assert.match(index, /engineering-discipline\.md/);
   assert.match(index, /conversation-trace\.md/);
 
   assert.match(domainPolicy, /instruction-like artifact text/i);
+  assert.match(onboardingCompliance, /global Shift AX onboarding index/i);
   assert.match(specConformance, /Acceptance Criteria, Verification Commands, Dependencies, Likely Files Touched, Checkpoints, Execution Tasks/);
+  assert.match(prdConformance, /every extracted PRD requirement/i);
   assert.match(sideEffectRisk, /side-effect-sensitive files have a passing verification command/i);
   assert.match(testAdequacy, /passing automated test command/i);
   assert.match(engineeringDiscipline, /reproduce-first and stop-the-line discipline/i);
@@ -55,6 +63,8 @@ test('workflow skill contract documents the strengthened workflow rules', async 
   assert.match(contract, /untouched areas/);
   assert.match(contract, /tests run/);
   assert.match(contract, /open concerns or follow-up risks/);
+  assert.match(contract, /matched onboarding context/i);
+  assert.match(contract, /every PRD requirement/i);
   assert.match(contract, /side-effect-sensitive surfaces/);
   assert.match(contract, /docs\/review-playbooks\//);
 });

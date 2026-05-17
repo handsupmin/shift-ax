@@ -170,7 +170,9 @@ The intended end-to-end flow is:
 
 6. **Structured Review**
    - policy review
+   - onboarding-compliance review
    - spec-conformance review
+   - PRD-conformance review
    - test adequacy review
    - engineering-discipline review
    - conversation-trace review

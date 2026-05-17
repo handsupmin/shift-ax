@@ -50,8 +50,10 @@ Review-ready plans should also keep anti-rationalization guardrails explicit and
 ## Review
 
 - verify domain/policy alignment
+- verify matched onboarding context and rules are visible in the reviewed artifacts
 - verify planning readiness and ambiguity score
 - verify spec conformance
+- verify every PRD requirement and acceptance criterion has execution or changed-test evidence
 - verify changed files stay inside reviewed paths and side-effect-sensitive surfaces have risk and verification evidence
 - verify tests cover the agreed behavior
 - verify engineering-method discipline

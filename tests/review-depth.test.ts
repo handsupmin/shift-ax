@@ -289,6 +289,132 @@ test('test-adequacy review fails when changed code lacks aligned test evidence',
   }
 });
 
+test('onboarding-compliance review fails when matched context is not carried into review artifacts', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir } = await writeReviewableTopic(root);
+    await writeFile(
+      join(topicDir, 'resolved-context.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          request: 'Build safer auth refresh flow',
+          matches: [
+            {
+              label: 'Payment policy',
+              path: 'docs/base-context/payment-policy.md',
+              content: '# Payment policy\n\n- Must verify payment limit behavior with tests before commit.',
+            },
+          ],
+          unresolved_paths: [],
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+
+    assert.equal(byLane.get('onboarding-compliance')?.status, 'changes_requested');
+    assert.match(JSON.stringify(byLane.get('onboarding-compliance')?.issues ?? []), /Payment policy/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('prd-conformance review fails when an acceptance criterion lacks execution or test evidence', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir, worktreePath } = await writeReviewableTopic(root);
+    const plan = await readFile(join(topicDir, 'implementation-plan.md'), 'utf8');
+    const planWithAudit = plan.replace(
+      '- No schema changes are introduced.',
+      '- No schema changes are introduced.\n- Refresh token revocation audit is recorded.',
+    );
+    await writeFile(join(topicDir, 'implementation-plan.md'), planWithAudit, 'utf8');
+    await writeFile(
+      join(topicDir, 'plan-review.json'),
+      JSON.stringify(
+        {
+          version: 1,
+          status: 'approved',
+          reviewer: 'Alex Reviewer',
+          reviewed_at: new Date().toISOString(),
+          approved_plan_fingerprint: {
+            plan_path: 'implementation-plan.md',
+            sha256: createHash('sha256').update(planWithAudit).digest('hex'),
+          },
+        },
+        null,
+        2,
+      ),
+      'utf8',
+    );
+    await writeFile(join(worktreePath, 'src', 'auth-refresh.ts'), 'export const refresh = true;\n', 'utf8');
+    await writeFile(
+      join(worktreePath, 'tests', 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    execFileSync('git', ['add', 'src/auth-refresh.ts', 'tests/auth-refresh.test.ts'], {
+      cwd: worktreePath,
+      stdio: 'pipe',
+    });
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+
+    assert.equal(byLane.get('prd-conformance')?.status, 'changes_requested');
+    assert.match(JSON.stringify(byLane.get('prd-conformance')?.issues ?? []), /revocation audit/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('engineering-discipline review blocks debug-only implementation artifacts', async () => {
+  const root = await createGitRepo();
+
+  try {
+    const { topicDir, worktreePath } = await writeReviewableTopic(root);
+    await writeFile(
+      join(worktreePath, 'src', 'auth-refresh.ts'),
+      'export function refreshTokenRotation() {\n  debugger;\n  return true;\n}\n',
+      'utf8',
+    );
+    await writeFile(
+      join(worktreePath, 'tests', 'auth-refresh.test.ts'),
+      [
+        "import { test } from 'node:test';",
+        "test('auth refresh keeps users signed in without schema changes', () => {});",
+        '// Covers auth policy token rotation behavior',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    execFileSync('git', ['add', 'src/auth-refresh.ts', 'tests/auth-refresh.test.ts'], {
+      cwd: worktreePath,
+      stdio: 'pipe',
+    });
+
+    const verdicts = await runReviewLanes({ topicDir });
+    const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
+
+    assert.equal(byLane.get('engineering-discipline')?.status, 'changes_requested');
+    assert.match(JSON.stringify(byLane.get('engineering-discipline')?.issues ?? []), /Debug breakpoint/i);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
 test('planning-readiness review recomputes stale assessment artifacts', async () => {
   const root = await createGitRepo();
 
@@ -478,6 +604,8 @@ test('test-adequacy review approves when changed tests cover spec and policy lan
     const verdicts = await runReviewLanes({ topicDir });
     const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
 
+    assert.equal(byLane.get('onboarding-compliance')?.status, 'approved');
+    assert.equal(byLane.get('prd-conformance')?.status, 'approved');
     assert.equal(byLane.get('test-adequacy')?.status, 'approved');
   } finally {
     await rm(root, { recursive: true, force: true });

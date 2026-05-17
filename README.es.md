@@ -206,7 +206,7 @@ La promesa central es esta:
   Un punto de parada explícito para que una persona valide el plan antes de implementar.
 
 - **Puerta de review independiente**
-  El review final incluye una puerta de clean-context que solo lee artefactos guardados y vuelve a comprobar alcance de paths, riesgo de side effects y evidencia de relevancia de tests antes del commit.
+  El review final incluye una puerta de clean-context que solo lee artefactos guardados y vuelve a comprobar onboarding compliance, evidencia de PRD, alcance de paths, riesgo de side effects y relevancia de tests antes del commit.
 
 - **Bucle request-to-commit**
   Context resolution, planificación, implementación, verificación, review y commit como un solo flujo guiado.

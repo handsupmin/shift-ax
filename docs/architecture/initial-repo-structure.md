@@ -121,7 +121,9 @@ Owns the review and verification gates.
 This is where Shift AX should implement:
 
 - domain/policy review
+- onboarding-compliance review
 - spec-conformance review
+- PRD-conformance review
 - test adequacy review
 - engineering-discipline review
 - conversation-trace review

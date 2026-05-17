@@ -282,7 +282,9 @@ test('runReviewLanes can approve when artifacts become reviewable and connected'
     const byLane = new Map(verdicts.map((verdict) => [verdict.lane, verdict]));
 
     assert.equal(byLane.get('domain-policy')?.status, 'approved');
+    assert.equal(byLane.get('onboarding-compliance')?.status, 'approved');
     assert.equal(byLane.get('spec-conformance')?.status, 'approved');
+    assert.equal(byLane.get('prd-conformance')?.status, 'approved');
     assert.equal(byLane.get('side-effect-risk')?.status, 'approved');
     assert.equal(byLane.get('test-adequacy')?.status, 'approved');
     assert.equal(byLane.get('engineering-discipline')?.status, 'approved');

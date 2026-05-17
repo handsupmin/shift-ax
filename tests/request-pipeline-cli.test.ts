@@ -179,9 +179,11 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume wit
       ], '', env);
       assert.equal(approved.code, 0, approved.stderr);
 
-      await writeFile(join(startResult.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+      await mkdir(join(startResult.worktree.worktree_path, 'src'), { recursive: true });
+      await mkdir(join(startResult.worktree.worktree_path, 'tests'), { recursive: true });
+      await writeFile(join(startResult.worktree.worktree_path, 'src', 'auth-refresh.ts'), 'done\n', 'utf8');
       await writeFile(
-        join(startResult.worktree.worktree_path, 'auth-refresh.test.ts'),
+        join(startResult.worktree.worktree_path, 'tests', 'auth-refresh.test.ts'),
         [
           "import { test } from 'node:test';",
           "test('auth refresh keeps users signed in without schema changes', () => {});",
@@ -192,9 +194,9 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume wit
       );
       await writeExecutionArtifacts({
         topicDir: startResult.topicDir,
-        changedFiles: ['feature.txt', 'auth-refresh.test.ts'],
+        changedFiles: ['src/auth-refresh.ts', 'tests/auth-refresh.test.ts'],
         summary:
-          'Updated feature.txt and auth-refresh.test.ts for the auth policy token rotation flow.',
+          'Updated src/auth-refresh.ts and tests/auth-refresh.test.ts for the auth policy token rotation flow without schema changes; clean build verified.',
       });
 
       const resumed = await runAx([
@@ -204,6 +206,8 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume wit
         '--resume',
         '--verify-command',
         'echo test',
+        '--verify-command',
+        'echo build',
       ], '', env);
       assert.equal(resumed.code, 0, resumed.stderr);
 
@@ -300,9 +304,11 @@ test('CLI automatic commit uses the saved locale for generated commit messages',
       ], '', env);
       assert.equal(approved.code, 0, approved.stderr);
 
-      await writeFile(join(startResult.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+      await mkdir(join(startResult.worktree.worktree_path, 'src'), { recursive: true });
+      await mkdir(join(startResult.worktree.worktree_path, 'tests'), { recursive: true });
+      await writeFile(join(startResult.worktree.worktree_path, 'src', 'auth-refresh.ts'), 'done\n', 'utf8');
       await writeFile(
-        join(startResult.worktree.worktree_path, 'auth-refresh.test.ts'),
+        join(startResult.worktree.worktree_path, 'tests', 'auth-refresh.test.ts'),
         [
           "import { test } from 'node:test';",
           "test('auth refresh keeps users signed in without schema changes', () => {});",
@@ -313,9 +319,9 @@ test('CLI automatic commit uses the saved locale for generated commit messages',
       );
       await writeExecutionArtifacts({
         topicDir: startResult.topicDir,
-        changedFiles: ['feature.txt', 'auth-refresh.test.ts'],
+        changedFiles: ['src/auth-refresh.ts', 'tests/auth-refresh.test.ts'],
         summary:
-          'Updated feature.txt and auth-refresh.test.ts for the auth policy token rotation flow.',
+          'Updated src/auth-refresh.ts and tests/auth-refresh.test.ts for the auth policy token rotation flow without schema changes; clean build verified.',
       });
 
       const resumed = await runAx([
@@ -325,6 +331,8 @@ test('CLI automatic commit uses the saved locale for generated commit messages',
         '--resume',
         '--verify-command',
         'echo test',
+        '--verify-command',
+        'echo build',
       ], '', env);
       assert.equal(resumed.code, 0, resumed.stderr);
 
@@ -417,9 +425,11 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
       assert.equal(blockedResume.code, 1);
       assert.match(blockedResume.stderr, /active escalation triggers/i);
 
-      await writeFile(join(startResult.worktree.worktree_path, 'feature.txt'), 'done\n', 'utf8');
+      await mkdir(join(startResult.worktree.worktree_path, 'src'), { recursive: true });
+      await mkdir(join(startResult.worktree.worktree_path, 'tests'), { recursive: true });
+      await writeFile(join(startResult.worktree.worktree_path, 'src', 'auth-refresh.ts'), 'done\n', 'utf8');
       await writeFile(
-        join(startResult.worktree.worktree_path, 'auth-refresh.test.ts'),
+        join(startResult.worktree.worktree_path, 'tests', 'auth-refresh.test.ts'),
         [
           "import { test } from 'node:test';",
           "test('auth refresh keeps users signed in without schema changes', () => {});",
@@ -430,9 +440,9 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
       );
       await writeExecutionArtifacts({
         topicDir: startResult.topicDir,
-        changedFiles: ['feature.txt', 'auth-refresh.test.ts'],
+        changedFiles: ['src/auth-refresh.ts', 'tests/auth-refresh.test.ts'],
         summary:
-          'Updated feature.txt and auth-refresh.test.ts for the auth policy token rotation flow.',
+          'Updated src/auth-refresh.ts and tests/auth-refresh.test.ts for the auth policy token rotation flow without schema changes; clean build verified.',
       });
 
       const cleared = await runAx([
@@ -445,6 +455,8 @@ test('CLI escalation path blocks resume until a human clears the stop', async ()
         'Reviewer approved the updated approach',
         '--verify-command',
         'echo test',
+        '--verify-command',
+        'echo build',
       ], '', env);
       assert.equal(cleared.code, 0, cleared.stderr);
 

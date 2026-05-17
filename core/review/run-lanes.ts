@@ -54,6 +54,9 @@ function verdictBase(
 
 function tokenizeReviewWords(value: string): string[] {
   const stopWords = new Set([
+    'and',
+    'for',
+    'the',
     'that',
     'this',
     'with',
@@ -78,6 +81,16 @@ function tokenizeReviewWords(value: string): string[] {
     'should',
     'expect',
     'assert',
+    'applies',
+    'apply',
+    'behavior',
+    'implemented',
+    'implement',
+    'introduced',
+    'introduce',
+    'recorded',
+    'record',
+    'safely',
     'string',
     'number',
     'null',
@@ -86,13 +99,16 @@ function tokenizeReviewWords(value: string): string[] {
     'public',
     'private',
     'static',
+    'updated',
+    'update',
+    'works',
   ]);
 
   return String(value || '')
     .toLowerCase()
-    .split(/[^a-z0-9]+/)
+    .split(/[^a-z0-9가-힣]+/)
     .map((token) => token.trim())
-    .filter((token) => token.length >= 4)
+    .filter((token) => token.length >= (/[가-힣]/.test(token) ? 2 : 4))
     .filter((token) => !stopWords.has(token));
 }
 
@@ -109,6 +125,83 @@ function countSharedReviewTokens(content: string, reference: string): number {
     if (contentTokens.has(token)) count += 1;
   }
   return count;
+}
+
+function hasMeaningfulEvidence(content: string, reference: string): boolean {
+  const referenceTokens = [...new Set(tokenizeReviewWords(reference))];
+  if (referenceTokens.length === 0) return false;
+  const shared = countSharedReviewTokens(content, reference);
+  return shared >= Math.min(3, referenceTokens.length);
+}
+
+function normalizeReviewLine(line: string): string {
+  return line
+    .trim()
+    .replace(/^[-*]\s+/, '')
+    .replace(/^\d+\.\s+/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isReviewableRequirement(line: string): boolean {
+  const normalized = normalizeReviewLine(line);
+  if (normalized.length < 8) return false;
+  if (/^(none|n\/a|na|tbd|todo|decide later|work on it|improve it)\.?$/i.test(normalized)) {
+    return false;
+  }
+  return tokenizeReviewWords(normalized).length >= 1;
+}
+
+function extractReviewableLines(value: string): string[] {
+  const bullets = extractMarkdownBullets(value).map(normalizeReviewLine);
+  const plainLines = String(value || '')
+    .split(/\r?\n/)
+    .map(normalizeReviewLine)
+    .filter((line) => line && !/^#+\s+/.test(line));
+  return [...new Set([...bullets, ...plainLines].filter(isReviewableRequirement))];
+}
+
+function extractSectionRequirements(markdown: string, sectionNames: string[]): string[] {
+  const sections = parseMarkdownSections(markdown);
+  return [
+    ...new Set(
+      sectionNames.flatMap((section) => extractReviewableLines(readPlanSection(sections, section))),
+    ),
+  ];
+}
+
+function extractPrdRequirements({
+  spec,
+  plan,
+  brainstorm,
+}: {
+  spec: string;
+  plan: string;
+  brainstorm: string;
+}): string[] {
+  return [
+    ...new Set([
+      ...extractSectionRequirements(plan, ['Acceptance Criteria']),
+      ...extractSectionRequirements(spec, ['Acceptance Criteria', 'Goal', 'Constraints']),
+      ...extractSectionRequirements(brainstorm, ['Clarified Outcome', 'Constraints']),
+    ]),
+  ];
+}
+
+function extractContextRuleLines(content: string): string[] {
+  return extractReviewableLines(content)
+    .filter((line) =>
+      /\b(must|shall|required|never|always|avoid|follow|verify|tdd|architecture|boundary|convention|commit|review|build|lint|type[- ]?check)\b|\btests?\b.*\b(together|before|after|with)\b|\b(test|verify)\b.*\b(before|after|commit|release)\b|반드시|금지|항상|따르|준수|검증|테스트|컨벤션|규칙|리뷰|커밋|아키텍처|경계|빌드|린트/i.test(
+        line,
+      ),
+    )
+    .slice(0, 12);
+}
+
+function basenameWithoutExtension(path: string): string {
+  const normalized = normalizeReviewPath(path);
+  const basename = normalized.split('/').filter(Boolean).pop() ?? normalized;
+  return basename.replace(/\.[A-Za-z0-9]+$/, '');
 }
 
 function normalizeReviewPath(path: string): string {
@@ -236,13 +329,13 @@ function buildPlanCompletionAudit({
 }
 
 async function readWorkflowStateMaybe(topicDir: string): Promise<{
-  verification?: Array<{ command: string; exit_code: number }>;
+  verification?: Array<{ command: string; exit_code: number; stdout?: string; stderr?: string }>;
   worktree?: { worktree_path?: string };
 } | null> {
   const raw = await readMaybe(join(topicDir, 'workflow-state.json'));
   if (!raw) return null;
   return JSON.parse(raw) as {
-    verification?: Array<{ command: string; exit_code: number }>;
+    verification?: Array<{ command: string; exit_code: number; stdout?: string; stderr?: string }>;
     worktree?: { worktree_path?: string };
   };
 }
@@ -414,6 +507,55 @@ function architecturePattern(value: string): RegExp {
   return new RegExp(normalized.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&').replace(/-/g, '[- ]?'), 'i');
 }
 
+function shouldInspectEngineeringFile(path: string): boolean {
+  if (/(^|\/)(docs?|readme|changelog)\//i.test(path) || /\.(md|mdx|txt|png|jpe?g|gif|svg|webp)$/i.test(path)) {
+    return false;
+  }
+  return /\.(cjs|cts|go|java|js|jsx|kt|mjs|mts|php|py|rb|rs|sql|swift|ts|tsx)$/i.test(path);
+}
+
+function findFirstMatchingLine(content: string, pattern: RegExp): number | undefined {
+  const lines = String(content || '').split(/\r?\n/);
+  const index = lines.findIndex((line) => pattern.test(line));
+  return index >= 0 ? index + 1 : undefined;
+}
+
+function inspectEngineeringFile(file: string, content: string): NonNullable<ReviewVerdict['issues']> {
+  const checks: Array<{ pattern: RegExp; severity: 'high' | 'medium'; message: string }> = [
+    {
+      pattern: /\bdebugger\b/,
+      severity: 'high',
+      message: 'Debug breakpoint left in changed code.',
+    },
+    {
+      pattern: /\b(?:describe|it|test)\.only\s*\(|\b(?:fit|fdescribe)\s*\(/,
+      severity: 'high',
+      message: 'Focused test marker would skip the real suite.',
+    },
+    {
+      pattern: /\b(?:TODO|FIXME|HACK)\b|throw new Error\(\s*['"`](?:todo|not implemented|implement me)/i,
+      severity: 'medium',
+      message: 'Placeholder or unfinished implementation marker remains in changed code.',
+    },
+    {
+      pattern: /\bconsole\.(?:log|debug)\s*\(/,
+      severity: 'medium',
+      message: 'Debug logging remains in changed code.',
+    },
+  ];
+
+  return checks
+    .map((check) => ({
+      check,
+      line: findFirstMatchingLine(content, check.pattern),
+    }))
+    .filter((item): item is { check: typeof checks[number]; line: number } => Boolean(item.line))
+    .map(({ check, line }) => ({
+      severity: check.severity,
+      message: `${check.message} (${file}:${line})`,
+    }));
+}
+
 async function runDomainPolicyLane(topicDir: string): Promise<ReviewVerdict> {
   const raw = await readMaybe(join(topicDir, 'resolved-context.json'));
   if (!raw) {
@@ -447,6 +589,106 @@ async function runDomainPolicyLane(topicDir: string): Promise<ReviewVerdict> {
       ? 'Relevant base-context documents were resolved and no unresolved paths were recorded.'
       : 'No relevant base-context documents matched this topic, and no unresolved paths were recorded.',
   );
+}
+
+function parseResolvedContextMatches(raw: string): Array<{
+  label?: string;
+  path?: string;
+  content?: string;
+}> {
+  if (!raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as {
+      matches?: Array<{ label?: string; path?: string; content?: string }>;
+    };
+    return parsed.matches ?? [];
+  } catch {
+    return [];
+  }
+}
+
+async function runOnboardingComplianceLane(topicDir: string): Promise<ReviewVerdict> {
+  const [resolvedContext, spec, plan, brainstorm] = await Promise.all([
+    readMaybe(join(topicDir, 'resolved-context.json')),
+    readMaybe(join(topicDir, 'spec.md')),
+    readMaybe(join(topicDir, 'implementation-plan.md')),
+    readMaybe(join(topicDir, 'brainstorm.md')),
+  ]);
+
+  if (!resolvedContext.trim()) {
+    return verdictBase(
+      'onboarding-compliance',
+      'changes_requested',
+      'Resolved onboarding context is missing, so rule compliance cannot be reviewed.',
+      [
+        {
+          severity: 'high',
+          message: 'Resolve global onboarding context before implementation review can pass.',
+        },
+      ],
+    );
+  }
+
+  const matches = parseResolvedContextMatches(resolvedContext);
+  if (matches.length === 0) {
+    return {
+      ...verdictBase(
+        'onboarding-compliance',
+        'approved',
+        'No matched onboarding context documents were recorded for this topic.',
+      ),
+      matched_context_count: 0,
+    };
+  }
+
+  const planningCorpus = [spec, plan, brainstorm].join('\n');
+  const issues = matches.flatMap((match) => {
+    const label = match.label ?? '';
+    const path = match.path ?? '';
+    const contextName = label || path || '(unlabeled context)';
+    const hasContextContent = Boolean(match.content?.trim());
+    const nameReferences = [label, path, basenameWithoutExtension(path)].filter(Boolean);
+    const nameMentioned = nameReferences.some((reference) =>
+      hasMeaningfulEvidence(planningCorpus, reference) || planningCorpus.toLowerCase().includes(reference.toLowerCase()),
+    );
+    const ruleLines = extractContextRuleLines(match.content ?? '');
+    const missingRules = ruleLines.filter((rule) => !hasMeaningfulEvidence(planningCorpus, rule));
+
+    return [
+      ...(nameMentioned || hasContextContent
+        ? []
+        : [{
+            severity: 'high' as const,
+            message: `Matched onboarding context is not referenced in spec, brainstorm, or implementation plan: ${contextName}`,
+          }]),
+      ...missingRules.map((rule) => ({
+        severity: 'high' as const,
+        message: `Onboarding rule is not reflected in spec or implementation plan (${contextName}): ${rule}`,
+      })),
+    ];
+  });
+
+  if (issues.length > 0) {
+    return verdictBase(
+      'onboarding-compliance',
+      'changes_requested',
+      'Matched onboarding context exists, but the spec or implementation plan does not carry the required rules forward.',
+      issues,
+    );
+  }
+
+  return {
+    ...verdictBase(
+      'onboarding-compliance',
+      'approved',
+      'Matched onboarding context is referenced by the review artifacts, and extracted rule lines are reflected before implementation review.',
+    ),
+    matched_context_count: matches.length,
+    extracted_rule_count: matches.reduce(
+      (sum, match) => sum + extractContextRuleLines(match.content ?? '').length,
+      0,
+    ),
+  };
 }
 
 async function readOrBuildReadinessAssessment(
@@ -605,6 +847,100 @@ async function runSpecConformanceLane(topicDir: string): Promise<ReviewVerdict> 
     'approved',
     'Spec and implementation plan are approved, fingerprint-matched, and free of unresolved placeholders.',
   );
+}
+
+async function runPrdConformanceLane(topicDir: string): Promise<ReviewVerdict> {
+  const [spec, plan, brainstorm] = await Promise.all([
+    readMaybe(join(topicDir, 'spec.md')),
+    readMaybe(join(topicDir, 'implementation-plan.md')),
+    readMaybe(join(topicDir, 'brainstorm.md')),
+  ]);
+  const requirements = extractPrdRequirements({ spec, plan, brainstorm });
+
+  if (requirements.length === 0) {
+    return verdictBase(
+      'prd-conformance',
+      'changes_requested',
+      'No reviewable PRD or acceptance criteria were found.',
+      [
+        {
+          severity: 'high',
+          message: 'Record concrete acceptance criteria, goal, and constraints before review can pass.',
+        },
+      ],
+    );
+  }
+
+  const workflow = await readWorkflowStateMaybe(topicDir);
+  const worktreePath = workflow?.worktree?.worktree_path;
+  if (!worktreePath) {
+    return verdictBase(
+      'prd-conformance',
+      'changes_requested',
+      'Worktree evidence is missing, so PRD conformance cannot be reviewed.',
+      [
+        {
+          severity: 'high',
+          message: 'Create or record the implementation worktree before PRD conformance review can pass.',
+        },
+      ],
+    );
+  }
+
+  const changedFiles = listChangedFiles(worktreePath);
+  if (changedFiles.length === 0) {
+    return verdictBase(
+      'prd-conformance',
+      'changes_requested',
+      'No changed files are present, so PRD conformance cannot be reviewed.',
+      [
+        {
+          severity: 'high',
+          message: 'Review requires implementation evidence for every acceptance criterion before commit can be allowed.',
+        },
+      ],
+    );
+  }
+
+  const changedTestContents = await Promise.all(
+    changedFiles
+      .filter((file) => isTestFile(file))
+      .map(async (file) => [file, await readMaybe(join(worktreePath, file))].join('\n')),
+  );
+  const executionResults = await readExecutionResultArtifacts(topicDir);
+  const verificationEvidence = (workflow?.verification ?? [])
+    .map((item) => [item.command, item.stdout ?? '', item.stderr ?? ''].join('\n'))
+    .join('\n');
+  const evidenceCorpus = [
+    ...changedTestContents,
+    ...executionResults,
+    verificationEvidence,
+  ].join('\n');
+
+  const missingEvidence = requirements.filter((requirement) =>
+    !hasMeaningfulEvidence(evidenceCorpus, requirement),
+  );
+
+  if (missingEvidence.length > 0) {
+    return verdictBase(
+      'prd-conformance',
+      'changes_requested',
+      'Some PRD requirements or acceptance criteria are not backed by execution or test evidence.',
+      missingEvidence.map((requirement) => ({
+        severity: 'high' as const,
+        message: `Missing execution/test evidence for requirement: ${requirement}`,
+      })),
+    );
+  }
+
+  return {
+    ...verdictBase(
+      'prd-conformance',
+      'approved',
+      'Every extracted PRD requirement has matching execution or test evidence.',
+    ),
+    checked_requirement_count: requirements.length,
+  };
 }
 
 async function runSideEffectRiskLane(topicDir: string): Promise<ReviewVerdict> {
@@ -842,25 +1178,41 @@ async function runEngineeringDisciplineLane(topicDir: string): Promise<ReviewVer
   const hasArchitecture = architecturePattern(requiredArchitecture).test(plan);
   const planSections = parseMarkdownSections(plan);
   const hasGuardrails = Boolean(readPlanSection(planSections, 'Anti-Rationalization Guardrails'));
+  const issues: NonNullable<ReviewVerdict['issues']> = [];
 
   if (containsPlaceholder(plan) || !hasTdd || !hasArchitecture || !hasGuardrails) {
+    issues.push({
+      severity: 'medium',
+      message: `Implementation plan should explicitly reference ${requiredTestStrategy} and ${requiredArchitecture}.`,
+    });
+  }
+
+  const workflow = await readWorkflowStateMaybe(topicDir);
+  const worktreePath = workflow?.worktree?.worktree_path;
+  if (worktreePath) {
+    const changedFiles = listChangedFiles(worktreePath).filter(shouldInspectEngineeringFile);
+    issues.push(...(
+      await Promise.all(
+        changedFiles.map(async (file) =>
+          inspectEngineeringFile(file, await readMaybe(join(worktreePath, file))),
+        ),
+      )
+    ).flat());
+  }
+
+  if (issues.length > 0) {
     return verdictBase(
       'engineering-discipline',
       'changes_requested',
-      'Engineering-discipline expectations are not yet explicit enough.',
-      [
-        {
-          severity: 'medium',
-          message: `Implementation plan should explicitly reference ${requiredTestStrategy} and ${requiredArchitecture}.`,
-        },
-      ],
+      'Engineering-discipline expectations or changed-code hygiene checks did not pass.',
+      issues,
     );
   }
 
   return verdictBase(
     'engineering-discipline',
     'approved',
-    'Implementation plan references the configured engineering-method guardrails.',
+    'Implementation plan references the configured engineering-method guardrails, and changed code has no debug-only or unfinished artifacts.',
   );
 }
 
@@ -971,8 +1323,10 @@ export async function runReviewLanes({
 }: RunReviewLanesInput): Promise<ReviewVerdict[]> {
   const upstreamVerdicts = await Promise.all([
     runDomainPolicyLane(topicDir),
+    runOnboardingComplianceLane(topicDir),
     runPlanningReadinessLane(topicDir),
     runSpecConformanceLane(topicDir),
+    runPrdConformanceLane(topicDir),
     runSideEffectRiskLane(topicDir),
     runTestAdequacyLane(topicDir),
     runEngineeringDisciplineLane(topicDir),
