@@ -178,12 +178,24 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
+async function directoryHasEntries(path: string): Promise<boolean> {
+  try {
+    return (await readdir(path)).length > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function homeHasExistingKnowledge(): Promise<boolean> {
   const home = getGlobalContextHome();
   return (
     (await pathExists(home.indexPath)) ||
     (await pathExists(home.profilePath)) ||
-    (await pathExists(home.settingsPath))
+    (await pathExists(join(home.root, 'role', 'primary-role.md'))) ||
+    (await directoryHasEntries(home.workTypesDir)) ||
+    (await directoryHasEntries(home.reposDir)) ||
+    (await directoryHasEntries(home.proceduresDir)) ||
+    (await directoryHasEntries(home.domainLanguageDir))
   );
 }
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -78,6 +78,56 @@ test('onboardProjectContext writes global docs, index, and profile', async () =>
       assert.equal(profile?.context_docs.some((entry) => entry.path === 'work-types/api-development.md'), true);
       assert.equal(profile?.onboarding_context?.work_types[0], 'API development');
       assert.match(profile?.onboarding_context?.primary_role_summary ?? '', /wallet APIs/i);
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('onboardProjectContext treats settings-only global home as not yet onboarded', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboarding-settings-only-'));
+
+  try {
+    await withTempGlobalHome('shift-ax-onboarding-settings-only-home-', async (home) => {
+      const settingsPath = join(home, 'settings.json');
+      const settings = {
+        version: 1,
+        updated_at: '2026-05-17T00:00:00.000Z',
+        locale: 'ko',
+        preferred_language: 'korean',
+        preferred_platform: 'codex',
+      };
+      await writeFile(settingsPath, `${JSON.stringify(settings, null, 2)}\n`, 'utf8');
+
+      await onboardProjectContext({
+        rootDir: root,
+        primaryRoleSummary: 'I mainly build request-to-commit workflows.',
+        workTypes: [
+          {
+            name: 'Harness development',
+            summary: 'I maintain request intake, planning, review, and commit gates.',
+            repositories: [
+              {
+                repository: 'shift-ax',
+                repositoryPath: root,
+                purpose: 'Request-to-commit harness',
+                directories: ['core/context', 'core/planning', 'core/review'],
+                workflow: 'Capture context, review the plan, implement, verify, and commit.',
+                inferredNotes: ['File-backed artifacts are required.'],
+                confirmationNotes: 'Confirmed by the user.',
+                volatility: 'stable',
+              },
+            ],
+          },
+        ],
+        overwrite: false,
+      });
+
+      const index = await readFile(join(home, 'index.md'), 'utf8');
+      const preservedSettings = JSON.parse(await readFile(settingsPath, 'utf8')) as typeof settings;
+
+      assert.match(index, /Harness development -> work-types\/harness-development.md/);
+      assert.deepEqual(preservedSettings, settings);
     });
   } finally {
     await rm(root, { recursive: true, force: true });
