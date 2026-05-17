@@ -15,7 +15,7 @@ export async function listTopicsStatus({
   rootDir: string;
   limit?: number;
 }): Promise<ShiftAxTopicsStatusSummary[]> {
-  const topicsRoot = join(rootDir, '.ax', 'topics');
+  const topicsRoot = join(rootDir, '.shift-ax', 'topics');
   const entries = await readdir(topicsRoot, { withFileTypes: true }).catch(() => []);
   const results: ShiftAxTopicsStatusSummary[] = [];
 

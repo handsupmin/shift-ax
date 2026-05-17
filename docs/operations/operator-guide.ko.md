@@ -40,7 +40,7 @@ npm run ax -- run-request --request "<request>"
 
 ```bash
 npm run ax -- approve-plan \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --reviewer "<name>" \
   --decision approve
 ```
@@ -51,7 +51,7 @@ npm run ax -- approve-plan \
 
 ```bash
 npm run ax -- sync-policy-context \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --summary "구현 전에 공유 정책 문서를 갱신함" \
   --path docs/base-context/<doc>.md
 ```
@@ -60,7 +60,7 @@ npm run ax -- sync-policy-context \
 
 ```bash
 npm run ax -- run-request \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --resume \
   --verify-command "npm test" \
   --verify-command "npm run build"
@@ -70,7 +70,7 @@ npm run ax -- run-request \
 
 ```bash
 npm run ax -- react-feedback \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --kind review-changes-requested \
   --summary "리뷰어가 rollback coverage를 추가 요청함"
 ```
@@ -80,7 +80,7 @@ npm run ax -- react-feedback \
 ### 단일 topic
 
 ```bash
-npm run ax -- topic-status --topic .ax/topics/<topic-slug>
+npm run ax -- topic-status --topic .shift-ax/topics/<topic-slug>
 ```
 
 보여주는 것:
@@ -109,7 +109,7 @@ npm run ax -- topics-status --limit 10
 ```bash
 npm run ax -- launch-execution \
   --platform codex \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
 ```
 
@@ -118,7 +118,7 @@ npm run ax -- launch-execution \
 ```bash
 npm run ax -- launch-execution \
   --platform claude-code \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
 ```
 

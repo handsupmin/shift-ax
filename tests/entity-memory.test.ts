@@ -12,7 +12,7 @@ test('buildEntityMemoryView combines related decisions, threads, and past topics
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-entity-memory-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-09-refund-fix');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-refund-fix');
     await mkdir(topicDir, { recursive: true });
     await writeFile(join(topicDir, 'request.md'), 'Refund rollback helper\n', 'utf8');
     await writeFile(join(topicDir, 'request-summary.md'), 'Refund rollback helper\n', 'utf8');

@@ -22,7 +22,7 @@ export interface ShiftAxDecisionMemoryMatch extends ShiftAxDecisionRecord {
 }
 
 function getDecisionRegisterPath(rootDir: string): string {
-  return join(rootDir, '.ax', 'memory', 'decision-register.json');
+  return join(rootDir, '.shift-ax', 'memory', 'decision-register.json');
 }
 
 async function readDecisionRegister(rootDir: string): Promise<ShiftAxDecisionRecord[]> {
@@ -188,15 +188,15 @@ export async function searchDecisionMemory({
 
   for (const record of records) {
     const topicSummary = record.source_topic
-      ? await readFile(join(rootDir, '.ax', 'topics', record.source_topic, 'request-summary.md'), 'utf8').catch(
+      ? await readFile(join(rootDir, '.shift-ax', 'topics', record.source_topic, 'request-summary.md'), 'utf8').catch(
           () => '',
         )
       : '';
     const topicRequest = record.source_topic
-      ? await readFile(join(rootDir, '.ax', 'topics', record.source_topic, 'request.md'), 'utf8').catch(() => '')
+      ? await readFile(join(rootDir, '.shift-ax', 'topics', record.source_topic, 'request.md'), 'utf8').catch(() => '')
       : '';
     const topicSpec = record.source_topic
-      ? await readFile(join(rootDir, '.ax', 'topics', record.source_topic, 'spec.md'), 'utf8').catch(() => '')
+      ? await readFile(join(rootDir, '.shift-ax', 'topics', record.source_topic, 'spec.md'), 'utf8').catch(() => '')
       : '';
 
     const score = scoreDecision(

@@ -22,13 +22,13 @@ This TODO list is ordered by direct impact on Shift AX's product goal.
 ## Next backlog — high priority
 
 - [x] **Readable state / handoff files**
-  - Add `.ax/STATE.md` or topic-level handoff summaries for human-readable current state.
+  - Add `.shift-ax/STATE.md` or topic-level handoff summaries for human-readable current state.
 - [x] **Context-window monitor**
   - Warn before context rot becomes dangerous; add warning and critical thresholds.
 - [x] **Pause-work / resume handoff**
   - Add an explicit command that writes a safe resume bundle when work must stop mid-flight.
 - [x] **Threads for cross-topic context**
-  - Add `.ax/threads/` for long-running decisions, migrations, and rollout work that spans multiple topics.
+  - Add `.shift-ax/threads/` for long-running decisions, migrations, and rollout work that spans multiple topics.
 - [x] **Token-budgeted context bundle builder**
   - Generate compact execution/review context bundles that prioritize docs, plans, decisions, and topic recall under a size budget.
 

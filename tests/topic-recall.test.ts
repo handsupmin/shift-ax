@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { searchPastTopics } from '../core/memory/topic-recall.js';
 
 async function seedTopic(root: string, slug: string, request: string, summary: string, spec: string) {
-  const topicDir = join(root, '.ax', 'topics', slug);
+  const topicDir = join(root, '.shift-ax', 'topics', slug);
   await mkdir(topicDir, { recursive: true });
   await writeFile(join(topicDir, 'request.md'), `${request}\n`, 'utf8');
   await writeFile(join(topicDir, 'request-summary.md'), `${summary}\n`, 'utf8');
@@ -67,7 +67,7 @@ test('searchPastTopics ignores uncommitted or incomplete topics by default', asy
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topic-recall-filter-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-08-incomplete');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-incomplete');
     await mkdir(topicDir, { recursive: true });
     await writeFile(join(topicDir, 'request.md'), 'Build auth experiment\n', 'utf8');
     await writeFile(join(topicDir, 'request-summary.md'), 'Incomplete topic\n', 'utf8');

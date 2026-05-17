@@ -133,8 +133,8 @@ Shift AX 会先解析上下文，创建请求专属 topic/worktree，在计划�
 ```bash
 shift-ax onboard-context --discover
 shift-ax run-request --request "Build safer auth refresh flow"
-shift-ax approve-plan --topic .ax/topics/<topic> --reviewer "Alex" --decision approve
-shift-ax run-request --topic .ax/topics/<topic> --resume
+shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
+shift-ax run-request --topic .shift-ax/topics/<topic> --resume
 ```
 
 ---

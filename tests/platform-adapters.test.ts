@@ -26,7 +26,7 @@ test('codex adapter uses AGENTS bootstrap and core defaults', () => {
   assert.equal(manifest.integration_mode, 'agents-md-bootstrap');
   assert.equal(manifest.natural_language_first, true);
   assert.match(manifest.default_base_context_index, /docs\/base-context\/index\.md$/);
-  assert.match(manifest.default_topic_root, /\.ax\/topics$/);
+  assert.match(manifest.default_topic_root, /\.shift-ax\/topics$/);
   assert.match(
     adapter.renderBootstrapInstructions('/repo'),
     /AGENTS\.md|bootstrap|worktree-create/i,
@@ -41,7 +41,7 @@ test('claude-code adapter uses hook bootstrap and core defaults', () => {
   assert.equal(manifest.integration_mode, 'hook-bootstrap');
   assert.equal(manifest.natural_language_first, true);
   assert.match(manifest.default_base_context_index, /docs\/base-context\/index\.md$/);
-  assert.match(manifest.default_topic_root, /\.ax\/topics$/);
+  assert.match(manifest.default_topic_root, /\.shift-ax\/topics$/);
   assert.match(
     adapter.renderBootstrapInstructions('/repo'),
     /hook|SessionStart|context injection|worktree-create/i,

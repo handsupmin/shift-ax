@@ -8,7 +8,7 @@ import { buildExecutionHandoff } from '../core/planning/execution-handoff.js';
 
 test('buildExecutionHandoff derives task contracts and lightweight lane metadata from the plan', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-execution-handoff-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-13-auth-refresh');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-13-auth-refresh');
 
   try {
     await mkdir(topicDir, { recursive: true });

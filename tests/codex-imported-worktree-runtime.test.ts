@@ -34,8 +34,8 @@ test('ensureCodexManagedWorktree creates and reuses a named branch worktree', as
 
     const created = ensureCodexManagedWorktree({
       repoRoot,
-      worktreePath: join(repoRoot, '.ax', 'codex-imported', 'worker-a'),
-      branchName: 'ax/imported-worker-a',
+      worktreePath: join(repoRoot, '.shift-ax', 'codex-imported', 'worker-a'),
+      branchName: 'shift-ax/imported-worker-a',
       baseRef,
     });
 
@@ -47,7 +47,7 @@ test('ensureCodexManagedWorktree creates and reuses a named branch worktree', as
     const reused = ensureCodexManagedWorktree({
       repoRoot,
       worktreePath: created.worktreePath,
-      branchName: 'ax/imported-worker-a',
+      branchName: 'shift-ax/imported-worker-a',
       baseRef,
     });
 
@@ -70,8 +70,8 @@ test('ensureCodexManagedWorktree rejects dirty existing worktrees', async () => 
 
     const created = ensureCodexManagedWorktree({
       repoRoot,
-      worktreePath: join(repoRoot, '.ax', 'codex-imported', 'worker-b'),
-      branchName: 'ax/imported-worker-b',
+      worktreePath: join(repoRoot, '.shift-ax', 'codex-imported', 'worker-b'),
+      branchName: 'shift-ax/imported-worker-b',
       baseRef,
     });
 
@@ -82,7 +82,7 @@ test('ensureCodexManagedWorktree rejects dirty existing worktrees', async () => 
         ensureCodexManagedWorktree({
           repoRoot,
           worktreePath: created.worktreePath,
-          branchName: 'ax/imported-worker-b',
+          branchName: 'shift-ax/imported-worker-b',
           baseRef,
         }),
       /worktree_dirty/,
@@ -104,8 +104,8 @@ test('removeCodexManagedWorktree removes the worktree path and branch', async ()
 
     const created = ensureCodexManagedWorktree({
       repoRoot,
-      worktreePath: join(repoRoot, '.ax', 'codex-imported', 'worker-c'),
-      branchName: 'ax/imported-worker-c',
+      worktreePath: join(repoRoot, '.shift-ax', 'codex-imported', 'worker-c'),
+      branchName: 'shift-ax/imported-worker-c',
       baseRef,
     });
     assert.equal(existsSync(created.worktreePath), true);

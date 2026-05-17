@@ -10,7 +10,7 @@ test('searchDecisionMemory ranks decisions and pulls source topic summaries into
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-decision-memory-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
     await mkdir(topicDir, { recursive: true });
     await writeFile(join(topicDir, 'request-summary.md'), 'Auth refresh rollback must stay safe.\n', 'utf8');
     await writeFile(join(topicDir, 'request.md'), 'Build safer auth refresh rollback flow.\n', 'utf8');

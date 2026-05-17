@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { writeRootStateSummary, writeTopicHandoff } from '../core/observability/state-handoff.js';
 
 async function seedTopic(root: string, slug: string, phase: string, reviewStatus: string) {
-  const topicDir = join(root, '.ax', 'topics', slug);
+  const topicDir = join(root, '.shift-ax', 'topics', slug);
   await mkdir(join(topicDir, 'review'), { recursive: true });
   await writeFile(
     join(topicDir, 'workflow-state.json'),
@@ -25,8 +25,8 @@ async function seedTopic(root: string, slug: string, phase: string, reviewStatus
           next_stage: reviewStatus === 'approved' ? 'finalization' : 'implementation',
         },
         worktree: {
-          branch_name: `ax/${slug}`,
-          worktree_path: join(root, '.ax', 'worktrees', slug),
+          branch_name: `shift-ax/${slug}`,
+          worktree_path: join(root, '.shift-ax', 'worktrees', slug),
           base_branch: 'main',
         },
       },
@@ -43,7 +43,7 @@ async function seedTopic(root: string, slug: string, phase: string, reviewStatus
   return topicDir;
 }
 
-test('writeRootStateSummary writes a readable .ax/STATE.md with active topics', async () => {
+test('writeRootStateSummary writes a readable .shift-ax/STATE.md with active topics', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-state-summary-'));
 
   try {
@@ -74,8 +74,8 @@ test('writeTopicHandoff writes a topic handoff with next step and operator comma
       summary: 'Stopping at the end of the work day.',
       nextStep: 'Resume implementation and rerun review.',
       remainingItems: ['Re-run auth refresh tests', 'Confirm review lane status'],
-      recommendedCommand: 'npm run ax -- topic-status --topic .ax/topics/2026-04-09-refund-fix',
-      commands: ['npm run ax -- topic-status --topic .ax/topics/2026-04-09-refund-fix'],
+      recommendedCommand: 'npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-refund-fix',
+      commands: ['npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-refund-fix'],
     });
     const content = await readFile(result.output_path, 'utf8');
 

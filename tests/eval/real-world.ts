@@ -64,7 +64,7 @@ async function createGitRepo(root: string): Promise<void> {
   execFileSync('git', ['config', 'user.name', 'RW Eval'], { cwd: root, stdio: 'pipe' });
   execFileSync('git', ['config', 'user.email', 'rw-eval@shift-ax.test'], { cwd: root, stdio: 'pipe' });
   await writeFile(join(root, 'README.md'), '# rw-eval-repo\n', 'utf8');
-  await writeFile(join(root, '.gitignore'), '.ax/\n', 'utf8');
+  await writeFile(join(root, '.gitignore'), '.shift-ax/\n', 'utf8');
   execFileSync('git', ['add', '.'], { cwd: root, stdio: 'pipe' });
   execFileSync('git', ['commit', '-m', 'init'], { cwd: root, stdio: 'pipe' });
 }
@@ -286,7 +286,7 @@ async function evalRealisticGlossaryCorpus(): Promise<void> {
 // ─── RW 3: Realistic past-topic history ──────────────────────────────────────
 
 async function seedCommittedTopic(root: string, slug: string, summary: string, updatedAt: string): Promise<void> {
-  const topicDir = join(root, '.ax', 'topics', slug);
+  const topicDir = join(root, '.shift-ax', 'topics', slug);
   await mkdir(topicDir, { recursive: true });
   await writeFile(join(topicDir, 'request.md'), `${summary}\n`, 'utf8');
   await writeFile(join(topicDir, 'request-summary.md'), `${summary}\n`, 'utf8');
@@ -384,7 +384,7 @@ async function evalRealisticRequestPipeline(): Promise<void> {
 
         const workflow = await readWorkflowState(started.topicDir);
 
-        if (workflow.phase === 'awaiting_plan_review' && started.topicDir.includes('.ax/topics/')) {
+        if (workflow.phase === 'awaiting_plan_review' && started.topicDir.includes('.shift-ax/topics/')) {
           passed_count++;
           pass(`rw pipeline: "${summary}" → topic created and awaiting plan review`);
         } else {

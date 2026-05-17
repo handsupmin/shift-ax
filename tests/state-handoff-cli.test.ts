@@ -8,11 +8,11 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax refresh-state writes .ax/STATE.md', async () => {
+test('ax refresh-state writes .shift-ax/STATE.md', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-refresh-state-cli-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
     await mkdir(join(topicDir, 'review'), { recursive: true });
     await writeFile(
       join(topicDir, 'workflow-state.json'),
@@ -25,8 +25,8 @@ test('ax refresh-state writes .ax/STATE.md', async () => {
           updated_at: new Date().toISOString(),
           plan_review_status: 'approved',
           worktree: {
-            branch_name: 'ax/2026-04-09-auth-fix',
-            worktree_path: join(root, '.ax', 'worktrees', '2026-04-09-auth-fix'),
+            branch_name: 'shift-ax/2026-04-09-auth-fix',
+            worktree_path: join(root, '.shift-ax', 'worktrees', '2026-04-09-auth-fix'),
             base_branch: 'main',
           },
         },
@@ -61,7 +61,7 @@ test('ax refresh-state writes .ax/STATE.md', async () => {
       });
     });
 
-    const content = await readFile(join(root, '.ax', 'STATE.md'), 'utf8');
+    const content = await readFile(join(root, '.shift-ax', 'STATE.md'), 'utf8');
     assert.match(content, /2026-04-09-auth-fix/);
     assert.match(content, /readiness:/);
   } finally {
@@ -73,7 +73,7 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-pause-work-cli-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
     await mkdir(join(topicDir, 'review'), { recursive: true });
     await writeFile(
       join(topicDir, 'workflow-state.json'),
@@ -91,8 +91,8 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
             next_stage: 'implementation',
           },
           worktree: {
-            branch_name: 'ax/2026-04-09-auth-fix',
-            worktree_path: join(root, '.ax', 'worktrees', '2026-04-09-auth-fix'),
+            branch_name: 'shift-ax/2026-04-09-auth-fix',
+            worktree_path: join(root, '.shift-ax', 'worktrees', '2026-04-09-auth-fix'),
             base_branch: 'main',
           },
         },
@@ -124,9 +124,9 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
           '--remaining-item',
           'Re-run auth refresh tests',
           '--recommended-command',
-          'npm run ax -- topic-status --topic .ax/topics/2026-04-09-auth-fix',
+          'npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-auth-fix',
           '--command',
-          'npm run ax -- topic-status --topic .ax/topics/2026-04-09-auth-fix',
+          'npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-auth-fix',
         ],
         {
           cwd: REPO_ROOT,
@@ -145,7 +145,7 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
     });
 
     const handoff = await readFile(join(topicDir, 'handoff.md'), 'utf8');
-    const state = await readFile(join(root, '.ax', 'STATE.md'), 'utf8');
+    const state = await readFile(join(root, '.shift-ax', 'STATE.md'), 'utf8');
 
     assert.match(handoff, /Pausing at the end of the day/);
     assert.match(handoff, /Resume implementation tomorrow/);

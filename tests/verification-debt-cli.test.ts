@@ -10,7 +10,7 @@ const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.u
 
 test('ax verification-debt prints unresolved verification debt items', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-verification-debt-cli-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
 
   try {
     await mkdir(join(topicDir, 'review'), { recursive: true });

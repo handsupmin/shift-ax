@@ -20,7 +20,7 @@ export function buildWorktreePlan({
   return {
     version: 1,
     topic_slug: topicSlug,
-    preferred_branch_name: `ax/${topicSlug}`,
-    preferred_worktree_path: `${rootDir}/.ax/worktrees/${topicSlug}`,
+    preferred_branch_name: `shift-ax/${topicSlug}`,
+    preferred_worktree_path: `${rootDir}/.shift-ax/worktrees/${topicSlug}`,
   };
 }

@@ -50,7 +50,7 @@ Everything adopted here must preserve two non-negotiable goals:
 - **Clarify → plan → execute → verify shape**
   - Keep Shift AX workflows stage-based and explicit.
 - **Persistent state and traces**
-  - Store plans, state, logs, and memory under `.ax/`.
+  - Store plans, state, logs, and memory under `.shift-ax/`.
 - **Execution mode split**
   - Keep short work on subagents and long work on tmux-backed execution.
 - **Operator surfaces**
@@ -78,13 +78,13 @@ Everything adopted here must preserve two non-negotiable goals:
 
 ### From get-shit-done
 - **Readable state file**
-  - Add a human-readable `.ax/STATE.md` or topic handoff file that summarizes current phase, blocker, next command, and recent decision.
+  - Add a human-readable `.shift-ax/STATE.md` or topic handoff file that summarizes current phase, blocker, next command, and recent decision.
 - **Context-window monitor**
   - Detect when the active session is approaching context exhaustion and warn or checkpoint before quality drops.
 - **Pause / handoff command**
   - Add an explicit pause-work surface that writes a structured handoff for later resumption.
 - **Threads for cross-topic work**
-  - Add `.ax/threads/` for long-running context that does not belong to a single topic.
+  - Add `.shift-ax/threads/` for long-running context that does not belong to a single topic.
 - **Compound context loader**
   - Provide a lightweight command that assembles the current repo/topic/decision context bundle for a given workflow step.
 - **Learned-debug/history notes**

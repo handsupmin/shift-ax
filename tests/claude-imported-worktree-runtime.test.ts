@@ -28,13 +28,13 @@ test('createClaudeManagedWorktree creates a named branch worktree', async () => 
   try {
     const created = createClaudeManagedWorktree({
       repoRoot,
-      worktreePath: join(repoRoot, '.ax', 'claude-imported', 'worker-a'),
-      branchName: 'ax/claude-imported-worker-a',
+      worktreePath: join(repoRoot, '.shift-ax', 'claude-imported', 'worker-a'),
+      branchName: 'shift-ax/claude-imported-worker-a',
       baseBranch: 'main',
     });
 
     assert.equal(existsSync(created.path), true);
-    assert.equal(created.branch, 'ax/claude-imported-worker-a');
+    assert.equal(created.branch, 'shift-ax/claude-imported-worker-a');
   } finally {
     await rm(repoRoot, { recursive: true, force: true });
   }
@@ -46,8 +46,8 @@ test('removeClaudeManagedWorktree removes the worktree path and branch', async (
   try {
     const created = createClaudeManagedWorktree({
       repoRoot,
-      worktreePath: join(repoRoot, '.ax', 'claude-imported', 'worker-b'),
-      branchName: 'ax/claude-imported-worker-b',
+      worktreePath: join(repoRoot, '.shift-ax', 'claude-imported', 'worker-b'),
+      branchName: 'shift-ax/claude-imported-worker-b',
       baseBranch: 'main',
     });
     assert.equal(existsSync(created.path), true);

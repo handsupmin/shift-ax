@@ -15,10 +15,10 @@ test('buildWorktreePlan derives branch and path from topic slug', () => {
     request: 'Build auth refresh flow',
   });
 
-  assert.equal(plan.preferred_branch_name, 'ax/2026-04-06-auth-refresh');
+  assert.equal(plan.preferred_branch_name, 'shift-ax/2026-04-06-auth-refresh');
   assert.equal(
     plan.preferred_worktree_path,
-    '/repo/.ax/worktrees/2026-04-06-auth-refresh',
+    '/repo/.shift-ax/worktrees/2026-04-06-auth-refresh',
   );
 });
 
@@ -71,8 +71,8 @@ test('ax worktree-plan updates worktree-plan.json for a topic', async () => {
 
     assert.equal(result.topic_slug, bootstrap.topicSlug);
     assert.equal(file.topic_slug, bootstrap.topicSlug);
-    assert.equal(result.preferred_branch_name, `ax/${bootstrap.topicSlug}`);
-    assert.match(result.preferred_worktree_path, /\.ax\/worktrees\//);
+    assert.equal(result.preferred_branch_name, `shift-ax/${bootstrap.topicSlug}`);
+    assert.match(result.preferred_worktree_path, /\.shift-ax\/worktrees\//);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

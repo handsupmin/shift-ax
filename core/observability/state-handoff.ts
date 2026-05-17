@@ -43,7 +43,7 @@ export async function writeRootStateSummary({
     }
   }
 
-  const outputPath = join(rootDir, '.ax', 'STATE.md');
+  const outputPath = join(rootDir, '.shift-ax', 'STATE.md');
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${lines.join('\n')}\n`, 'utf8');
   return { output_path: outputPath };

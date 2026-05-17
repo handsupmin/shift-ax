@@ -171,7 +171,7 @@ async function evalGlossaryLatency(): Promise<void> {
 // ─── Perf 3: Topic Recall latency ────────────────────────────────────────────
 
 async function seedCommittedTopic(root: string, slug: string, summary: string, updatedAt: string): Promise<void> {
-  const topicDir = join(root, '.ax', 'topics', slug);
+  const topicDir = join(root, '.shift-ax', 'topics', slug);
   await mkdir(topicDir, { recursive: true });
   await writeFile(join(topicDir, 'request.md'), `${summary}\n`, 'utf8');
   await writeFile(join(topicDir, 'request-summary.md'), `${summary}\n`, 'utf8');

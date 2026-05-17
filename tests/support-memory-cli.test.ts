@@ -84,7 +84,7 @@ test('ax promote-thread creates a topic from a saved thread', async () => {
       'Create refund rollback topic',
     ]);
     const result = JSON.parse(stdout) as { topicDir: string };
-    assert.match(result.topicDir, /\.ax\/topics\//);
+    assert.match(result.topicDir, /\.shift-ax\/topics\//);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -94,7 +94,7 @@ test('ax entity-memory combines matching topics, decisions, and threads for an e
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-entity-memory-cli-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-09-refund-fix');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-refund-fix');
     await mkdir(topicDir, { recursive: true });
     await writeFile(join(topicDir, 'request.md'), 'Refund rollback helper\n', 'utf8');
     await writeFile(join(topicDir, 'request-summary.md'), 'Refund rollback helper\n', 'utf8');

@@ -123,7 +123,7 @@ npm run ax -- doctor
 4. review:
 - `docs/base-context/index.md`
 - `docs/base-context/domain-glossary.md`
-- `.ax/project-profile.json`
+- `.shift-ax/project-profile.json`
 
 Exit condition:
 - `doctor` is `ok`

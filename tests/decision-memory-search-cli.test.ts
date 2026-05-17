@@ -14,7 +14,7 @@ test('ax decisions returns ranked decision-memory matches when query search is u
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-decision-memory-cli-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
     await mkdir(topicDir, { recursive: true });
     await writeFile(join(topicDir, 'request-summary.md'), 'Auth refresh rollback must stay safe.\n', 'utf8');
     await writeFile(

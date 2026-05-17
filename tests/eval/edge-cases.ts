@@ -211,19 +211,19 @@ async function evalTopicRecallEdgeCases(): Promise<void> {
   section('Edge: searchPastTopics — boundary + missing data');
 
   await withTmpDir(async (root) => {
-    // No .ax directory at all
+    // No .shift-ax directory at all
     const rNone = await searchPastTopics({ rootDir: root, query: 'auth refresh', limit: 5 });
-    if (Array.isArray(rNone) && rNone.length === 0) pass('recall edge: no .ax dir returns empty (graceful)');
-    else fail(`recall edge: no .ax dir returned ${rNone.length} matches`);
+    if (Array.isArray(rNone) && rNone.length === 0) pass('recall edge: no .shift-ax dir returns empty (graceful)');
+    else fail(`recall edge: no .shift-ax dir returned ${rNone.length} matches`);
 
-    // .ax/topics exists but is empty
-    await mkdir(join(root, '.ax', 'topics'), { recursive: true });
+    // .shift-ax/topics exists but is empty
+    await mkdir(join(root, '.shift-ax', 'topics'), { recursive: true });
     const rNoTopics = await searchPastTopics({ rootDir: root, query: 'auth refresh', limit: 5 });
     if (Array.isArray(rNoTopics) && rNoTopics.length === 0) pass('recall edge: empty topics dir returns empty');
     else fail(`recall edge: empty topics dir returned ${rNoTopics.length} matches`);
 
     // Topic directory exists but has no workflow-state.json (should be skipped)
-    const incompleteDir = join(root, '.ax', 'topics', '2026-01-01-incomplete');
+    const incompleteDir = join(root, '.shift-ax', 'topics', '2026-01-01-incomplete');
     await mkdir(incompleteDir, { recursive: true });
     await writeFile(join(incompleteDir, 'request.md'), 'Auth refresh token\n', 'utf8');
     const rIncomplete = await searchPastTopics({ rootDir: root, query: 'auth refresh', limit: 5 });
@@ -231,7 +231,7 @@ async function evalTopicRecallEdgeCases(): Promise<void> {
     else fail(`recall edge: incomplete topic returned ${rIncomplete.length} matches unexpectedly`);
 
     // Topic in non-committed phase (e.g. awaiting_plan_review) — should be skipped
-    const pendingDir = join(root, '.ax', 'topics', '2026-02-01-pending');
+    const pendingDir = join(root, '.shift-ax', 'topics', '2026-02-01-pending');
     await mkdir(pendingDir, { recursive: true });
     await writeFile(join(pendingDir, 'request.md'), 'Auth refresh token\n', 'utf8');
     await writeFile(join(pendingDir, 'workflow-state.json'), JSON.stringify({ phase: 'awaiting_plan_review' }, null, 2), 'utf8');
@@ -240,7 +240,7 @@ async function evalTopicRecallEdgeCases(): Promise<void> {
     else fail(`recall edge: pending topic returned ${rPending.length} matches`);
 
     // limit=0 — returns nothing, no crash
-    const committedDir = join(root, '.ax', 'topics', '2026-03-01-committed');
+    const committedDir = join(root, '.shift-ax', 'topics', '2026-03-01-committed');
     await mkdir(committedDir, { recursive: true });
     await writeFile(join(committedDir, 'request.md'), 'Auth refresh token\n', 'utf8');
     await writeFile(join(committedDir, 'request-summary.md'), 'Auth refresh token\n', 'utf8');

@@ -79,7 +79,7 @@ export async function consolidateMemory({
     .filter(([, count]) => count > 1)
     .map(([title, count]) => ({ title, count }));
 
-  const topicsRoot = join(rootDir, '.ax', 'topics');
+  const topicsRoot = join(rootDir, '.shift-ax', 'topics');
   const topicEntries = await readdir(topicsRoot, { withFileTypes: true }).catch(() => []);
   const summaryCounts = new Map<string, number>();
   for (const entry of topicEntries) {

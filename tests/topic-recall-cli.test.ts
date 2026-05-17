@@ -12,7 +12,7 @@ test('ax recall-topics prints matching committed topic summaries', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topic-recall-cli-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
     await mkdir(topicDir, { recursive: true });
     await writeFile(join(topicDir, 'request.md'), 'Build safer auth refresh flow\n', 'utf8');
     await writeFile(join(topicDir, 'request-summary.md'), 'Reviewed auth refresh delivery flow.\n', 'utf8');

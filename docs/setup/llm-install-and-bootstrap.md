@@ -245,7 +245,7 @@ shift-ax run-request \
 
 Expected result:
 
-- a topic under `.ax/topics/<topic-slug>/`
+- a topic under `.shift-ax/topics/<topic-slug>/`
 - resolved-context, brainstorm, spec, and implementation-plan artifacts
 - workflow pauses at human plan review
 
@@ -253,7 +253,7 @@ Expected result:
 
 ```bash
 shift-ax approve-plan \
-  --topic /absolute/path/to/target-repo/.ax/topics/<topic-slug> \
+  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
   --reviewer "Reviewer Name" \
   --decision approve
 ```
@@ -264,7 +264,7 @@ If the approved plan indicates shared policy/base-context updates are required, 
 
 ```bash
 shift-ax sync-policy-context \
-  --topic /absolute/path/to/target-repo/.ax/topics/<topic-slug> \
+  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
   --summary "Updated shared policy docs before implementation" \
   --path docs/base-context/refund-policy.md
 ```
@@ -273,7 +273,7 @@ shift-ax sync-policy-context \
 
 ```bash
 shift-ax run-request \
-  --topic /absolute/path/to/target-repo/.ax/topics/<topic-slug> \
+  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
   --resume \
   --verify-command "npm test" \
   --verify-command "npm run build"

@@ -123,7 +123,7 @@ npm run ax -- doctor
 4. 검토:
 - `docs/base-context/index.md`
 - `docs/base-context/domain-glossary.md`
-- `.ax/project-profile.json`
+- `.shift-ax/project-profile.json`
 
 종료 조건:
 - `doctor` 결과가 `ok`

@@ -40,7 +40,7 @@ This creates a topic, worktree, planning artifacts, and a human review gate.
 
 ```bash
 npm run ax -- approve-plan \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --reviewer "<name>" \
   --decision approve
 ```
@@ -51,7 +51,7 @@ If the reviewed plan requires shared policy or base-context doc updates, Shift A
 
 ```bash
 npm run ax -- sync-policy-context \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --summary "Updated shared policy docs before implementation" \
   --path docs/base-context/<doc>.md
 ```
@@ -60,7 +60,7 @@ npm run ax -- sync-policy-context \
 
 ```bash
 npm run ax -- run-request \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --resume \
   --verify-command "npm test" \
   --verify-command "npm run build"
@@ -70,7 +70,7 @@ npm run ax -- run-request \
 
 ```bash
 npm run ax -- react-feedback \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --kind review-changes-requested \
   --summary "Reviewer requested additional rollback coverage"
 ```
@@ -80,7 +80,7 @@ npm run ax -- react-feedback \
 ### Single topic
 
 ```bash
-npm run ax -- topic-status --topic .ax/topics/<topic-slug>
+npm run ax -- topic-status --topic .shift-ax/topics/<topic-slug>
 ```
 
 Shows:
@@ -109,7 +109,7 @@ Use platform launchers when you want the runtime to perform the task itself.
 ```bash
 npm run ax -- launch-execution \
   --platform codex \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
 ```
 
@@ -118,7 +118,7 @@ npm run ax -- launch-execution \
 ```bash
 npm run ax -- launch-execution \
   --platform claude-code \
-  --topic .ax/topics/<topic-slug> \
+  --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
 ```
 

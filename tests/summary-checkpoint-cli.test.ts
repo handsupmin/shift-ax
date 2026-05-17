@@ -10,7 +10,7 @@ const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.u
 
 test('ax checkpoint-context writes a topic summary checkpoint', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-checkpoint-cli-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
 
   try {
     await mkdir(topicDir, { recursive: true });

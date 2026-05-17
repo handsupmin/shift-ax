@@ -13,7 +13,7 @@ export interface ShiftAxLearnedDebugNote {
 }
 
 function storePath(rootDir: string): string {
-  return join(rootDir, '.ax', 'memory', 'learned-debug.json');
+  return join(rootDir, '.shift-ax', 'memory', 'learned-debug.json');
 }
 
 async function readStore(rootDir: string): Promise<ShiftAxLearnedDebugNote[]> {

@@ -11,7 +11,7 @@ export interface DiscoverBaseContextEntriesInput {
   rootDir: string;
 }
 
-const EXCLUDED_SEGMENTS = new Set(['base-context', 'verification', 'roadmap', '.ax']);
+const EXCLUDED_SEGMENTS = new Set(['base-context', 'verification', 'roadmap', '.shift-ax']);
 const INCLUDED_KEYWORDS = [
   'architecture',
   'policy',

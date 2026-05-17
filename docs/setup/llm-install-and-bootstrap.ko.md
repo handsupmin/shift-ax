@@ -249,7 +249,7 @@ shift-ax run-request \
 
 기대 결과:
 
-- `.ax/topics/<topic-slug>/`
+- `.shift-ax/topics/<topic-slug>/`
 - resolved-context / brainstorm / spec / implementation-plan artifact 생성
 - workflow는 human plan review 게이트에서 멈춤
 
@@ -257,7 +257,7 @@ shift-ax run-request \
 
 ```bash
 shift-ax approve-plan \
-  --topic /absolute/path/to/target-repo/.ax/topics/<topic-slug> \
+  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
   --reviewer "Reviewer Name" \
   --decision approve
 ```
@@ -268,7 +268,7 @@ shift-ax approve-plan \
 
 ```bash
 shift-ax sync-policy-context \
-  --topic /absolute/path/to/target-repo/.ax/topics/<topic-slug> \
+  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
   --summary "Updated shared policy docs before implementation" \
   --path docs/base-context/refund-policy.md
 ```
@@ -277,7 +277,7 @@ shift-ax sync-policy-context \
 
 ```bash
 shift-ax run-request \
-  --topic /absolute/path/to/target-repo/.ax/topics/<topic-slug> \
+  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
   --resume \
   --verify-command "npm test" \
   --verify-command "npm run build"

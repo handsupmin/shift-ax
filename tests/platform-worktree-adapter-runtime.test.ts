@@ -33,7 +33,7 @@ test('codex adapter runs plan/create/remove worktree operations through the adap
 
     const plan = await adapter.planWorktree({ topicDir: bootstrap.topicDir });
     assert.equal(plan.topic_slug, bootstrap.topicSlug);
-    assert.match(plan.preferred_worktree_path, /\.ax\/worktrees\//);
+    assert.match(plan.preferred_worktree_path, /\.shift-ax\/worktrees\//);
 
     const created = await adapter.createWorktree({
       topicDir: bootstrap.topicDir,
@@ -63,7 +63,7 @@ test('claude-code adapter runs plan/create/remove worktree operations through th
 
     const plan = await adapter.planWorktree({ topicDir: bootstrap.topicDir });
     assert.equal(plan.topic_slug, bootstrap.topicSlug);
-    assert.match(plan.preferred_worktree_path, /\.ax\/worktrees\//);
+    assert.match(plan.preferred_worktree_path, /\.shift-ax\/worktrees\//);
 
     const created = await adapter.createWorktree({
       topicDir: bootstrap.topicDir,

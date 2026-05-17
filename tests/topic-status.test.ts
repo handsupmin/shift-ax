@@ -9,7 +9,7 @@ import { summarizeTopicStatus } from '../core/observability/topic-status.js';
 
 test('summarizeTopicStatus returns a compact view of workflow, review, execution, and lifecycle state', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topic-status-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
 
   try {
     await mkdir(join(topicDir, 'review'), { recursive: true });
@@ -26,8 +26,8 @@ test('summarizeTopicStatus returns a compact view of workflow, review, execution
           updated_at: new Date().toISOString(),
           plan_review_status: 'approved',
           worktree: {
-            branch_name: 'ax/2026-04-08-auth-refresh',
-            worktree_path: join(root, '.ax', 'worktrees', '2026-04-08-auth-refresh'),
+            branch_name: 'shift-ax/2026-04-08-auth-refresh',
+            worktree_path: join(root, '.shift-ax', 'worktrees', '2026-04-08-auth-refresh'),
             base_branch: 'main',
           },
         },
@@ -192,7 +192,7 @@ test('summarizeTopicStatus returns a compact view of workflow, review, execution
         '',
         '## Recommended Command',
         '',
-        '`npm run ax -- topic-status --topic .ax/topics/2026-04-08-auth-refresh`',
+        '`npm run ax -- topic-status --topic .shift-ax/topics/2026-04-08-auth-refresh`',
         '',
       ].join('\n'),
       'utf8',
@@ -212,7 +212,7 @@ test('summarizeTopicStatus returns a compact view of workflow, review, execution
     assert.equal(summary.execution_status, 'completed');
     assert.equal(summary.readiness, 'implementation_required');
     assert.equal(summary.plan_fingerprint_status, 'matched');
-    assert.equal(summary.branch_name, 'ax/2026-04-08-auth-refresh');
+    assert.equal(summary.branch_name, 'shift-ax/2026-04-08-auth-refresh');
     assert.equal(summary.remaining_items?.[0], 'Re-run auth refresh tests');
     assert.match(summary.recommended_command ?? '', /topic-status/);
     assert.match(summary.latest_checkpoint?.summary ?? '', /Paused after review feedback/);

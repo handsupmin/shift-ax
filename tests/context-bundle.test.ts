@@ -8,7 +8,7 @@ import { buildContextBundle } from '../core/context/context-bundle.js';
 import { recordDecision } from '../core/memory/decision-register.js';
 
 async function writeTopic(root: string, slug: string, phase = 'committed') {
-  const topicDir = join(root, '.ax', 'topics', slug);
+  const topicDir = join(root, '.shift-ax', 'topics', slug);
   await mkdir(topicDir, { recursive: true });
   await writeFile(join(topicDir, 'request.md'), `Request for ${slug}\n`, 'utf8');
   await writeFile(join(topicDir, 'request-summary.md'), `Summary for ${slug}\n`, 'utf8');

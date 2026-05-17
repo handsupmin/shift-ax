@@ -193,10 +193,10 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 
 **Shift AX에서의 번역**
 
-- 모든 요청은 `.ax/topics/` 아래 topic 디렉토리를 가진다
+- 모든 요청은 `.shift-ax/topics/` 아래 topic 디렉토리를 가진다
 - 요청, 요약, 문맥, 계획, 리뷰, finalization artifact가 topic 안에 저장된다
 - worktree 계획도 topic과 연결된다
-- `.ax/STATE.md`와 topic `handoff.md`가 사람에게 읽히는 상태를 제공한다
+- `.shift-ax/STATE.md`와 topic `handoff.md`가 사람에게 읽히는 상태를 제공한다
 
 ### 4.4 Planning and human review layer
 
@@ -322,7 +322,7 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 - `shift-ax topics-status`
 - `shift-ax context-health`
 - `shift-ax monitor-context`
-- readable `.ax/STATE.md`
+- readable `.shift-ax/STATE.md`
 
 dashboard가 꼭 필요하다는 운영 압력이 생기기 전까지는 **compact CLI observability**를 우선한다.
 

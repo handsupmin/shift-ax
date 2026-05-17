@@ -10,7 +10,7 @@ const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.u
 
 test('ax topic-status prints a compact topic observability summary', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topic-status-cli-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
 
   try {
     await mkdir(join(topicDir, 'review'), { recursive: true });

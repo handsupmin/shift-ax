@@ -327,14 +327,14 @@ test('finalizeTopicCommit refuses when aggregate review does not allow commit', 
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-finalize-blocked-'));
 
   try {
-    await mkdir(join(root, '.ax', 'topics', '2026-04-07-blocked', 'review'), {
+    await mkdir(join(root, '.shift-ax', 'topics', '2026-04-07-blocked', 'review'), {
       recursive: true,
     });
-    await mkdir(join(root, '.ax', 'topics', '2026-04-07-blocked', 'final'), {
+    await mkdir(join(root, '.shift-ax', 'topics', '2026-04-07-blocked', 'final'), {
       recursive: true,
     });
     await writeFile(
-      join(root, '.ax', 'topics', '2026-04-07-blocked', 'review', 'aggregate.json'),
+      join(root, '.shift-ax', 'topics', '2026-04-07-blocked', 'review', 'aggregate.json'),
       JSON.stringify(
         {
           version: 1,
@@ -354,7 +354,7 @@ test('finalizeTopicCommit refuses when aggregate review does not allow commit', 
       'utf8',
     );
     await writeFile(
-      join(root, '.ax', 'topics', '2026-04-07-blocked', 'final', 'commit-message.md'),
+      join(root, '.shift-ax', 'topics', '2026-04-07-blocked', 'final', 'commit-message.md'),
       buildLoreCommitMessage({
         intent: 'Blocked commit should never run',
         body: 'This message exists only for the blocked finalization test.',
@@ -369,7 +369,7 @@ test('finalizeTopicCommit refuses when aggregate review does not allow commit', 
     );
 
     await assert.rejects(
-      finalizeTopicCommit({ topicDir: join(root, '.ax', 'topics', '2026-04-07-blocked') }),
+      finalizeTopicCommit({ topicDir: join(root, '.shift-ax', 'topics', '2026-04-07-blocked') }),
       /commit_allowed/i,
     );
   } finally {

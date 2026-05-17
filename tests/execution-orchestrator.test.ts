@@ -8,8 +8,8 @@ import { orchestrateExecutionTasks } from '../core/planning/execution-orchestrat
 
 test('orchestrateExecutionTasks records task results and waits for output artifacts', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-exec-orchestrator-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-08-exec');
-  const worktreePath = join(root, '.ax', 'worktrees', '2026-04-08-exec');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-exec');
+  const worktreePath = join(root, '.shift-ax', 'worktrees', '2026-04-08-exec');
 
   try {
     await mkdir(topicDir, { recursive: true });
@@ -75,8 +75,8 @@ test('orchestrateExecutionTasks records task results and waits for output artifa
 
 test('orchestrateExecutionTasks reuses an existing non-empty output artifact instead of re-running the task', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-exec-orchestrator-reuse-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-08-exec');
-  const worktreePath = join(root, '.ax', 'worktrees', '2026-04-08-exec');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-exec');
+  const worktreePath = join(root, '.shift-ax', 'worktrees', '2026-04-08-exec');
 
   try {
     await mkdir(topicDir, { recursive: true });

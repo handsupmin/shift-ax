@@ -8,7 +8,7 @@ import { listVerificationDebt } from '../core/observability/verification-debt.js
 
 test('listVerificationDebt returns failing verification commands and non-approved review lanes', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-verification-debt-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
 
   try {
     await mkdir(join(topicDir, 'review'), { recursive: true });
@@ -69,7 +69,7 @@ test('listVerificationDebt returns failing verification commands and non-approve
 
 test('listVerificationDebt surfaces CI verification failures distinctly', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-verification-debt-ci-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
 
   try {
     await mkdir(join(topicDir, 'review'), { recursive: true });

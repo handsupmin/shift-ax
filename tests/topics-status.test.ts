@@ -10,8 +10,8 @@ test('listTopicsStatus returns compact summaries for tracked topics ordered by u
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topics-status-'));
 
   try {
-    const first = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
-    const second = join(root, '.ax', 'topics', '2026-04-08-billing-window');
+    const first = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
+    const second = join(root, '.shift-ax', 'topics', '2026-04-08-billing-window');
     await mkdir(join(first, 'review'), { recursive: true });
     await mkdir(join(second, 'review'), { recursive: true });
 

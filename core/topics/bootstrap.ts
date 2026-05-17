@@ -84,7 +84,7 @@ export async function bootstrapTopic({
   }
 
   const topicSlug = buildTopicSlug(request, now);
-  const topicDir = join(rootDir, '.ax', 'topics', topicSlug);
+  const topicDir = join(rootDir, '.shift-ax', 'topics', topicSlug);
   const artifacts = defaultTopicArtifacts();
 
   await mkdir(topicDir, { recursive: true });

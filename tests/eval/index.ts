@@ -62,7 +62,7 @@ async function createGitRepo(root: string): Promise<void> {
   execFileSync('git', ['config', 'user.name', 'Eval Test'], { cwd: root, stdio: 'pipe' });
   execFileSync('git', ['config', 'user.email', 'eval@shift-ax.test'], { cwd: root, stdio: 'pipe' });
   await writeFile(join(root, 'README.md'), '# eval-repo\n', 'utf8');
-  await writeFile(join(root, '.gitignore'), '.ax/\n', 'utf8');
+  await writeFile(join(root, '.gitignore'), '.shift-ax/\n', 'utf8');
   execFileSync('git', ['add', '.'], { cwd: root, stdio: 'pipe' });
   execFileSync('git', ['commit', '-m', 'init'], { cwd: root, stdio: 'pipe' });
 }
@@ -324,7 +324,7 @@ async function evalGlossaryExtraction(): Promise<void> {
 // ─── FEATURE 3: Topic Recall ─────────────────────────────────────────────────
 
 async function seedCommittedTopic(root: string, slug: string, summary: string, updatedAt: string): Promise<void> {
-  const topicDir = join(root, '.ax', 'topics', slug);
+  const topicDir = join(root, '.shift-ax', 'topics', slug);
   await mkdir(topicDir, { recursive: true });
   await writeFile(join(topicDir, 'request.md'), `${summary}\n`, 'utf8');
   await writeFile(join(topicDir, 'request-summary.md'), `${summary}\n`, 'utf8');
@@ -445,7 +445,7 @@ async function evalRequestPipelineGoldenPath(): Promise<void> {
         fail('pipeline: no context matches resolved');
       }
 
-      if (started.topicDir.includes('.ax/topics/')) {
+      if (started.topicDir.includes('.shift-ax/topics/')) {
         pass(`pipeline: topic directory created at ${started.topicDir}`);
       } else {
         fail(`pipeline: unexpected topicDir path ${started.topicDir}`);

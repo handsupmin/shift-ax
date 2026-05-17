@@ -18,7 +18,7 @@ export function slugifyThreadName(value: string): string {
 }
 
 export function threadPath(rootDir: string, name: string): string {
-  return join(rootDir, '.ax', 'threads', `${slugifyThreadName(name)}.md`);
+  return join(rootDir, '.shift-ax', 'threads', `${slugifyThreadName(name)}.md`);
 }
 
 export async function saveThreadNote({
@@ -66,7 +66,7 @@ export async function listThreads({
 }: {
   rootDir: string;
 }): Promise<ShiftAxThreadSummary[]> {
-  const dir = join(rootDir, '.ax', 'threads');
+  const dir = join(rootDir, '.shift-ax', 'threads');
   const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
   const result: ShiftAxThreadSummary[] = [];
 

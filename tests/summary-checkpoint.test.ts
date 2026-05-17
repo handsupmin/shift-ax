@@ -8,7 +8,7 @@ import { writeTopicSummaryCheckpoint } from '../core/memory/summary-checkpoints.
 
 test('writeTopicSummaryCheckpoint writes a timestamped summary checkpoint for a topic', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-summary-checkpoint-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-09-auth-fix');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
 
   try {
     await mkdir(topicDir, { recursive: true });

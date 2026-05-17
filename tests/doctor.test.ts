@@ -17,7 +17,7 @@ async function createGitRepo(): Promise<string> {
   execFileSync('git', ['config', 'user.name', 'Shift AX Test'], { cwd: root, stdio: 'pipe' });
   execFileSync('git', ['config', 'user.email', 'shift-ax@example.com'], { cwd: root, stdio: 'pipe' });
   await writeFile(join(root, 'README.md'), '# repo\n', 'utf8');
-  await writeFile(join(root, '.gitignore'), '.ax/\nnode_modules/\ndist/\n', 'utf8');
+  await writeFile(join(root, '.gitignore'), '.shift-ax/\nnode_modules/\ndist/\n', 'utf8');
   execFileSync('git', ['add', 'README.md', '.gitignore'], { cwd: root, stdio: 'pipe' });
   execFileSync('git', ['commit', '-m', 'init'], { cwd: root, stdio: 'pipe' });
   return root;

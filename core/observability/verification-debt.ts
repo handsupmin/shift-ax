@@ -101,7 +101,7 @@ export async function listVerificationDebt({
     throw new Error('rootDir or topicDir is required');
   }
 
-  const topicsRoot = join(rootDir, '.ax', 'topics');
+  const topicsRoot = join(rootDir, '.shift-ax', 'topics');
   const entries = await readdir(topicsRoot, { withFileTypes: true }).catch(() => []);
   const all = await Promise.all(
     entries.filter((entry) => entry.isDirectory()).map((entry) => readTopicDebt(join(topicsRoot, entry.name))),

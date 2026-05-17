@@ -158,5 +158,5 @@ export function defaultBaseContextIndex(rootDir: string): string {
 }
 
 export function defaultTopicRoot(rootDir: string): string {
-  return join(rootDir, '.ax', 'topics');
+  return join(rootDir, '.shift-ax', 'topics');
 }

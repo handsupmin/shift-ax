@@ -7,7 +7,7 @@ export interface ShiftAxTeamPreferences {
 }
 
 function path(rootDir: string): string {
-  return join(rootDir, '.ax', 'team-preferences.json');
+  return join(rootDir, '.shift-ax', 'team-preferences.json');
 }
 
 export async function readTeamPreferences(rootDir: string): Promise<ShiftAxTeamPreferences | null> {
@@ -25,6 +25,6 @@ export async function writeTeamPreferences({
   rootDir: string;
   preferences: ShiftAxTeamPreferences;
 }): Promise<void> {
-  await mkdir(join(rootDir, '.ax'), { recursive: true });
+  await mkdir(join(rootDir, '.shift-ax'), { recursive: true });
   await writeFile(path(rootDir), `${JSON.stringify(preferences, null, 2)}\n`, 'utf8');
 }

@@ -133,8 +133,8 @@ Shift AX は先にコンテキストを解決し、リクエスト専用の topi
 ```bash
 shift-ax onboard-context --discover
 shift-ax run-request --request "Build safer auth refresh flow"
-shift-ax approve-plan --topic .ax/topics/<topic> --reviewer "Alex" --decision approve
-shift-ax run-request --topic .ax/topics/<topic> --resume
+shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
+shift-ax run-request --topic .shift-ax/topics/<topic> --resume
 ```
 
 ---

@@ -64,10 +64,10 @@ function runGit(cwd: string, args: string[]): string {
 
 function getRootDirFromTopicDir(topicDir: string): string {
   const resolved = resolve(topicDir);
-  const marker = `${sep}.ax${sep}topics${sep}`;
+  const marker = `${sep}.shift-ax${sep}topics${sep}`;
   const index = resolved.lastIndexOf(marker);
   if (index === -1) {
-    throw new Error(`topicDir is not inside .ax/topics: ${topicDir}`);
+    throw new Error(`topicDir is not inside .shift-ax/topics: ${topicDir}`);
   }
   return resolved.slice(0, index);
 }

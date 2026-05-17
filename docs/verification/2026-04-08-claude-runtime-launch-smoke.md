@@ -7,7 +7,7 @@ Verify that `ax launch-execution --platform claude-code` can launch a real Claud
 ## Result
 
 - Status: success
-- Marker file: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/smoke-marker.txt`
+- Marker file: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/smoke-marker.txt`
 - Marker contents: `claude runtime smoke complete.`
 
 ## Key Outputs
@@ -59,7 +59,7 @@ Verify that `ax launch-execution --platform claude-code` can launch a real Claud
 ```json
 {
   "topicSlug": "2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
-  "topicDir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+  "topicDir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
   "metadata": {
     "version": 1,
     "topic_slug": "2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
@@ -102,8 +102,8 @@ Verify that `ax launch-execution --platform claude-code` can launch a real Claud
   "worktree": {
     "version": 1,
     "topic_slug": "2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
-    "branch_name": "ax/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
-    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+    "branch_name": "shift-ax/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
     "base_branch": "main",
     "created": true,
     "reused": false
@@ -120,8 +120,8 @@ Verify that `ax launch-execution --platform claude-code` can launch a real Claud
       "triggers": []
     },
     "worktree": {
-      "branch_name": "ax/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
-      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+      "branch_name": "shift-ax/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
       "base_branch": "main"
     },
     "resolved_context": {
@@ -153,21 +153,21 @@ Verify that `ax launch-execution --platform claude-code` can launch a real Claud
 {
   "platform": "claude-code",
   "launched": false,
-  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
   "tasks": [
     {
       "task_id": "task-2",
       "source_text": "Implement Create smoke-marker.txt with the exact text claude runtime smoke complete. inside: smoke-marker.txt.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json",
       "command": [
         "/bin/sh",
         "-lc",
-        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
+        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
     }
   ]
 }
@@ -178,21 +178,21 @@ Verify that `ax launch-execution --platform claude-code` can launch a real Claud
 {
   "platform": "claude-code",
   "launched": true,
-  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
   "tasks": [
     {
       "task_id": "task-2",
       "source_text": "Implement Create smoke-marker.txt with the exact text claude runtime smoke complete. inside: smoke-marker.txt.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json",
       "command": [
         "/bin/sh",
         "-lc",
-        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
+        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-prompts/task-2.md' | claude -p --output-format json --permission-mode bypassPermissions --add-dir '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex' > '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.4TMiZFZqlK/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-claude-runtime-ex/execution-results/task-2.json'"
     }
   ]
 }

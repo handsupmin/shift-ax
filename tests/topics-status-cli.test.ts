@@ -12,7 +12,7 @@ test('ax topics-status prints compact summaries for recent topics', async () => 
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topics-status-cli-'));
 
   try {
-    const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+    const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
     await mkdir(join(topicDir, 'review'), { recursive: true });
     await writeFile(
       join(topicDir, 'workflow-state.json'),

@@ -9,7 +9,7 @@ import { saveThreadNote } from '../core/memory/threads.js';
 import { consolidateMemory } from '../core/memory/consolidation.js';
 
 async function seedCommittedTopic(root: string, slug: string, summary: string): Promise<void> {
-  const topicDir = join(root, '.ax', 'topics', slug);
+  const topicDir = join(root, '.shift-ax', 'topics', slug);
   await mkdir(topicDir, { recursive: true });
   await writeFile(join(topicDir, 'request.md'), `${summary}\n`, 'utf8');
   await writeFile(join(topicDir, 'request-summary.md'), `${summary}\n`, 'utf8');

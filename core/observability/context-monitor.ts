@@ -25,7 +25,7 @@ export async function writeContextMonitorSnapshot({
   });
   const effectiveRoot = rootDir || (topicDir ? getRootDirFromTopicDir(topicDir) : '');
   const targetPath =
-    outputPath || join(effectiveRoot, '.ax', 'context-monitor.json');
+    outputPath || join(effectiveRoot, '.shift-ax', 'context-monitor.json');
   await mkdir(dirname(targetPath), { recursive: true });
   await writeFile(
     targetPath,

@@ -46,7 +46,7 @@ test('createTopicWorktree creates a git worktree from topic plan', async () => {
     assert.equal(result.created, true);
     assert.equal(result.reused, false);
     assert.equal(existsSync(result.worktree_path), true);
-    assert.match(result.branch_name, /^ax\//);
+    assert.match(result.branch_name, /^shift-ax\//);
 
     const state = JSON.parse(
       await readFile(join(bootstrap.topicDir, 'worktree-state.json'), 'utf8'),

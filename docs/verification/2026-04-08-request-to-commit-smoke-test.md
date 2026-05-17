@@ -15,17 +15,17 @@ This log captures the current end-to-end CLI flow:
 ## Temporary Repo
 
 - Temp repo root: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR`
-- Topic directory: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow`
-- Worktree directory: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow`
+- Topic directory: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow`
+- Worktree directory: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow`
 
 ## Commands Run
 
 ```bash
 npm --silent run ax -- onboard-context --root "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR" --input "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/onboarding.json"
 printf '%s\n'   'Users should stay signed in during refresh token rotation.'   'Auth policy applies and no schema changes are allowed.'   'Do not change billing or the session UI.'   'Verification needs auth refresh tests plus a clean build.'   'Auth refresh service, token store, and session middleware.'   'Token store migration analysis is the only long-running slice.'   '' | npm --silent run ax -- run-request --root "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR" --request 'Build safer auth refresh flow'
-npm --silent run ax -- launch-execution --platform codex --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow" --dry-run
-npm --silent run ax -- approve-plan --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow" --reviewer "Alex Reviewer" --decision approve
-npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow" --resume --verify-command 'node --test auth-refresh.test.js'
+npm --silent run ax -- launch-execution --platform codex --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --dry-run
+npm --silent run ax -- approve-plan --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --reviewer "Alex Reviewer" --decision approve
+npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --resume --verify-command 'node --test auth-refresh.test.js'
 ```
 
 ## Key Outputs
@@ -91,7 +91,7 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
 ```json
 {
   "topicSlug": "2026-04-08-build-safer-auth-refresh-flow",
-  "topicDir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow",
+  "topicDir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow",
   "metadata": {
     "version": 1,
     "topic_slug": "2026-04-08-build-safer-auth-refresh-flow",
@@ -134,8 +134,8 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
   "worktree": {
     "version": 1,
     "topic_slug": "2026-04-08-build-safer-auth-refresh-flow",
-    "branch_name": "ax/2026-04-08-build-safer-auth-refresh-flow",
-    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+    "branch_name": "shift-ax/2026-04-08-build-safer-auth-refresh-flow",
+    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
     "base_branch": "main",
     "created": true,
     "reused": false
@@ -152,8 +152,8 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
       "triggers": []
     },
     "worktree": {
-      "branch_name": "ax/2026-04-08-build-safer-auth-refresh-flow",
-      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "branch_name": "shift-ax/2026-04-08-build-safer-auth-refresh-flow",
+      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
       "base_branch": "main"
     },
     "resolved_context": {
@@ -172,129 +172,129 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
 {
   "platform": "codex",
   "launched": false,
-  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow",
+  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow",
   "tasks": [
     {
       "task_id": "task-1",
       "source_text": "Add or update tests first using TDD for: Verification needs auth refresh tests plus a clean build.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-1.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-1.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-1.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-1.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-1.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-1.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-1.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-1.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-1.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-1.json' -"
     },
     {
       "task_id": "task-2",
       "source_text": "Implement Users should stay signed in during refresh token rotation. inside: Auth refresh service, token store, and session middleware..",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-2.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-2.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-2.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-2.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-2.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-2.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-2.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-2.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-2.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-2.json' -"
     },
     {
       "task_id": "task-3",
       "source_text": "Respect clean boundaries and keep these constraints visible: Auth policy applies and no schema changes are allowed.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-3.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-3.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-3.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-3.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-3.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-3.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-3.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-3.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-3.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-3.json' -"
     },
     {
       "task_id": "task-4",
       "source_text": "Keep these items out of scope: Do not change billing or the session UI.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-4.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-4.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-4.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-4.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-4.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-4.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-4.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-4.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-4.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-4.json' -"
     },
     {
       "task_id": "task-5",
       "source_text": "Capture verification evidence for: Verification needs auth refresh tests plus a clean build.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-5.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-5.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-5.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-5.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-5.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-5.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-5.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-5.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-5.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-5.json' -"
     },
     {
       "task_id": "task-6",
       "source_text": "Short slices should use subagent.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-6.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-6.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-6.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-6.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-6.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-6.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-6.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-6.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-6.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-6.json' -"
     },
     {
       "task_id": "task-7",
       "source_text": "Long-running or cross-cutting work should use tmux.",
       "execution_mode": "tmux",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-7.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-7.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-7.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-7.json",
       "command": [
         "tmux",
         "new-session",
@@ -302,19 +302,19 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
         "-s",
         "axexec-2026-04-08-build-safer-auth-re",
         "-c",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-7.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-7.json' -"
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-7.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-7.json' -"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-7.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-7.json' -",
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-7.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-7.json' -",
       "session_name": "axexec-2026-04-08-build-safer-auth-re"
     },
     {
       "task_id": "task-8",
       "source_text": "Token store migration analysis is the only long-running slice. -> tmux",
       "execution_mode": "tmux",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-8.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-8.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-8.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-8.json",
       "command": [
         "tmux",
         "new-session",
@@ -322,30 +322,30 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
         "-s",
         "axexec-2026-04-08-build-safer-auth-re",
         "-c",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-8.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-8.json' -"
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-8.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-8.json' -"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-8.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-8.json' -",
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-8.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-8.json' -",
       "session_name": "axexec-2026-04-08-build-safer-auth-re"
     },
     {
       "task_id": "task-9",
       "source_text": "Auth refresh service, token store, and session middleware. -> subagent",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-9.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-9.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-9.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-9.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-9.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-9.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-9.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-9.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-prompts/task-9.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/execution-results/task-9.json' -"
     }
   ]
 }
@@ -382,8 +382,8 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
       "triggers": []
     },
     "worktree": {
-      "branch_name": "ax/2026-04-08-build-safer-auth-refresh-flow",
-      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+      "branch_name": "shift-ax/2026-04-08-build-safer-auth-refresh-flow",
+      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
       "base_branch": "main"
     },
     "resolved_context": {
@@ -479,9 +479,9 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
     "status": "committed",
     "commit_sha": "a01e37ac34b93662fbaad030f03c04b62b8712c0",
     "committed_at": "2026-04-08T00:09:30.062Z",
-    "git_cwd": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
-    "message_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/final/commit-message.md",
-    "review_summary_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/topics/2026-04-08-build-safer-auth-refresh-flow/review/summary.md"
+    "git_cwd": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+    "message_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/final/commit-message.md",
+    "review_summary_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow/review/summary.md"
   }
 }
 ```
@@ -569,8 +569,8 @@ npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10
     "triggers": []
   },
   "worktree": {
-    "branch_name": "ax/2026-04-08-build-safer-auth-refresh-flow",
-    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
+    "branch_name": "shift-ax/2026-04-08-build-safer-auth-refresh-flow",
+    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/worktrees/2026-04-08-build-safer-auth-refresh-flow",
     "base_branch": "main"
   },
   "resolved_context": {

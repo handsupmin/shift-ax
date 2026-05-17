@@ -31,7 +31,7 @@ export async function searchPastTopics({
   query: string;
   limit?: number;
 }): Promise<ShiftAxPastTopicMatch[]> {
-  const topicsRoot = join(rootDir, '.ax', 'topics');
+  const topicsRoot = join(rootDir, '.shift-ax', 'topics');
   const topicEntries = await readdir(topicsRoot, { withFileTypes: true }).catch(() => []);
   const matches: ShiftAxPastTopicMatch[] = [];
 

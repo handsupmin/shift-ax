@@ -9,7 +9,7 @@ import { withTempGlobalHome } from './helpers/global-home.js';
 
 test('buildContextBundle prefers reviewed artifacts first and local repo evidence over global knowledge', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-precedence-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-09-precedence');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-precedence');
 
   try {
     await withTempGlobalHome('shift-ax-precedence-home-', async (home) => {

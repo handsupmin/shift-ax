@@ -8,7 +8,7 @@ import { recordLifecycleEvent, readLifecycleEvents } from '../core/planning/life
 
 test('recordLifecycleEvent appends ordered lifecycle events to a topic log', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-lifecycle-events-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
 
   try {
     await mkdir(topicDir, { recursive: true });
@@ -39,7 +39,7 @@ test('recordLifecycleEvent appends ordered lifecycle events to a topic log', asy
 
 test('recordLifecycleEvent can also persist a reaction record when automation handles a failure', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-lifecycle-reaction-'));
-  const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
 
   try {
     await mkdir(topicDir, { recursive: true });

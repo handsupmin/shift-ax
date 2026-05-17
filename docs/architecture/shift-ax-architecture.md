@@ -198,10 +198,10 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
 
 **How Shift AX translates those ideas**
 
-- every request gets a topic directory under `.ax/topics/`
+- every request gets a topic directory under `.shift-ax/topics/`
 - every topic stores request, summary, context, plan, review, and finalization artifacts
 - worktree planning is tied to the topic
-- `.ax/STATE.md` and topic `handoff.md` make the current state readable to humans
+- `.shift-ax/STATE.md` and topic `handoff.md` make the current state readable to humans
 
 ### 4.4 Planning and human review layer
 
@@ -327,7 +327,7 @@ They must never outrank:
 - `shift-ax topics-status`
 - `shift-ax context-health`
 - `shift-ax monitor-context`
-- readable `.ax/STATE.md`
+- readable `.shift-ax/STATE.md`
 
 Shift AX prefers **compact CLI observability** over a dashboard unless the team truly needs the extra surface area.
 

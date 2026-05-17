@@ -208,7 +208,7 @@ test('runReviewLanes can approve when artifacts become reviewable and connected'
           updated_at: new Date().toISOString(),
           plan_review_status: 'approved',
           worktree: {
-            branch_name: 'ax/review-green',
+            branch_name: 'shift-ax/review-green',
             worktree_path: worktreePath,
             base_branch: 'main',
           },
@@ -233,7 +233,7 @@ test('runReviewLanes can approve when artifacts become reviewable and connected'
         {
           version: 1,
           status: 'created',
-          branch_name: 'ax/review-green',
+          branch_name: 'shift-ax/review-green',
           worktree_path: worktreePath,
           base_branch: 'main',
         },

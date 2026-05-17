@@ -7,7 +7,7 @@ Verify that `ax launch-execution --platform codex` can launch a real Codex task 
 ## Result
 
 - Status: success
-- Marker file: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/smoke-marker.txt`
+- Marker file: `/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/smoke-marker.txt`
 - Marker contents: `codex runtime smoke complete.`
 
 ## Key Outputs
@@ -59,7 +59,7 @@ Verify that `ax launch-execution --platform codex` can launch a real Codex task 
 ```json
 {
   "topicSlug": "2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
-  "topicDir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+  "topicDir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
   "metadata": {
     "version": 1,
     "topic_slug": "2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
@@ -102,8 +102,8 @@ Verify that `ax launch-execution --platform codex` can launch a real Codex task 
   "worktree": {
     "version": 1,
     "topic_slug": "2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
-    "branch_name": "ax/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
-    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+    "branch_name": "shift-ax/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+    "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
     "base_branch": "main",
     "created": true,
     "reused": false
@@ -120,8 +120,8 @@ Verify that `ax launch-execution --platform codex` can launch a real Codex task 
       "triggers": []
     },
     "worktree": {
-      "branch_name": "ax/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
-      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+      "branch_name": "shift-ax/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+      "worktree_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
       "base_branch": "main"
     },
     "resolved_context": {
@@ -153,26 +153,26 @@ Verify that `ax launch-execution --platform codex` can launch a real Codex task 
 {
   "platform": "codex",
   "launched": false,
-  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
   "tasks": [
     {
       "task_id": "task-2",
       "source_text": "Implement Create smoke-marker.txt with the exact text codex runtime smoke complete. inside: smoke-marker.txt.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json' -"
     }
   ]
 }
@@ -183,26 +183,26 @@ Verify that `ax launch-execution --platform codex` can launch a real Codex task 
 {
   "platform": "codex",
   "launched": true,
-  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+  "topic_dir": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
   "tasks": [
     {
       "task_id": "task-2",
       "source_text": "Implement Create smoke-marker.txt with the exact text codex runtime smoke complete. inside: smoke-marker.txt.",
       "execution_mode": "subagent",
-      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
-      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md",
-      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
+      "working_directory": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+      "prompt_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md",
+      "output_path": "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
       "command": [
         "codex",
         "exec",
         "--full-auto",
         "-C",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution",
         "-o",
-        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
+        "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json",
         "-"
       ],
-      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json' -"
+      "shell_command": "cat '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-prompts/task-2.md' | codex exec --full-auto -C '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution' -o '/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/topics/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/execution-results/task-2.json' -"
     }
   ]
 }
@@ -210,7 +210,7 @@ Verify that `ax launch-execution --platform codex` can launch a real Codex task 
 
 ### Codex Output Artifact
 ```text
-Created [smoke-marker.txt](/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/smoke-marker.txt) with the required line `codex runtime smoke complete.`
+Created [smoke-marker.txt](/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.yuEaf7AYjh/.shift-ax/worktrees/2026-04-08-create-a-smoke-marker-file-for-runtime-execution/smoke-marker.txt) with the required line `codex runtime smoke complete.`
 
 Verification: `sed` shows the expected text, `wc -c` reports 30 bytes, and `od` confirms the file contains that text followed by a trailing `\n`. Changed files: `smoke-marker.txt`. Simplifications made: kept the scope to a single new file, with no extra tests or artifacts. Remaining risk: if the consumer requires byte-for-byte content with no trailing newline, the current file is a standard POSIX text file and ends with `LF`.
 ```

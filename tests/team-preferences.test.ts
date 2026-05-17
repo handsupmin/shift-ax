@@ -21,7 +21,7 @@ test('writeTeamPreferences stores a lightweight support-only team preference pro
     const prefs = await readTeamPreferences(root);
     assert.equal(prefs?.implementation_style, 'small reversible changes');
     assert.equal(prefs?.review_style, 'explicit rollback risk callouts');
-    const raw = await readFile(join(root, '.ax', 'team-preferences.json'), 'utf8');
+    const raw = await readFile(join(root, '.shift-ax', 'team-preferences.json'), 'utf8');
     assert.match(raw, /small reversible changes/);
   } finally {
     await rm(root, { recursive: true, force: true });

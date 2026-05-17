@@ -20,8 +20,8 @@ async function createGitRepo(): Promise<string> {
 }
 
 async function writeReviewableTopic(root: string): Promise<{ topicDir: string; worktreePath: string }> {
-  const topicDir = join(root, '.ax', 'topics', '2026-04-08-auth-refresh');
-  const worktreePath = join(root, '.ax', 'worktrees', '2026-04-08-auth-refresh');
+  const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
+  const worktreePath = join(root, '.shift-ax', 'worktrees', '2026-04-08-auth-refresh');
   await mkdir(join(topicDir, 'review'), { recursive: true });
   await mkdir(join(topicDir, 'final'), { recursive: true });
   await mkdir(join(topicDir, 'execution-results'), { recursive: true });
@@ -172,7 +172,7 @@ async function writeReviewableTopic(root: string): Promise<{ topicDir: string; w
         updated_at: new Date().toISOString(),
         plan_review_status: 'approved',
         worktree: {
-          branch_name: 'ax/2026-04-08-auth-refresh',
+          branch_name: 'shift-ax/2026-04-08-auth-refresh',
           worktree_path: worktreePath,
           base_branch: 'main',
         },
@@ -196,7 +196,7 @@ async function writeReviewableTopic(root: string): Promise<{ topicDir: string; w
       {
         version: 1,
         status: 'created',
-        branch_name: 'ax/2026-04-08-auth-refresh',
+        branch_name: 'shift-ax/2026-04-08-auth-refresh',
         worktree_path: worktreePath,
         base_branch: 'main',
       },

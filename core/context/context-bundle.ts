@@ -380,7 +380,7 @@ export async function writeContextBundle({
   });
   const effectiveRoot = rootDir || (topicDir ? getRootDirFromTopicDir(topicDir) : '');
   const targetPath =
-    outputPath || join(effectiveRoot, '.ax', 'context-bundles', `${slugify(query)}--${slugify(workflowStep)}.md`);
+    outputPath || join(effectiveRoot, '.shift-ax', 'context-bundles', `${slugify(query)}--${slugify(workflowStep)}.md`);
   await mkdir(dirname(targetPath), { recursive: true });
   await writeFile(
     targetPath,
