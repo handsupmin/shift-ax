@@ -1,4 +1,5 @@
 .ax/
+.shift-ax/evals/
 node_modules/
 dist/
 .omx/

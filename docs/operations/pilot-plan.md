@@ -249,6 +249,15 @@ Keep this lightweight. Track these in a shared note or sheet.
 - average time from `run-request` to plan approval
 - average time from plan approval to review result
 - average time to recover from a blocked topic
+- `shift-ax eval` objective score and failed metric count
+- token reduction percentage from the latest objective eval report
+- review gate allow/block accuracy from the latest objective eval report
+
+Run this during pilot setup and after meaningful workflow changes:
+
+```bash
+shift-ax eval --output .shift-ax/evals/latest
+```
 
 ### Qualitative notes
 

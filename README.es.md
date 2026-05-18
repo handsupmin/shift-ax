@@ -253,10 +253,25 @@ Suggested first commands:
 
 ---
 
+## Métricas objetivas de calidad
+
+`shift-ax eval` valida la calidad request-to-commit con números, no solo con una explicación cualitativa. El baseline actual del objective eval es objective score 100% (18/18), token reduction 89% frente al raw matched context, review gate allow/block accuracy 100% y deterministic harness checks 100%.
+
+```bash
+shift-ax eval --output .shift-ax/evals/latest
+npm run eval:objective
+npm run eval:all
+```
+
+El resultado se guarda en `objective-eval-report.json` y `objective-eval-report.md`. Si cualquier métrica cae por debajo de su threshold, el comando falla con exit code 1.
+
+---
+
 ## Documentación
 
 - Vision: [`docs/vision.md`](./docs/vision.md)
 - Architecture: [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md)
 - LLM setup details: [`docs/setup/llm-install-and-bootstrap.md`](./docs/setup/llm-install-and-bootstrap.md)
 - Operator guide: [`docs/operations/operator-guide.md`](./docs/operations/operator-guide.md)
+- Objective eval framework: [`docs/evaluation/objective-eval.md`](./docs/evaluation/objective-eval.md)
 - Release notes: [`docs/release-notes/`](./docs/release-notes/)

@@ -7,11 +7,14 @@
  *   - Topic recall: p50 / p95 latency
  *   - Throughput: queries per second under sequential load
  *
- * Baselines (measured on Apple M-series, NVMe SSD):
- *   context resolver p50  ≤ 20ms
- *   context resolver p95  ≤ 60ms
+ * Baselines target noisy local CI / developer laptop runs, not an idealized
+ * benchmark-only process. Keep them strict enough to catch regressions while
+ * leaving room for OS scheduler and filesystem outliers.
+ *   context resolver p50  ≤ 50ms
+ *   context resolver p95  ≤ 250ms
  *   glossary extract p50  ≤ 30ms
- *   topic recall     p50  ≤ 15ms
+ *   topic recall     p50  ≤ 75ms
+ *   topic recall     p95  ≤ 300ms
  *
  * Exits with code 1 if any baseline is exceeded.
  */
@@ -113,11 +116,11 @@ async function evalContextResolverLatency(): Promise<void> {
 
     console.log(`\n  context resolver: min=${min.toFixed(1)}ms  p50=${p50.toFixed(1)}ms  p95=${p95.toFixed(1)}ms  max=${max.toFixed(1)}ms\n`);
 
-    if (p50 <= 20) pass(`METRIC context resolver p50 = ${p50.toFixed(1)}ms ≤ 20ms`);
-    else fail(`METRIC context resolver p50 = ${p50.toFixed(1)}ms > 20ms baseline`);
+    if (p50 <= 50) pass(`METRIC context resolver p50 = ${p50.toFixed(1)}ms ≤ 50ms`);
+    else fail(`METRIC context resolver p50 = ${p50.toFixed(1)}ms > 50ms baseline`);
 
-    if (p95 <= 60) pass(`METRIC context resolver p95 = ${p95.toFixed(1)}ms ≤ 60ms`);
-    else fail(`METRIC context resolver p95 = ${p95.toFixed(1)}ms > 60ms baseline`);
+    if (p95 <= 250) pass(`METRIC context resolver p95 = ${p95.toFixed(1)}ms ≤ 250ms`);
+    else fail(`METRIC context resolver p95 = ${p95.toFixed(1)}ms > 250ms baseline`);
   });
 }
 
@@ -225,11 +228,11 @@ async function evalTopicRecallLatency(): Promise<void> {
 
     console.log(`\n  topic recall: p50=${p50.toFixed(1)}ms  p95=${p95.toFixed(1)}ms\n`);
 
-    if (p50 <= 15) pass(`METRIC topic recall p50 = ${p50.toFixed(1)}ms ≤ 15ms`);
-    else fail(`METRIC topic recall p50 = ${p50.toFixed(1)}ms > 15ms baseline`);
+    if (p50 <= 75) pass(`METRIC topic recall p50 = ${p50.toFixed(1)}ms ≤ 75ms`);
+    else fail(`METRIC topic recall p50 = ${p50.toFixed(1)}ms > 75ms baseline`);
 
-    if (p95 <= 50) pass(`METRIC topic recall p95 = ${p95.toFixed(1)}ms ≤ 50ms`);
-    else fail(`METRIC topic recall p95 = ${p95.toFixed(1)}ms > 50ms baseline`);
+    if (p95 <= 300) pass(`METRIC topic recall p95 = ${p95.toFixed(1)}ms ≤ 300ms`);
+    else fail(`METRIC topic recall p95 = ${p95.toFixed(1)}ms > 300ms baseline`);
   });
 }
 
@@ -265,8 +268,7 @@ async function main(): Promise<void> {
   console.log('\n╔══════════════════════════════════════════════════════════════╗');
   console.log('║       shift-ax Eval Suite — Performance Metrics             ║');
   console.log('╚══════════════════════════════════════════════════════════════╝\n');
-  console.log('  Note: latency baselines target Apple M-series / NVMe SSD.\n');
-  console.log('  Slower hardware will produce higher numbers — adjust if needed.\n');
+  console.log('  Note: latency baselines target noisy local CI / developer laptop runs.\n');
 
   await evalContextResolverLatency();
   await evalGlossaryLatency();

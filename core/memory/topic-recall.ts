@@ -17,9 +17,9 @@ function tokenize(value: string): string[] {
     .filter((token) => token.length >= 3);
 }
 
-function scoreTopic(query: string, content: string): number {
+function scoreTopicTokens(queryTokens: string[], content: string): number {
   const haystack = new Set(tokenize(content));
-  return tokenize(query).reduce((score, token) => score + (haystack.has(token) ? 1 : 0), 0);
+  return queryTokens.reduce((score, token) => score + (haystack.has(token) ? 1 : 0), 0);
 }
 
 export async function searchPastTopics({
@@ -31,13 +31,19 @@ export async function searchPastTopics({
   query: string;
   limit?: number;
 }): Promise<ShiftAxPastTopicMatch[]> {
+  if (limit <= 0) return [];
+
   const topicsRoot = join(rootDir, '.shift-ax', 'topics');
   const topicEntries = await readdir(topicsRoot, { withFileTypes: true }).catch(() => []);
-  const matches: ShiftAxPastTopicMatch[] = [];
+  const queryTokens = tokenize(query);
+  if (queryTokens.length === 0) return [];
 
-  for (const entry of topicEntries) {
-    if (!entry.isDirectory()) continue;
-    const topicDir = join(topicsRoot, entry.name);
+  const matches: ShiftAxPastTopicMatch[] = [];
+  const directories = topicEntries.filter((entry) => entry.isDirectory());
+  const batchSize = 16;
+
+  async function readTopic(entryName: string): Promise<ShiftAxPastTopicMatch | null> {
+    const topicDir = join(topicsRoot, entryName);
     const [request, summary, spec, workflowRaw] = await Promise.all([
       readFile(join(topicDir, 'request.md'), 'utf8').catch(() => ''),
       readFile(join(topicDir, 'request-summary.md'), 'utf8').catch(() => ''),
@@ -45,20 +51,33 @@ export async function searchPastTopics({
       readFile(join(topicDir, 'workflow-state.json'), 'utf8').catch(() => ''),
     ]);
 
-    if (!workflowRaw) continue;
-    const workflow = JSON.parse(workflowRaw) as { phase?: string; updated_at?: string };
-    if (workflow.phase !== 'committed') continue;
+    if (!workflowRaw) return null;
 
-    const score = scoreTopic(query, [request, summary, spec].join('\n'));
-    if (score <= 0) continue;
+    let workflow: { phase?: string; updated_at?: string };
+    try {
+      workflow = JSON.parse(workflowRaw) as { phase?: string; updated_at?: string };
+    } catch {
+      return null;
+    }
 
-    matches.push({
-      topic_slug: entry.name,
+    if (workflow.phase !== 'committed') return null;
+
+    const score = scoreTopicTokens(queryTokens, [request, summary, spec].join('\n'));
+    if (score <= 0) return null;
+
+    return {
+      topic_slug: entryName,
       summary: summary.trim(),
       request: request.trim(),
       score,
       updated_at: workflow.updated_at,
-    });
+    };
+  }
+
+  for (let offset = 0; offset < directories.length; offset += batchSize) {
+    const batch = directories.slice(offset, offset + batchSize);
+    const batchMatches = await Promise.all(batch.map((entry) => readTopic(entry.name)));
+    matches.push(...batchMatches.filter((match): match is ShiftAxPastTopicMatch => match !== null));
   }
 
   return matches

@@ -97,6 +97,8 @@ Every workflow skill must state:
 - which commands provide verification evidence
 - which failures should block continuation
 
+For product-level workflow changes, run `shift-ax eval --output .shift-ax/evals/latest` or `npm run eval:objective` and inspect the JSON/Markdown report. Objective eval failures for context retrieval, ambiguity scoring, token reduction, deterministic harness behavior, review-gate accuracy, or artifact completeness block completion.
+
 ## Base-context priority
 
 The base-context index and linked markdown documents remain the primary source of truth.

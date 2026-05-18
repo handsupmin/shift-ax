@@ -253,10 +253,25 @@ Suggested first commands:
 
 ---
 
+## 客观质量指标
+
+`shift-ax eval` 用数字验证 request-to-commit 质量，而不是只靠定性描述。当前 objective eval baseline 是 objective score 100% (18/18)、相对 raw matched context 的 token reduction 89%、review gate allow/block accuracy 100%、deterministic harness checks 100%。
+
+```bash
+shift-ax eval --output .shift-ax/evals/latest
+npm run eval:objective
+npm run eval:all
+```
+
+结果会写入 `objective-eval-report.json` 和 `objective-eval-report.md`。只要任一指标低于 threshold，命令就会以 exit code 1 失败。
+
+---
+
 ## 文档
 
 - Vision: [`docs/vision.md`](./docs/vision.md)
 - Architecture: [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md)
 - LLM setup details: [`docs/setup/llm-install-and-bootstrap.md`](./docs/setup/llm-install-and-bootstrap.md)
 - Operator guide: [`docs/operations/operator-guide.md`](./docs/operations/operator-guide.md)
+- Objective eval framework: [`docs/evaluation/objective-eval.md`](./docs/evaluation/objective-eval.md)
 - Release notes: [`docs/release-notes/`](./docs/release-notes/)

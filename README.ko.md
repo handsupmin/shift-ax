@@ -256,10 +256,34 @@ Suggested first commands:
 
 ---
 
+## 객관 품질 지표
+
+`shift-ax eval`은 request-to-commit 품질을 정성 설명이 아니라 숫자로 검증합니다.
+
+| 지표 | 현재 기준선 | Suite |
+|---|---|---|
+| Request-to-Commit Objective Score | **100%** (18/18) | `eval:objective` |
+| Context Recall@3 / MRR | **100% / 1.000** | `eval:objective` |
+| Token Reduction vs Raw Matched Context | **89%** | `eval:objective` |
+| Review Gate Allow/Block Accuracy | **100%** | `eval:objective` |
+| Deterministic Harness Checks | **100%** | `eval:objective` |
+| Artifact Completeness | **100%** | `eval:objective` |
+
+```bash
+shift-ax eval --output .shift-ax/evals/latest
+npm run eval:objective
+npm run eval:all
+```
+
+결과는 `objective-eval-report.json`과 `objective-eval-report.md`로 남고, threshold를 하나라도 못 넘으면 exit code 1로 실패합니다.
+
+---
+
 ## 문서
 
 - Vision: [`docs/vision.md`](./docs/vision.md)
 - Architecture: [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md)
 - LLM setup detail: [`docs/setup/llm-install-and-bootstrap.ko.md`](./docs/setup/llm-install-and-bootstrap.ko.md)
 - Operator guide: [`docs/operations/operator-guide.ko.md`](./docs/operations/operator-guide.ko.md)
+- Objective eval framework: [`docs/evaluation/objective-eval.ko.md`](./docs/evaluation/objective-eval.ko.md)
 - Release notes: [`docs/release-notes/`](./docs/release-notes/)

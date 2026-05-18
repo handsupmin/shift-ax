@@ -253,10 +253,25 @@ Suggested first commands:
 
 ---
 
+## 客観的な品質指標
+
+`shift-ax eval` は request-to-commit の品質を、定性的な説明ではなく数値で検証します。現在の objective eval baseline は objective score 100% (18/18)、raw matched context 比で token reduction 89%、review gate allow/block accuracy 100%、deterministic harness checks 100% です。
+
+```bash
+shift-ax eval --output .shift-ax/evals/latest
+npm run eval:objective
+npm run eval:all
+```
+
+結果は `objective-eval-report.json` と `objective-eval-report.md` に保存され、threshold を 1 つでも下回ると exit code 1 で失敗します。
+
+---
+
 ## ドキュメント
 
 - Vision: [`docs/vision.md`](./docs/vision.md)
 - Architecture: [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md)
 - LLM setup details: [`docs/setup/llm-install-and-bootstrap.md`](./docs/setup/llm-install-and-bootstrap.md)
 - Operator guide: [`docs/operations/operator-guide.md`](./docs/operations/operator-guide.md)
+- Objective eval framework: [`docs/evaluation/objective-eval.md`](./docs/evaluation/objective-eval.md)
 - Release notes: [`docs/release-notes/`](./docs/release-notes/)

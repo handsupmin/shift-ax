@@ -272,9 +272,14 @@ The following numbers are produced by the eval suite in `tests/eval/` and serve 
 | Realistic Topic History Recall | **100%** (6/6) | `eval:real-world` |
 | Realistic Glossary Precision (real codebases) | **100%** (7/7) | `eval:real-world` |
 | Edge Case Pass Rate | **100%** (33/33) | `eval:edge-cases` |
-| Context Resolver p50 Latency | **< 1ms** | `eval:performance` |
-| Context Resolver p95 Latency | **< 1ms** | `eval:performance` |
-| Sequential Throughput | **> 3000 q/s** | `eval:performance` |
+| Context Resolver p50 Latency | **≤ 50ms threshold** | `eval:performance` |
+| Context Resolver p95 Latency | **≤ 250ms threshold** | `eval:performance` |
+| Topic Recall p95 Latency | **≤ 300ms threshold** | `eval:performance` |
+| Sequential Throughput | **≥ 50 q/s threshold** | `eval:performance` |
+| Request-to-Commit Objective Score | **100%** (18/18) | `eval:objective` |
+| Token Reduction vs Raw Matched Context | **89%** | `eval:objective` |
+| Review Gate Allow/Block Accuracy | **100%** | `eval:objective` |
+| Deterministic Harness Checks | **100%** | `eval:objective` |
 
 > **How to reproduce:** run `npm run eval:all` from the repository root. Every number in this table is recomputed from scratch each time — no hardcoded results.
 
@@ -287,7 +292,9 @@ npm run eval               # golden path + core correctness
 npm run eval:edge-cases    # empty, malformed, adversarial inputs
 npm run eval:real-world    # realistic engineering-team fixtures
 npm run eval:performance   # latency (p50/p95) + throughput
+npm run eval:objective     # request-to-commit quality, review gates, token reduction
 npm run eval:all           # full suite (CI gate)
+shift-ax eval --output .shift-ax/evals/latest
 ```
 
 Each script prints a per-scenario PASS/FAIL with the measured value, then a final scorecard. Any metric below its baseline floor causes exit code 1, which blocks CI.
@@ -300,4 +307,5 @@ Each script prints a per-scenario PASS/FAIL with the measured value, then a fina
 - Architecture: [`docs/architecture/shift-ax-architecture.md`](./docs/architecture/shift-ax-architecture.md)
 - LLM setup details: [`docs/setup/llm-install-and-bootstrap.md`](./docs/setup/llm-install-and-bootstrap.md)
 - Operator guide: [`docs/operations/operator-guide.md`](./docs/operations/operator-guide.md)
+- Objective eval framework: [`docs/evaluation/objective-eval.md`](./docs/evaluation/objective-eval.md)
 - Release notes: [`docs/release-notes/`](./docs/release-notes/)

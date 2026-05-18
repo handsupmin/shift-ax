@@ -249,6 +249,15 @@ npm run ax -- topic-status --topic <topic>
 - `run-request`부터 plan approval까지 평균 시간
 - plan approval부터 review result까지 평균 시간
 - blocked topic을 회복하는 평균 시간
+- `shift-ax eval` objective score와 failed metric count
+- 최신 objective eval report의 token reduction percentage
+- 최신 objective eval report의 review gate allow/block accuracy
+
+pilot setup 때와 workflow가 의미 있게 바뀐 뒤에는 아래를 실행한다.
+
+```bash
+shift-ax eval --output .shift-ax/evals/latest
+```
 
 ### 정성 메모
 

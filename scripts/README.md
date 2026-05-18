@@ -21,6 +21,7 @@ Currently implemented:
 - `ax-react-feedback.ts`
 - `ax-finalize-commit.ts`
 - `ax-launch-execution.ts`
+- `ax-eval.ts`
 - `ax-topic-status.ts`
 - `ax-topics-status.ts`
 - `ax-platform-manifest.ts`
@@ -51,6 +52,7 @@ Current request-to-commit behavior:
 - `shift-ax run-request --topic <dir> --resume` resumes after approval, reruns review aggregation, auto-generates a Lore-compatible commit message artifact, and auto-commits by default once review passes. Use `--no-auto-commit` to stop at commit-ready for manual inspection. It also accepts `--escalation <kind>:<summary>` / `--clear-escalations` to pause or resume around the three mandatory human-escalation triggers.
 - `shift-ax finalize-commit --topic <dir>` validates or auto-generates the Lore commit message, verifies the aggregate review gate allows commit, and writes the local commit state artifact.
 - `shift-ax launch-execution --platform <codex|claude-code> --topic <dir> [--task-id <id>] [--dry-run]` materializes execution prompts from `execution-handoff.json` and returns or launches the concrete Codex / Claude / tmux commands for each task.
+- `shift-ax eval [--output <dir>] [--token-budget-chars N] [--json]` runs objective request-to-commit evals for context retrieval, ambiguity scoring, token reduction, deterministic harness rails, review-gate accuracy, and artifact completeness. It writes JSON/Markdown reports when `--output` is provided and exits non-zero when any threshold fails.
 - `shift-ax topic-status --topic <dir>` prints a compact status summary for the topic's current phase, review state, execution state, policy-sync gate, and latest lifecycle/reaction records.
 - `shift-ax topics-status [--root <dir>] [--limit N]` prints a compact multi-topic list for lightweight supervision without requiring a separate dashboard.
 - `shift-ax decisions --query "<text>" [--active-at YYYY-MM-DD] [--limit N]` can now act as a ranked decision-memory search and includes linked source-topic summaries when they are available.
