@@ -2,7 +2,7 @@
 
 ## Goal
 
-Verify that `ax launch-execution --platform claude-code` can launch a real Claude task from `execution-handoff.json` and produce a concrete worktree change.
+Verify that `shift-ax launch-execution --platform claude-code` can launch a real Claude task from `execution-handoff.json` and produce a concrete worktree change.
 
 ## Result
 

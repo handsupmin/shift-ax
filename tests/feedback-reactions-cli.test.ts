@@ -11,7 +11,7 @@ import { topicArtifactPath } from '../core/topics/topic-artifacts.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax react-feedback reopens a topic after downstream review feedback', async () => {
+test('shift-ax react-feedback reopens a topic after downstream review feedback', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-feedback-cli-'));
 
   try {
@@ -74,7 +74,7 @@ test('ax react-feedback reopens a topic after downstream review feedback', async
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax react-feedback exited ${code}`));
+        else reject(new Error(error || `shift-ax react-feedback exited ${code}`));
       });
     });
 

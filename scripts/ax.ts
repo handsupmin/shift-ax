@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -9,6 +9,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const command = process.argv[2];
 const args = process.argv.slice(3);
 const compiledMode = existsSync(join(here, 'ax-shell.js'));
+const versionCommands = new Set(['--version', '-v', '-V', 'version']);
 const shellMode =
   !command ||
   command === '--codex' ||
@@ -17,6 +18,19 @@ const shellMode =
   command === '--root' ||
   command === '--discover' ||
   command === '--onboarding-input';
+
+function readPackageVersion(): string {
+  const candidates = [
+    join(here, '..', 'package.json'),
+    join(here, '..', '..', 'package.json'),
+  ];
+  for (const candidate of candidates) {
+    if (!existsSync(candidate)) continue;
+    const parsed = JSON.parse(readFileSync(candidate, 'utf8')) as { version?: string };
+    if (parsed.version) return parsed.version;
+  }
+  return 'unknown';
+}
 
 const commands = new Map<string, string>([
   ['bootstrap-topic', 'ax-bootstrap-topic.ts'],
@@ -61,7 +75,10 @@ const commands = new Map<string, string>([
   ['scaffold-build', 'ax-scaffold-build.ts'],
 ]);
 
-if (shellMode) {
+if (versionCommands.has(command ?? '')) {
+  process.stdout.write(`${readPackageVersion()}\n`);
+  process.exit(0);
+} else if (shellMode) {
   const child = compiledMode
     ? spawn(process.execPath, [join(here, 'ax-shell.js'), ...process.argv.slice(2)], {
         stdio: 'inherit',
@@ -79,6 +96,7 @@ if (shellMode) {
       'Shift AX CLI',
       '',
       'Shell launcher:',
+      '  shift-ax --version | -v | -V | version',
       '  shift-ax --codex [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
       '  shift-ax --claude-code [--root DIR] [--lang en|ko] [--discover] [--overwrite] [--onboarding-input FILE] [initial prompt]',
       '  shift-ax  # default launcher (Codex unless global settings choose another platform)',

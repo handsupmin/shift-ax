@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax thread-save and ax threads manage cross-topic thread notes', async () => {
+test('shift-ax thread-save and shift-ax threads manage cross-topic thread notes', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-threads-cli-'));
 
   try {
@@ -32,7 +32,7 @@ test('ax thread-save and ax threads manage cross-topic thread notes', async () =
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax threads command exited ${code}`));
+          else reject(new Error(error || `shift-ax threads command exited ${code}`));
         });
       });
 

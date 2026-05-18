@@ -4,7 +4,7 @@ import { completePolicyContextSync, type ShiftAxPolicyContextSyncEntry } from '.
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-sync-policy-context --topic DIR --summary "<text>" [--path REL_PATH]... [--entry "Label -> path"]...\n',
+    'Usage: shift-ax sync-policy-context --topic DIR --summary "<text>" [--path REL_PATH]... [--entry "Label -> path"]...\n',
   );
 }
 

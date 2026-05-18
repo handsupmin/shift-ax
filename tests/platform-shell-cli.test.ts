@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -20,7 +20,7 @@ async function writeFakeLauncher(binDir: string, name: string, outputPath: strin
   );
 }
 
-test('ax --codex with explicit onboarding input still onboards before launch', async () => {
+test('shift-ax --codex with explicit onboarding input still onboards before launch', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-codex-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -90,7 +90,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
         });
         child.on('exit', (code) => {
           if (code === 0) resolve();
-          else reject(new Error(error || `ax shell exited ${code}`));
+          else reject(new Error(error || `shift-ax shell exited ${code}`));
         });
       });
 
@@ -116,7 +116,7 @@ test('ax --codex with explicit onboarding input still onboards before launch', a
   }
 });
 
-test('ax with no args asks for language once, stores it globally, then launches codex without a startup prompt', async () => {
+test('shift-ax with no args asks for language once, stores it globally, then launches codex without a startup prompt', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-interactive-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -145,7 +145,7 @@ test('ax with no args asks for language once, stores it globally, then launches 
         });
         child.on('exit', (code) => {
           if (code === 0) resolve();
-          else reject(new Error(error || `ax shell interactive exited ${code}`));
+          else reject(new Error(error || `shift-ax shell interactive exited ${code}`));
         });
         child.stdin.end('2\n2\n');
       });
@@ -167,7 +167,7 @@ test('ax with no args asks for language once, stores it globally, then launches 
   }
 });
 
-test('ax --claude-code asks for language before launch and starts cleanly', async () => {
+test('shift-ax --claude-code asks for language before launch and starts cleanly', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-claude-bootstrap-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -196,7 +196,7 @@ test('ax --claude-code asks for language before launch and starts cleanly', asyn
         });
         child.on('exit', (code) => {
           if (code === 0) resolve();
-          else reject(new Error(error || `ax claude bootstrap shell exited ${code}`));
+          else reject(new Error(error || `shift-ax claude bootstrap shell exited ${code}`));
         });
         child.stdin.end('1\n2\n');
       });
@@ -217,7 +217,7 @@ test('ax --claude-code asks for language before launch and starts cleanly', asyn
   }
 });
 
-test('ax --claude-code with explicit onboarding input launches Claude shell mode in the target repo cwd', async () => {
+test('shift-ax --claude-code with explicit onboarding input launches Claude shell mode in the target repo cwd', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-shell-claude-'));
   const binDir = join(root, 'bin');
   await mkdir(binDir, { recursive: true });
@@ -287,7 +287,7 @@ test('ax --claude-code with explicit onboarding input launches Claude shell mode
         });
         child.on('exit', (code) => {
           if (code === 0) resolve();
-          else reject(new Error(error || `ax claude shell exited ${code}`));
+          else reject(new Error(error || `shift-ax claude shell exited ${code}`));
         });
       });
 
@@ -368,11 +368,25 @@ test('shift-ax --full-auto enables runtime automation even when the saved defaul
   }
 });
 
-test('package bin exposes both ax and shift-ax for shell entry', async () => {
+test('package bin exposes only shift-ax for public shell entry', async () => {
   const packageJson = JSON.parse(await readFile(PACKAGE_JSON_URL, 'utf8')) as {
     bin: Record<string, string>;
   };
 
-  assert.equal(packageJson.bin['ax'], 'dist/scripts/ax.js');
-  assert.equal(packageJson.bin['shift-ax'], 'dist/scripts/ax.js');
+  assert.deepEqual(packageJson.bin, { 'shift-ax': 'dist/scripts/ax.js' });
+});
+
+test('shift-ax version aliases print the package version', async () => {
+  const packageJson = JSON.parse(await readFile(PACKAGE_JSON_URL, 'utf8')) as {
+    version: string;
+  };
+
+  for (const arg of ['--version', '-v', '-V', 'version']) {
+    const stdout = execFileSync(process.execPath, ['--import', 'tsx', 'scripts/ax.ts', arg], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+    });
+
+    assert.equal(stdout.trim(), packageJson.version);
+  }
 });

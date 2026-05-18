@@ -11,7 +11,7 @@ import { withTempGlobalHome } from './helpers/global-home.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax-onboard-context --help exits without starting guided onboarding', () => {
+test('shift-ax onboard-context --help exits without starting guided onboarding', () => {
   const result = spawnSync(
     process.execPath,
     ['--import', 'tsx', 'scripts/ax.ts', 'onboard-context', '--help'],
@@ -24,11 +24,11 @@ test('ax-onboard-context --help exits without starting guided onboarding', () =>
   );
 
   assert.equal(result.status, 0);
-  assert.match(result.stderr, /Usage: ax-onboard-context/);
+  assert.match(result.stderr, /Usage: shift-ax onboard-context/);
   assert.doesNotMatch(result.stderr, /What kind of work do you usually own or lead/);
 });
 
-test('ax-onboard-context prompts interactively when no input file is provided', async () => {
+test('shift-ax onboard-context prompts interactively when no input file is provided', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboarding-cli-'));
 
   try {
@@ -82,7 +82,7 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
         });
         child.on('exit', (code) => {
           if (code === 0) resolve({ stdout: output, stderr: error });
-          else reject(new Error(error || `ax-onboard-context exited ${code}`));
+          else reject(new Error(error || `shift-ax onboard-context exited ${code}`));
         });
 
         child.stdin.end(
@@ -134,7 +134,7 @@ test('ax-onboard-context prompts interactively when no input file is provided', 
   }
 });
 
-test('ax-onboard-context --input can persist shell language and platform settings', async () => {
+test('shift-ax onboard-context --input can persist shell language and platform settings', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboarding-cli-settings-'));
 
   try {
@@ -221,7 +221,7 @@ test('ax-onboard-context --input can persist shell language and platform setting
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax-onboard-context exited ${code}`));
+          else reject(new Error(error || `shift-ax onboard-context exited ${code}`));
         });
       });
 

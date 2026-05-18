@@ -10,7 +10,7 @@ import { recordDecision } from '../core/memory/decision-register.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax decisions returns ranked decision-memory matches when query search is used', async () => {
+test('shift-ax decisions returns ranked decision-memory matches when query search is used', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-decision-memory-cli-'));
 
   try {
@@ -74,7 +74,7 @@ test('ax decisions returns ranked decision-memory matches when query search is u
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax decisions exited ${code}`));
+        else reject(new Error(error || `shift-ax decisions exited ${code}`));
       });
     });
 

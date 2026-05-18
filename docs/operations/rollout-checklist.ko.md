@@ -20,20 +20,20 @@ AX 경험이 많지 않은 팀도 Shift AX를 도입할 수 있게 만드는 체
 
 - [ ] domain / policy / architecture 문서 준비
 - [ ] 실행:
-  - [ ] `npm run ax -- onboard-context --discover`
+  - [ ] `shift-ax onboard-context --discover`
   - 또는
-  - [ ] `npm run ax -- onboard-context --input ./onboarding.json`
+  - [ ] `shift-ax onboard-context --input ./onboarding.json`
 - [ ] `docs/base-context/index.md` 검토
 - [ ] `docs/base-context/domain-glossary.md` 검토
-- [ ] `npm run ax -- doctor` 실행
+- [ ] `shift-ax doctor` 실행
 - [ ] doctor 결과가 `ok`인지 확인
 
 ## 3단계 — pilot 흐름 검증
 
-- [ ] 작은 요청 1개를 `ax run-request`로 시작
+- [ ] 작은 요청 1개를 `shift-ax run-request`로 시작
 - [ ] 생성된 brainstorm/spec/implementation plan 검토
-- [ ] 실제 human approval를 `ax approve-plan`으로 기록
-- [ ] 공유 문서 수정이 필요하면 `ax sync-policy-context`가 실제로 사용되는지 확인
+- [ ] 실제 human approval를 `shift-ax approve-plan`으로 기록
+- [ ] 공유 문서 수정이 필요하면 `shift-ax sync-policy-context`가 실제로 사용되는지 확인
 - [ ] verification command와 함께 resume 실행
 - [ ] `topic-status`에서 phase 전이가 기대대로 보이는지 확인
 - [ ] reviewed local commit이 실제로 생성되거나, review gate가 올바르게 막는지 확인
@@ -43,18 +43,18 @@ AX 경험이 많지 않은 팀도 Shift AX를 도입할 수 있게 만드는 체
 실제로 사용할 platform마다 최소 1개 task를 실행합니다.
 
 ### Codex
-- [ ] `ax launch-execution --platform codex --topic ... --task-id ...`
+- [ ] `shift-ax launch-execution --platform codex --topic ... --task-id ...`
 - [ ] worktree 안에 실제 파일 변경이 있었는지 확인
 - [ ] execution output artifact가 생성됐는지 확인
 
 ### Claude Code
-- [ ] `ax launch-execution --platform claude-code --topic ... --task-id ...`
+- [ ] `shift-ax launch-execution --platform claude-code --topic ... --task-id ...`
 - [ ] worktree 안에 실제 파일 변경이 있었는지 확인
 - [ ] execution output artifact가 생성됐는지 확인
 
 ## 5단계 — 실패 처리
 
-- [ ] `ax react-feedback`로 review-fix 또는 CI-fix reopen을 한 번 실행
+- [ ] `shift-ax react-feedback`로 review-fix 또는 CI-fix reopen을 한 번 실행
 - [ ] topic이 `implementation_running`으로 되돌아가는지 확인
 - [ ] `topics-status`에 reopened item이 제대로 보이는지 확인
 

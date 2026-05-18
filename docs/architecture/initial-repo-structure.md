@@ -178,11 +178,11 @@ Owns operator-facing top-level commands.
 
 Examples:
 
-- `ax`
-- `ax-bootstrap-topic`
-- `ax-resolve-context`
-- `ax-review`
-- `ax-finalize-commit`
+- `shift-ax`
+- `shift-ax bootstrap-topic`
+- `shift-ax resolve-context`
+- `shift-ax review`
+- `shift-ax finalize-commit`
 
 These commands should feel simple enough for teams that are not AX experts.
 

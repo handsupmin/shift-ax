@@ -34,7 +34,7 @@ async function seedCommittedTopic(root: string, slug: string, summary: string): 
   );
 }
 
-test('ax recall supports topic, decision, and repo scopes with ranked results', async () => {
+test('shift-ax recall supports topic, decision, and repo scopes with ranked results', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-recall-cli-'));
 
   try {
@@ -69,7 +69,7 @@ test('ax recall supports topic, decision, and repo scopes with ranked results', 
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax recall exited ${code}`));
+          else reject(new Error(error || `shift-ax recall exited ${code}`));
         });
       });
 

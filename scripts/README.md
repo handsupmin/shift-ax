@@ -30,7 +30,7 @@ Currently implemented:
 
 Current request-to-commit behavior:
 
-- `shift-ax --codex`, `shift-ax --claude-code`, or plain `ax` now open a conversational platform shell. The reusable knowledge base lives under `~/.shift-ax/`, with `~/.shift-ax/index.md` as the main index.
+- `shift-ax --codex`, `shift-ax --claude-code`, or plain `shift-ax` now open a conversational platform shell. The reusable knowledge base lives under `~/.shift-ax/`, with `~/.shift-ax/index.md` as the main index.
 - Before runtime handoff, Shift AX asks for the preferred language once when `~/.shift-ax/settings.json` does not have one yet, then stores and reuses it globally.
 - On first setup it also asks whether full-auto mode should be enabled by default and stores that choice globally.
 - When full-auto is active, Shift AX maps it to the runtime-specific unsafe automation flags:

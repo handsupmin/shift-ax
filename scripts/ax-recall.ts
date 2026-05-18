@@ -6,7 +6,7 @@ import { buildContextBundle } from '../core/context/context-bundle.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-recall --root DIR --scope <topic|decision|repo> --query "<text>" [--limit N]\n',
+    'Usage: shift-ax recall --root DIR --scope <topic|decision|repo> --query "<text>" [--limit N]\n',
   );
 }
 

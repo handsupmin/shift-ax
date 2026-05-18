@@ -141,7 +141,7 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
   }
 });
 
-test('ax scaffold-build writes bootstrap assets for a requested platform', async () => {
+test('shift-ax scaffold-build writes bootstrap assets for a requested platform', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-build-cli-'));
 
   try {
@@ -174,7 +174,7 @@ test('ax scaffold-build writes bootstrap assets for a requested platform', async
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax scaffold-build exited ${code}`));
+        else reject(new Error(error || `shift-ax scaffold-build exited ${code}`));
       });
     });
 

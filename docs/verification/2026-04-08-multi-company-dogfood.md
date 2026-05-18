@@ -12,13 +12,13 @@ Dogfooding Shift AX against realistic sample repos representing:
 
 ### HanPay / Codex
 
-- `ax onboard-context --discover`
-- `ax doctor`
-- `ax run-request`
-- `ax approve-plan`
+- `shift-ax onboard-context --discover`
+- `shift-ax doctor`
+- `shift-ax run-request`
+- `shift-ax approve-plan`
 - planning-detected policy sync gate
-- `ax sync-policy-context`
-- real `ax launch-execution --platform codex`
+- `shift-ax sync-policy-context`
+- real `shift-ax launch-execution --platform codex`
 
 Observed:
 
@@ -34,10 +34,10 @@ Follow-up hardening:
 
 ### MediFlow / Claude Code
 
-- `ax onboard-context --discover`
-- `ax run-request`
-- `ax approve-plan`
-- real `ax launch-execution --platform claude-code`
+- `shift-ax onboard-context --discover`
+- `shift-ax run-request`
+- `shift-ax approve-plan`
+- real `shift-ax launch-execution --platform claude-code`
 
 Observed before hardening:
 
@@ -58,14 +58,14 @@ Current post-fix status:
 
 ### ShopBridge / Core operator flow
 
-- `ax onboard-context --discover`
-- `ax doctor`
-- `ax run-request`
-- `ax approve-plan`
-- `ax run-request --resume`
-- `ax react-feedback`
-- `ax topic-status`
-- `ax topics-status`
+- `shift-ax onboard-context --discover`
+- `shift-ax doctor`
+- `shift-ax run-request`
+- `shift-ax approve-plan`
+- `shift-ax run-request --resume`
+- `shift-ax react-feedback`
+- `shift-ax topic-status`
+- `shift-ax topics-status`
 
 Observed:
 

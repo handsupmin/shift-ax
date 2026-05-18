@@ -3,7 +3,7 @@
 import { writeTopicSummaryCheckpoint } from '../core/memory/summary-checkpoints.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-checkpoint-context --topic DIR --summary "<text>"\n');
+  process.stderr.write('Usage: shift-ax checkpoint-context --topic DIR --summary "<text>"\n');
 }
 
 function readArg(flag: string): string | undefined {

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax recall-topics prints matching committed topic summaries', async () => {
+test('shift-ax recall-topics prints matching committed topic summaries', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topic-recall-cli-'));
 
   try {
@@ -54,7 +54,7 @@ test('ax recall-topics prints matching committed topic summaries', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax recall-topics exited ${code}`));
+        else reject(new Error(error || `shift-ax recall-topics exited ${code}`));
       });
     });
 

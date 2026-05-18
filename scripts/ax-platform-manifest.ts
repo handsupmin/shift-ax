@@ -4,7 +4,7 @@ import { getPlatformAdapter } from '../adapters/index.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-platform-manifest --platform <codex|claude-code> [--root DIR]\n',
+    'Usage: shift-ax platform-manifest --platform <codex|claude-code> [--root DIR]\n',
   );
 }
 

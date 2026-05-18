@@ -4,7 +4,7 @@ import { saveThreadNote } from '../core/memory/threads.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-thread-save --root DIR --name NAME [--summary "<text>"] --note "<text>"\n',
+    'Usage: shift-ax thread-save --root DIR --name NAME [--summary "<text>"] --note "<text>"\n',
   );
 }
 

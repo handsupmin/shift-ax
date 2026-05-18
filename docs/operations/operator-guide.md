@@ -13,25 +13,25 @@ Use it when you want the shortest safe path from request to reviewed local commi
 ### 1. Onboard shared context
 
 ```bash
-npm run ax -- onboard-context --discover
+shift-ax onboard-context --discover
 ```
 
 Use file-driven onboarding when the team already has prepared docs:
 
 ```bash
-npm run ax -- onboard-context --input ./onboarding.json
+shift-ax onboard-context --input ./onboarding.json
 ```
 
 ### 2. Check repo health
 
 ```bash
-npm run ax -- doctor
+shift-ax doctor
 ```
 
 ### 3. Start a request
 
 ```bash
-npm run ax -- run-request --request "<request>"
+shift-ax run-request --request "<request>"
 ```
 
 This creates a topic, worktree, planning artifacts, and a human review gate.
@@ -39,7 +39,7 @@ This creates a topic, worktree, planning artifacts, and a human review gate.
 ### 4. Record human plan review
 
 ```bash
-npm run ax -- approve-plan \
+shift-ax approve-plan \
   --topic .shift-ax/topics/<topic-slug> \
   --reviewer "<name>" \
   --decision approve
@@ -50,7 +50,7 @@ npm run ax -- approve-plan \
 If the reviewed plan requires shared policy or base-context doc updates, Shift AX stops before implementation.
 
 ```bash
-npm run ax -- sync-policy-context \
+shift-ax sync-policy-context \
   --topic .shift-ax/topics/<topic-slug> \
   --summary "Updated shared policy docs before implementation" \
   --path docs/base-context/<doc>.md
@@ -59,7 +59,7 @@ npm run ax -- sync-policy-context \
 ### 6. Resume implementation and review
 
 ```bash
-npm run ax -- run-request \
+shift-ax run-request \
   --topic .shift-ax/topics/<topic-slug> \
   --resume \
   --verify-command "npm test" \
@@ -69,7 +69,7 @@ npm run ax -- run-request \
 ### 7. Reopen when downstream feedback says the work is not done
 
 ```bash
-npm run ax -- react-feedback \
+shift-ax react-feedback \
   --topic .shift-ax/topics/<topic-slug> \
   --kind review-changes-requested \
   --summary "Reviewer requested additional rollback coverage"
@@ -80,7 +80,7 @@ npm run ax -- react-feedback \
 ### Single topic
 
 ```bash
-npm run ax -- topic-status --topic .shift-ax/topics/<topic-slug>
+shift-ax topic-status --topic .shift-ax/topics/<topic-slug>
 ```
 
 Shows:
@@ -93,7 +93,7 @@ Shows:
 ### Multiple topics
 
 ```bash
-npm run ax -- topics-status --limit 10
+shift-ax topics-status --limit 10
 ```
 
 Use this instead of a dashboard when you only need a compact operator view.
@@ -107,7 +107,7 @@ Use platform launchers when you want the runtime to perform the task itself.
 ### Codex
 
 ```bash
-npm run ax -- launch-execution \
+shift-ax launch-execution \
   --platform codex \
   --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
@@ -116,7 +116,7 @@ npm run ax -- launch-execution \
 ### Claude Code
 
 ```bash
-npm run ax -- launch-execution \
+shift-ax launch-execution \
   --platform claude-code \
   --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
@@ -136,7 +136,7 @@ Planning said a shared doc must change before coding.
 
 Action:
 - update the shared doc
-- run `ax sync-policy-context`
+- run `shift-ax sync-policy-context`
 
 ### `review requested more implementation work`
 The gates found a real gap.
@@ -144,7 +144,7 @@ The gates found a real gap.
 Action:
 - implement the missing work
 - keep execution artifacts and tests aligned
-- rerun resume or use `ax react-feedback` if the request came later
+- rerun resume or use `shift-ax react-feedback` if the request came later
 
 ## Operator rules
 

@@ -11,7 +11,7 @@ import { withTempGlobalHome } from './helpers/global-home.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax-onboard-context --discover seeds the index from existing docs', async () => {
+test('shift-ax onboard-context --discover seeds the index from existing docs', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboard-discovery-cli-'));
 
   try {
@@ -47,7 +47,7 @@ test('ax-onboard-context --discover seeds the index from existing docs', async (
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax-onboard-context exited ${code}`));
+          else reject(new Error(error || `shift-ax onboard-context exited ${code}`));
         });
       });
 

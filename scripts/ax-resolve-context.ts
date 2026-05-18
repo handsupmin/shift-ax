@@ -7,7 +7,7 @@ import { getGlobalContextHome } from '../core/settings/global-context-home.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-resolve-context [--index PATH] --query "<text>" [--root DIR] [--max N]\n',
+    'Usage: shift-ax resolve-context [--index PATH] --query "<text>" [--root DIR] [--max N]\n',
   );
 }
 

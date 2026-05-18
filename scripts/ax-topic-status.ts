@@ -3,7 +3,7 @@
 import { summarizeTopicStatus } from '../core/observability/topic-status.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-topic-status --topic DIR\n');
+  process.stderr.write('Usage: shift-ax topic-status --topic DIR\n');
 }
 
 function readArg(flag: string): string | undefined {

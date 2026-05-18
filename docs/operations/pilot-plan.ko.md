@@ -116,8 +116,8 @@ pilot은 아래가 모두 충족될 때만 성공으로 본다.
 3. 실행:
 
 ```bash
-npm run ax -- onboard-context --discover
-npm run ax -- doctor
+shift-ax onboard-context --discover
+shift-ax doctor
 ```
 
 4. 검토:
@@ -148,7 +148,7 @@ shared policy/docs를 실제로 건드려야 하는 요청을 고른다.
 2. plan approve
 3. workflow가 policy sync gate에서 실제로 멈추는지 확인
 4. shared doc 수정
-5. `ax sync-policy-context` 실행
+5. `shift-ax sync-policy-context` 실행
 6. flow resume
 
 목표:
@@ -161,13 +161,13 @@ shared policy/docs를 실제로 건드려야 하는 요청을 고른다.
 #### Codex
 
 ```bash
-npm run ax -- launch-execution --platform codex --topic <topic> --task-id <id>
+shift-ax launch-execution --platform codex --topic <topic> --task-id <id>
 ```
 
 #### Claude Code
 
 ```bash
-npm run ax -- launch-execution --platform claude-code --topic <topic> --task-id <id>
+shift-ax launch-execution --platform claude-code --topic <topic> --task-id <id>
 ```
 
 목표:
@@ -181,7 +181,7 @@ npm run ax -- launch-execution --platform claude-code --topic <topic> --task-id 
 3. 실행:
 
 ```bash
-npm run ax -- react-feedback \
+shift-ax react-feedback \
   --topic <topic> \
   --kind review-changes-requested \
   --summary "Pilot feedback requested more work"
@@ -217,14 +217,14 @@ Week 1 종료 조건을 만족했을 때만 확장한다.
 하루 시작 시:
 
 ```bash
-npm run ax -- doctor
-npm run ax -- topics-status --limit 10
+shift-ax doctor
+shift-ax topics-status --limit 10
 ```
 
 진행 중 topic별:
 
 ```bash
-npm run ax -- topic-status --topic <topic>
+shift-ax topic-status --topic <topic>
 ```
 
 요청이 막히면:

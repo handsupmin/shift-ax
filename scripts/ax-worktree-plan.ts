@@ -3,7 +3,7 @@
 import { planTopicWorktree } from '../core/topics/worktree-runtime.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-worktree-plan --topic DIR\n');
+  process.stderr.write('Usage: shift-ax worktree-plan --topic DIR\n');
 }
 
 function readArg(flag: string): string | undefined {

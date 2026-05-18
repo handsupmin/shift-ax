@@ -7,7 +7,7 @@ import {
 import { runReviewLanes } from '../core/review/run-lanes.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-review --topic DIR [--run]\n');
+  process.stderr.write('Usage: shift-ax review --topic DIR [--run]\n');
 }
 
 function readArg(flag: string): string | undefined {

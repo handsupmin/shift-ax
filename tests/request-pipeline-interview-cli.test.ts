@@ -57,7 +57,7 @@ async function runAxInteractive(args: string[], input: string, env?: NodeJS.Proc
   });
 }
 
-test('ax run-request interviews for planning details and writes structured artifacts by default', async () => {
+test('shift-ax run-request interviews for planning details and writes structured artifacts by default', async () => {
   const root = await createGitRepo();
 
   try {
@@ -148,7 +148,7 @@ test('ax run-request interviews for planning details and writes structured artif
   }
 });
 
-test('ax run-request fails fast when the global index points to an unresolved document', async () => {
+test('shift-ax run-request fails fast when the global index points to an unresolved document', async () => {
   const root = await createGitRepo();
 
   try {
@@ -174,7 +174,7 @@ test('ax run-request fails fast when the global index points to an unresolved do
   }
 });
 
-test('ax run-request re-resolves base-context using interview details, not only the raw request text', async () => {
+test('shift-ax run-request re-resolves base-context using interview details, not only the raw request text', async () => {
   const root = await createGitRepo();
 
   try {

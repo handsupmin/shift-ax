@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax context-health prints an operator-friendly status for the current query budget', async () => {
+test('shift-ax context-health prints an operator-friendly status for the current query budget', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-context-health-cli-'));
 
   try {
@@ -44,7 +44,7 @@ test('ax context-health prints an operator-friendly status for the current query
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax context-health exited ${code}`));
+        else reject(new Error(error || `shift-ax context-health exited ${code}`));
       });
     });
 

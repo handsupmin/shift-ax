@@ -60,7 +60,7 @@ test('createTopicWorktree creates a git worktree from topic plan', async () => {
   }
 });
 
-test('ax worktree-create creates worktree from topic directory', async () => {
+test('shift-ax worktree-create creates worktree from topic directory', async () => {
   const repoRoot = await createGitRepo();
 
   try {
@@ -90,7 +90,7 @@ test('ax worktree-create creates worktree from topic directory', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax worktree-create exited ${code}`));
+        else reject(new Error(error || `shift-ax worktree-create exited ${code}`));
       });
     });
 

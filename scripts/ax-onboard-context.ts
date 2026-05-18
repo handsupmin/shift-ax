@@ -15,7 +15,7 @@ import type { ShiftAxPlatform } from '../adapters/contracts.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-onboard-context [--input FILE] [--discover] [--gctree-reference DIR] [--no-glossary] [--overwrite] [--lang en|ko] [--platform codex|claude-code] [--root DIR]\n',
+    'Usage: shift-ax onboard-context [--input FILE] [--discover] [--gctree-reference DIR] [--no-glossary] [--overwrite] [--lang en|ko] [--platform codex|claude-code] [--root DIR]\n',
   );
 }
 

@@ -4,7 +4,7 @@ import { getPlatformAdapter } from '../adapters/index.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-launch-execution --platform <codex|claude-code> --topic DIR [--task-id ID] [--dry-run]\n',
+    'Usage: shift-ax launch-execution --platform <codex|claude-code> --topic DIR [--task-id ID] [--dry-run]\n',
   );
 }
 

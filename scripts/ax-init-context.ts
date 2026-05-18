@@ -4,7 +4,7 @@ import { writeContextBundle } from '../core/context/context-bundle.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-init-context [--root DIR] [--topic DIR] --query "<text>" [--max-chars N] [--output PATH]\n',
+    'Usage: shift-ax init-context [--root DIR] [--topic DIR] --query "<text>" [--max-chars N] [--output PATH]\n',
   );
 }
 

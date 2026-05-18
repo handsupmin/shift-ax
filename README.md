@@ -67,7 +67,8 @@ If you can get the design and requirements into good shape, Shift AX is built to
 ## Install & quick start
 
 ```bash
-npm install -g shift-ax
+npm install -g shift-ax@latest
+shift-ax --version
 shift-ax --codex
 ```
 
@@ -234,7 +235,7 @@ Goal:
 
 Rules:
 - use `shift-ax`, not `ax`, in user-facing commands
-- if Shift AX is not installed, run `npm install -g shift-ax`
+- if Shift AX is not installed, run `npm install -g shift-ax@latest`
 - if working from a source checkout instead of a global install, run:
   - `npm install`
   - `npm run build`

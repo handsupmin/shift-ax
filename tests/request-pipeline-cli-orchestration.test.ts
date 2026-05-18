@@ -57,7 +57,7 @@ async function runAx(args: string[], input = '', env?: NodeJS.ProcessEnv): Promi
   });
 }
 
-test('ax run-request --resume --platform codex orchestrates execution before verification', async () => {
+test('shift-ax run-request --resume --platform codex orchestrates execution before verification', async () => {
   const root = await createGitRepo();
   const binDir = await mkdtemp(join(tmpdir(), 'shift-ax-fake-codex-bin-'));
 

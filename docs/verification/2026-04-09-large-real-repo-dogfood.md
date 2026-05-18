@@ -16,9 +16,9 @@ Dogfood the honcho/get-shit-done-derived support layers on large real repositori
 
 | Repository | Shape | Size | Onboarding mode |
 | --- | --- | ---: | --- |
-| `oh-my-codex` | docs-heavy orchestration repo | 716 tracked files / 21 MB | `ax onboard-context --discover` |
-| `agent-orchestrator` | docs-heavy app/runtime repo | 573 tracked files / 25 MB | `ax onboard-context --discover` |
-| `cosmo-backend` | large service monorepo with sparse shared docs | 874 tracked files / 1.1 GB | `ax onboard-context --input ...` |
+| `oh-my-codex` | docs-heavy orchestration repo | 716 tracked files / 21 MB | `shift-ax onboard-context --discover` |
+| `agent-orchestrator` | docs-heavy app/runtime repo | 573 tracked files / 25 MB | `shift-ax onboard-context --discover` |
+| `cosmo-backend` | large service monorepo with sparse shared docs | 874 tracked files / 1.1 GB | `shift-ax onboard-context --input ...` |
 
 Each repo was tested in a temporary git worktree so the source repository stayed untouched.
 
@@ -26,23 +26,23 @@ Each repo was tested in a temporary git worktree so the source repository stayed
 
 For each repo, the dogfood flow executed:
 
-- `ax onboard-context`
-- `ax doctor`
-- `ax build-context-bundle`
-- `ax init-context`
-- `ax context-health`
-- `ax monitor-context`
-- `ax bootstrap-topic`
-- `ax checkpoint-context`
-- `ax pause-work`
-- `ax thread-save`
-- `ax threads`
-- `ax promote-thread`
-- `ax team-preferences`
-- `ax recall --scope repo`
-- `ax entity-memory`
-- `ax consolidate-memory`
-- `ax refresh-state`
+- `shift-ax onboard-context`
+- `shift-ax doctor`
+- `shift-ax build-context-bundle`
+- `shift-ax init-context`
+- `shift-ax context-health`
+- `shift-ax monitor-context`
+- `shift-ax bootstrap-topic`
+- `shift-ax checkpoint-context`
+- `shift-ax pause-work`
+- `shift-ax thread-save`
+- `shift-ax threads`
+- `shift-ax promote-thread`
+- `shift-ax team-preferences`
+- `shift-ax recall --scope repo`
+- `shift-ax entity-memory`
+- `shift-ax consolidate-memory`
+- `shift-ax refresh-state`
 
 Temporary committed topics and decision-register entries were added inside each test worktree to exercise recall, entity views, and consolidation.
 
@@ -51,46 +51,46 @@ Temporary committed topics and decision-register entries were added inside each 
 ### 1. `oh-my-codex`
 
 - Discovery onboarding created 4 base-context entries.
-- `ax doctor` returned `ok`.
+- `shift-ax doctor` returned `ok`.
 - Docs-first bundle selected shared docs before support recall.
-- `ax context-health` returned `ok`.
+- `shift-ax context-health` returned `ok`.
 - Repo recall returned:
   - 1 base-context match
   - 2 committed topic matches
   - 2 decision matches
-- `ax promote-thread` wrote `support-thread.md` and did **not** inject support content into `brainstorm.md`.
+- `shift-ax promote-thread` wrote `support-thread.md` and did **not** inject support content into `brainstorm.md`.
 - Consolidation returned one duplicate-decision suggestion plus usable glossary candidates such as `openclaw`, `release`, and `context`.
 
 ### 2. `agent-orchestrator`
 
 - Discovery onboarding created 2 base-context entries.
-- `ax doctor` returned `ok`.
+- `shift-ax doctor` returned `ok`.
 - Docs-first bundle selected `Project-Based Dashboard Architecture`.
-- `ax context-health` returned `critical`.
+- `shift-ax context-health` returned `critical`.
   - This was the expected and desired result: the selected architecture doc alone exceeded the compact bundle budget.
   - Shift AX surfaced context pressure instead of silently pretending the bundle was safe.
 - Repo recall returned:
   - 1 base-context match
   - 2 committed topic matches
   - 2 decision matches
-- `ax promote-thread` again wrote `support-thread.md` without polluting `brainstorm.md`.
+- `shift-ax promote-thread` again wrote `support-thread.md` without polluting `brainstorm.md`.
 - Consolidation returned usable glossary candidates such as `dashboard`, `observability`, and `routing`.
 
 ### 3. `cosmo-backend`
 
 - Manual onboarding created 5 shared docs copied into `docs/base-context/`.
-- `ax doctor` returned `ok`.
+- `shift-ax doctor` returned `ok`.
 - Docs-first bundle selected service-level shared docs such as:
   - `Gas Fuel Service Overview`
   - `Transaction Worker Overview`
   - `API Service Overview`
   - `Indexer Overview`
-- `ax context-health` returned `ok`.
+- `shift-ax context-health` returned `ok`.
 - Repo recall returned:
   - 1 base-context match
   - 2 committed topic matches
   - 2 decision matches
-- `ax entity-memory --entity transaction` returned matching decisions, threads, and topics.
+- `shift-ax entity-memory --entity transaction` returned matching decisions, threads, and topics.
 - Consolidation returned usable glossary candidates such as `rollback` and `transaction-worker`.
 
 ## Key checks
@@ -99,7 +99,7 @@ Temporary committed topics and decision-register entries were added inside each 
 
 - Every repo produced a base-context bundle first.
 - Repo recall still returned `base_context` separately from topics and decisions.
-- `ax doctor` stayed green only after the base-context index and linked docs existed.
+- `shift-ax doctor` stayed green only after the base-context index and linked docs existed.
 
 ### Support layers stayed secondary
 
@@ -113,7 +113,7 @@ Temporary committed topics and decision-register entries were added inside each 
 
 ## Dogfood-driven fix
 
-Large-repo dogfooding exposed noisy glossary candidates during `ax consolidate-memory`.  
+Large-repo dogfooding exposed noisy glossary candidates during `shift-ax consolidate-memory`.
 Examples from the first pass included generic junk such as `Thread` and malformed cross-line fragments.
 
 This branch was updated to:

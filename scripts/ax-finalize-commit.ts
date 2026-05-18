@@ -6,7 +6,7 @@ import { finalizeTopicCommit } from '../core/finalization/commit-workflow.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-finalize-commit --topic DIR [--message-file PATH]\n',
+    'Usage: shift-ax finalize-commit --topic DIR [--message-file PATH]\n',
   );
 }
 

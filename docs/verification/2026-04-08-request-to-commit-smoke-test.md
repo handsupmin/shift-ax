@@ -21,11 +21,11 @@ This log captures the current end-to-end CLI flow:
 ## Commands Run
 
 ```bash
-npm --silent run ax -- onboard-context --root "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR" --input "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/onboarding.json"
-printf '%s\n'   'Users should stay signed in during refresh token rotation.'   'Auth policy applies and no schema changes are allowed.'   'Do not change billing or the session UI.'   'Verification needs auth refresh tests plus a clean build.'   'Auth refresh service, token store, and session middleware.'   'Token store migration analysis is the only long-running slice.'   '' | npm --silent run ax -- run-request --root "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR" --request 'Build safer auth refresh flow'
-npm --silent run ax -- launch-execution --platform codex --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --dry-run
-npm --silent run ax -- approve-plan --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --reviewer "Alex Reviewer" --decision approve
-npm --silent run ax -- run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --resume --verify-command 'node --test auth-refresh.test.js'
+shift-ax onboard-context --root "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR" --input "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/onboarding.json"
+printf '%s\n'   'Users should stay signed in during refresh token rotation.'   'Auth policy applies and no schema changes are allowed.'   'Do not change billing or the session UI.'   'Verification needs auth refresh tests plus a clean build.'   'Auth refresh service, token store, and session middleware.'   'Token store migration analysis is the only long-running slice.'   '' | shift-ax run-request --root "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR" --request 'Build safer auth refresh flow'
+shift-ax launch-execution --platform codex --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --dry-run
+shift-ax approve-plan --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --reviewer "Alex Reviewer" --decision approve
+shift-ax run-request --topic "/var/folders/3t/gfy8tm3558sgzwgk8q10qkhc0000gn/T/tmp.W0JOuKA9LR/.shift-ax/topics/2026-04-08-build-safer-auth-refresh-flow" --resume --verify-command 'node --test auth-refresh.test.js'
 ```
 
 ## Key Outputs
@@ -631,7 +631,7 @@ Related: topic:2026-04-08-build-safer-auth-refresh-flow
 
 - interactive planning answers were captured into planning artifacts
 - `execution-handoff.json` was generated with subagent / tmux task routing
-- `ax launch-execution --dry-run` produced concrete Codex / tmux launch commands
+- `shift-ax launch-execution --dry-run` produced concrete Codex / tmux launch commands
 - workflow reached `committed`
 - aggregate review allowed commit
 - finalization ran automatically on resume

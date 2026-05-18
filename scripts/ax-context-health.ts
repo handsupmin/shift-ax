@@ -4,7 +4,7 @@ import { assessContextHealth } from '../core/observability/context-health.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-context-health [--root DIR] [--topic DIR] --query "<text>" [--max-chars N]\n',
+    'Usage: shift-ax context-health [--root DIR] [--topic DIR] --query "<text>" [--max-chars N]\n',
   );
 }
 

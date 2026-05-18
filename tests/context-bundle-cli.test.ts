@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax build-context-bundle prints a docs-first bundle summary', async () => {
+test('shift-ax build-context-bundle prints a docs-first bundle summary', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-context-bundle-cli-'));
 
   try {
@@ -44,7 +44,7 @@ test('ax build-context-bundle prints a docs-first bundle summary', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax build-context-bundle exited ${code}`));
+        else reject(new Error(error || `shift-ax build-context-bundle exited ${code}`));
       });
     });
 
@@ -59,7 +59,7 @@ test('ax build-context-bundle prints a docs-first bundle summary', async () => {
   }
 });
 
-test('ax init-context writes a bundle markdown file for a workflow step', async () => {
+test('shift-ax init-context writes a bundle markdown file for a workflow step', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-init-context-cli-'));
 
   try {
@@ -95,7 +95,7 @@ test('ax init-context writes a bundle markdown file for a workflow step', async 
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax init-context exited ${code}`));
+        else reject(new Error(error || `shift-ax init-context exited ${code}`));
       });
     });
 

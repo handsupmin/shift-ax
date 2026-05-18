@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax learned-debug-save and ax learned-debug persist and retrieve reusable debug notes', async () => {
+test('shift-ax learned-debug-save and shift-ax learned-debug persist and retrieve reusable debug notes', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-learned-debug-cli-'));
 
   try {
@@ -32,7 +32,7 @@ test('ax learned-debug-save and ax learned-debug persist and retrieve reusable d
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax learned-debug command exited ${code}`));
+          else reject(new Error(error || `shift-ax learned-debug command exited ${code}`));
         });
       });
 

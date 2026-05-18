@@ -116,8 +116,8 @@ The pilot is successful only if all of these are true.
 3. run:
 
 ```bash
-npm run ax -- onboard-context --discover
-npm run ax -- doctor
+shift-ax onboard-context --discover
+shift-ax doctor
 ```
 
 4. review:
@@ -148,7 +148,7 @@ Pick a request that should touch shared policy/docs.
 2. approve plan
 3. confirm the workflow stops at the policy sync gate
 4. update the shared doc
-5. run `ax sync-policy-context`
+5. run `shift-ax sync-policy-context`
 6. resume flow
 
 Target outcome:
@@ -161,13 +161,13 @@ Run at least one real execution task per platform in scope.
 #### Codex
 
 ```bash
-npm run ax -- launch-execution --platform codex --topic <topic> --task-id <id>
+shift-ax launch-execution --platform codex --topic <topic> --task-id <id>
 ```
 
 #### Claude Code
 
 ```bash
-npm run ax -- launch-execution --platform claude-code --topic <topic> --task-id <id>
+shift-ax launch-execution --platform claude-code --topic <topic> --task-id <id>
 ```
 
 Target outcome:
@@ -181,7 +181,7 @@ Target outcome:
 3. run:
 
 ```bash
-npm run ax -- react-feedback \
+shift-ax react-feedback \
   --topic <topic> \
   --kind review-changes-requested \
   --summary "Pilot feedback requested more work"
@@ -217,14 +217,14 @@ Do **not** expand all three at once.
 At the start of the day:
 
 ```bash
-npm run ax -- doctor
-npm run ax -- topics-status --limit 10
+shift-ax doctor
+shift-ax topics-status --limit 10
 ```
 
 Per active topic:
 
 ```bash
-npm run ax -- topic-status --topic <topic>
+shift-ax topic-status --topic <topic>
 ```
 
 When a request is blocked:

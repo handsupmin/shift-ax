@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { spawn } from 'node:child_process';
 import { withTempGlobalHome } from './helpers/global-home.js';
 
-test('ax-resolve-context defaults to docs/base-context/index.md', async () => {
+test('shift-ax resolve-context defaults to docs/base-context/index.md', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-cli-context-'));
 
   try {
@@ -47,7 +47,7 @@ test('ax-resolve-context defaults to docs/base-context/index.md', async () => {
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax-resolve-context exited ${code}`));
+          else reject(new Error(error || `shift-ax resolve-context exited ${code}`));
         });
       });
 

@@ -31,12 +31,12 @@ function runAx(args: string[]): Promise<string> {
     });
     child.on('exit', (code) => {
       if (code === 0) resolve(output);
-      else reject(new Error(error || `ax command exited ${code}`));
+      else reject(new Error(error || `shift-ax command exited ${code}`));
     });
   });
 }
 
-test('ax team-preferences reads back the saved team preference profile', async () => {
+test('shift-ax team-preferences reads back the saved team preference profile', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-team-prefs-cli-'));
 
   try {
@@ -62,7 +62,7 @@ test('ax team-preferences reads back the saved team preference profile', async (
   }
 });
 
-test('ax promote-thread creates a topic from a saved thread', async () => {
+test('shift-ax promote-thread creates a topic from a saved thread', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-promote-thread-cli-'));
 
   try {
@@ -90,7 +90,7 @@ test('ax promote-thread creates a topic from a saved thread', async () => {
   }
 });
 
-test('ax entity-memory combines matching topics, decisions, and threads for an entity', async () => {
+test('shift-ax entity-memory combines matching topics, decisions, and threads for an entity', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-entity-memory-cli-'));
 
   try {

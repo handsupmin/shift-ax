@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax checkpoint-context writes a topic summary checkpoint', async () => {
+test('shift-ax checkpoint-context writes a topic summary checkpoint', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-checkpoint-cli-'));
   const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
 
@@ -43,7 +43,7 @@ test('ax checkpoint-context writes a topic summary checkpoint', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax checkpoint-context exited ${code}`));
+        else reject(new Error(error || `shift-ax checkpoint-context exited ${code}`));
       });
     });
 

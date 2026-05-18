@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax verification-debt prints unresolved verification debt items', async () => {
+test('shift-ax verification-debt prints unresolved verification debt items', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-verification-debt-cli-'));
   const topicDir = join(root, '.shift-ax', 'topics', '2026-04-09-auth-fix');
 
@@ -59,7 +59,7 @@ test('ax verification-debt prints unresolved verification debt items', async () 
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax verification-debt exited ${code}`));
+        else reject(new Error(error || `shift-ax verification-debt exited ${code}`));
       });
     });
 

@@ -3,7 +3,7 @@
 import { promoteThreadToTopic } from '../core/memory/thread-promotion.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-promote-thread --root DIR --name NAME --request "<text>"\n');
+  process.stderr.write('Usage: shift-ax promote-thread --root DIR --name NAME --request "<text>"\n');
 }
 
 function readArg(flag: string): string | undefined {

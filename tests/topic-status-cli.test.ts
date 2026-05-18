@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax topic-status prints a compact topic observability summary', async () => {
+test('shift-ax topic-status prints a compact topic observability summary', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topic-status-cli-'));
   const topicDir = join(root, '.shift-ax', 'topics', '2026-04-08-auth-refresh');
 
@@ -78,7 +78,7 @@ test('ax topic-status prints a compact topic observability summary', async () =>
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax topic-status exited ${code}`));
+        else reject(new Error(error || `shift-ax topic-status exited ${code}`));
       });
     });
 

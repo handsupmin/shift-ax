@@ -4,7 +4,7 @@ import { writeContextMonitorSnapshot } from '../core/observability/context-monit
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-monitor-context [--root DIR] [--topic DIR] --query "<text>" [--max-chars N] [--output PATH]\n',
+    'Usage: shift-ax monitor-context [--root DIR] [--topic DIR] --query "<text>" [--max-chars N] [--output PATH]\n',
   );
 }
 

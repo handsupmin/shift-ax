@@ -4,7 +4,7 @@ import { bootstrapTopic } from '../core/topics/bootstrap.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-bootstrap-topic --request "<text>" [--summary "<text>"] [--root DIR]\n',
+    'Usage: shift-ax bootstrap-topic --request "<text>" [--summary "<text>"] [--root DIR]\n',
   );
 }
 

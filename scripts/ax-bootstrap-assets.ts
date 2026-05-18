@@ -4,7 +4,7 @@ import { getPlatformBootstrapAssets } from '../platform/index.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-bootstrap-assets --platform <codex|claude-code> [--root DIR]\n',
+    'Usage: shift-ax bootstrap-assets --platform <codex|claude-code> [--root DIR]\n',
   );
 }
 

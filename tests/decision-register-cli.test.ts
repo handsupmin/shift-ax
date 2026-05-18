@@ -10,7 +10,7 @@ import { recordDecision } from '../core/memory/decision-register.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax decisions lists matching active decisions', async () => {
+test('shift-ax decisions lists matching active decisions', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-decisions-cli-'));
 
   try {
@@ -54,7 +54,7 @@ test('ax decisions lists matching active decisions', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax decisions exited ${code}`));
+        else reject(new Error(error || `shift-ax decisions exited ${code}`));
       });
     });
 

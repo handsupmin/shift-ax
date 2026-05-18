@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax consolidate-memory prints structured consolidation suggestions', async () => {
+test('shift-ax consolidate-memory prints structured consolidation suggestions', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-consolidation-cli-'));
 
   try {
@@ -31,7 +31,7 @@ test('ax consolidate-memory prints structured consolidation suggestions', async 
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax consolidate-memory exited ${code}`));
+        else reject(new Error(error || `shift-ax consolidate-memory exited ${code}`));
       });
     });
 

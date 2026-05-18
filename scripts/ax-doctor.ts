@@ -4,7 +4,7 @@ import { runDoctor } from '../core/diagnostics/doctor.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-doctor [--root DIR] [--topic DIR] [--platform <codex|claude-code>]\n',
+    'Usage: shift-ax doctor [--root DIR] [--topic DIR] [--platform <codex|claude-code>]\n',
   );
 }
 

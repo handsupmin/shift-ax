@@ -3,7 +3,7 @@
 ## Goal
 
 Confirm that Shift AX can drive a **real Claude Code file edit**
-through `ax launch-execution`, not just a fake launcher test.
+through `shift-ax launch-execution`, not just a fake launcher test.
 
 ## Verified path
 

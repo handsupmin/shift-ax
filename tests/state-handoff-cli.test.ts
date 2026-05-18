@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax refresh-state writes .shift-ax/STATE.md', async () => {
+test('shift-ax refresh-state writes .shift-ax/STATE.md', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-refresh-state-cli-'));
 
   try {
@@ -57,7 +57,7 @@ test('ax refresh-state writes .shift-ax/STATE.md', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve();
-        else reject(new Error(error || `ax refresh-state exited ${code}`));
+        else reject(new Error(error || `shift-ax refresh-state exited ${code}`));
       });
     });
 
@@ -69,7 +69,7 @@ test('ax refresh-state writes .shift-ax/STATE.md', async () => {
   }
 });
 
-test('ax pause-work writes topic handoff and refreshes root state', async () => {
+test('shift-ax pause-work writes topic handoff and refreshes root state', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-pause-work-cli-'));
 
   try {
@@ -124,9 +124,9 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
           '--remaining-item',
           'Re-run auth refresh tests',
           '--recommended-command',
-          'npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-auth-fix',
+          'shift-ax topic-status --topic .shift-ax/topics/2026-04-09-auth-fix',
           '--command',
-          'npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-auth-fix',
+          'shift-ax topic-status --topic .shift-ax/topics/2026-04-09-auth-fix',
         ],
         {
           cwd: REPO_ROOT,
@@ -140,7 +140,7 @@ test('ax pause-work writes topic handoff and refreshes root state', async () => 
       });
       child.on('exit', (code) => {
         if (code === 0) resolve();
-        else reject(new Error(error || `ax pause-work exited ${code}`));
+        else reject(new Error(error || `shift-ax pause-work exited ${code}`));
       });
     });
 

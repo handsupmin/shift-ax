@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax monitor-context writes a snapshot file and returns the current health state', async () => {
+test('shift-ax monitor-context writes a snapshot file and returns the current health state', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-context-monitor-cli-'));
 
   try {
@@ -43,7 +43,7 @@ test('ax monitor-context writes a snapshot file and returns the current health s
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax monitor-context exited ${code}`));
+        else reject(new Error(error || `shift-ax monitor-context exited ${code}`));
       });
     });
 

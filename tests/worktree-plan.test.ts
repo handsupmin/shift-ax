@@ -22,7 +22,7 @@ test('buildWorktreePlan derives branch and path from topic slug', () => {
   );
 });
 
-test('ax worktree-plan updates worktree-plan.json for a topic', async () => {
+test('shift-ax worktree-plan updates worktree-plan.json for a topic', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-worktree-plan-'));
 
   try {
@@ -52,7 +52,7 @@ test('ax worktree-plan updates worktree-plan.json for a topic', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax worktree-plan exited ${code}`));
+        else reject(new Error(error || `shift-ax worktree-plan exited ${code}`));
       });
     });
 

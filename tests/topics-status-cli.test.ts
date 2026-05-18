@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
 
-test('ax topics-status prints compact summaries for recent topics', async () => {
+test('shift-ax topics-status prints compact summaries for recent topics', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-topics-status-cli-'));
 
   try {
@@ -66,7 +66,7 @@ test('ax topics-status prints compact summaries for recent topics', async () => 
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax topics-status exited ${code}`));
+        else reject(new Error(error || `shift-ax topics-status exited ${code}`));
       });
     });
 

@@ -3,7 +3,7 @@
 import { listDecisionRecords, searchDecisionMemory } from '../core/memory/decision-register.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-decisions [--root DIR] [--query "<text>"] [--active-at YYYY-MM-DD] [--limit N]\n');
+  process.stderr.write('Usage: shift-ax decisions [--root DIR] [--query "<text>"] [--active-at YYYY-MM-DD] [--limit N]\n');
 }
 
 function readArg(flag: string): string | undefined {

@@ -26,8 +26,8 @@ function usage(): void {
   process.stderr.write(
     [
       'Usage:',
-      '  ax-run-request --request "<text>" [--summary "<text>"] [--brainstorm-file PATH] [--spec-file PATH] [--plan-file PATH] [--index PATH] [--root DIR] [--base BRANCH]',
-      '  ax-run-request --topic DIR --resume [--platform <codex|claude-code>] [--verify-command CMD]... [--escalation KIND[:summary]]... [--clear-escalations] [--escalation-resolution "<text>"] [--no-auto-commit]',
+      '  shift-ax run-request --request "<text>" [--summary "<text>"] [--brainstorm-file PATH] [--spec-file PATH] [--plan-file PATH] [--index PATH] [--root DIR] [--base BRANCH]',
+      '  shift-ax run-request --topic DIR --resume [--platform <codex|claude-code>] [--verify-command CMD]... [--escalation KIND[:summary]]... [--clear-escalations] [--escalation-resolution "<text>"] [--no-auto-commit]',
       '',
     ].join('\n'),
   );

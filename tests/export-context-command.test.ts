@@ -4,7 +4,7 @@ import { spawn } from 'node:child_process';
 
 import { withTempGlobalHome } from './helpers/global-home.js';
 
-test('ax export-context prints sharing guidance for ~/.shift-ax', async () => {
+test('shift-ax export-context prints sharing guidance for ~/.shift-ax', async () => {
   await withTempGlobalHome('shift-ax-export-home-', async (home) => {
     const stdout = await new Promise<string>((resolve, reject) => {
       const child = spawn(
@@ -30,7 +30,7 @@ test('ax export-context prints sharing guidance for ~/.shift-ax', async () => {
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax export-context exited ${code}`));
+        else reject(new Error(error || `shift-ax export-context exited ${code}`));
       });
     });
 

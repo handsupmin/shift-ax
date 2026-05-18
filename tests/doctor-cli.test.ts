@@ -23,7 +23,7 @@ async function createGitRepo(): Promise<string> {
   return root;
 }
 
-test('ax doctor prints a compact health report for an onboarded repo', async () => {
+test('shift-ax doctor prints a compact health report for an onboarded repo', async () => {
   const root = await createGitRepo();
 
   try {
@@ -71,7 +71,7 @@ test('ax doctor prints a compact health report for an onboarded repo', async () 
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax doctor exited ${code}`));
+          else reject(new Error(error || `shift-ax doctor exited ${code}`));
         });
       });
 

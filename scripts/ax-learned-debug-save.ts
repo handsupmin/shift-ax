@@ -4,7 +4,7 @@ import { recordLearnedDebugNote } from '../core/memory/learned-debug.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-learned-debug-save --root DIR --summary "<text>" --resolution "<text>" [--occurrences N] [--approved] [--fix-commit SHA]\n',
+    'Usage: shift-ax learned-debug-save --root DIR --summary "<text>" --resolution "<text>" [--occurrences N] [--approved] [--fix-commit SHA]\n',
   );
 }
 

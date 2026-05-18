@@ -4,7 +4,7 @@ import { applyFeedbackReaction } from '../core/planning/feedback-reactions.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-react-feedback --topic DIR --kind <review-changes-requested|ci-failed> --summary "<text>"\n',
+    'Usage: shift-ax react-feedback --topic DIR --kind <review-changes-requested|ci-failed> --summary "<text>"\n',
   );
 }
 

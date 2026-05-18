@@ -20,20 +20,20 @@ Reference the detailed plan in `docs/operations/pilot-plan.md` while running thi
 
 - [ ] Create or collect core docs for domain, policy, and architecture
 - [ ] Run:
-  - [ ] `npm run ax -- onboard-context --discover`
+  - [ ] `shift-ax onboard-context --discover`
   - or
-  - [ ] `npm run ax -- onboard-context --input ./onboarding.json`
+  - [ ] `shift-ax onboard-context --input ./onboarding.json`
 - [ ] Review `docs/base-context/index.md`
 - [ ] Review generated `docs/base-context/domain-glossary.md`
-- [ ] Run `npm run ax -- doctor`
+- [ ] Run `shift-ax doctor`
 - [ ] Confirm doctor is `ok`
 
 ## Phase 3 — Pilot flow
 
-- [ ] Start 1 small request with `ax run-request`
+- [ ] Start 1 small request with `shift-ax run-request`
 - [ ] Review the generated brainstorm/spec/implementation plan
-- [ ] Record a real human plan approval with `ax approve-plan`
-- [ ] If shared docs must change, confirm `ax sync-policy-context` is used before implementation
+- [ ] Record a real human plan approval with `shift-ax approve-plan`
+- [ ] If shared docs must change, confirm `shift-ax sync-policy-context` is used before implementation
 - [ ] Resume with verification commands
 - [ ] Confirm `topic-status` shows the expected phase transitions
 - [ ] Confirm a reviewed local commit is produced, or confirm the review gate correctly blocks it
@@ -43,18 +43,18 @@ Reference the detailed plan in `docs/operations/pilot-plan.md` while running thi
 Run at least one real execution task per platform the team intends to use.
 
 ### Codex
-- [ ] `ax launch-execution --platform codex --topic ... --task-id ...`
+- [ ] `shift-ax launch-execution --platform codex --topic ... --task-id ...`
 - [ ] Confirm file edits happened in the worktree
 - [ ] Confirm execution output artifact was written
 
 ### Claude Code
-- [ ] `ax launch-execution --platform claude-code --topic ... --task-id ...`
+- [ ] `shift-ax launch-execution --platform claude-code --topic ... --task-id ...`
 - [ ] Confirm file edits happened in the worktree
 - [ ] Confirm execution output artifact was written
 
 ## Phase 5 — Failure handling
 
-- [ ] Trigger a review-fix or CI-fix style reopen with `ax react-feedback`
+- [ ] Trigger a review-fix or CI-fix style reopen with `shift-ax react-feedback`
 - [ ] Confirm the topic returns to `implementation_running`
 - [ ] Confirm `topics-status` shows the reopened item clearly
 

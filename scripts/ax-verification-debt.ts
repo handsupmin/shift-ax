@@ -3,7 +3,7 @@
 import { listVerificationDebt } from '../core/observability/verification-debt.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-verification-debt [--root DIR] [--topic DIR]\n');
+  process.stderr.write('Usage: shift-ax verification-debt [--root DIR] [--topic DIR]\n');
 }
 
 function readArg(flag: string): string | undefined {

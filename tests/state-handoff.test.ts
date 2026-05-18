@@ -74,8 +74,8 @@ test('writeTopicHandoff writes a topic handoff with next step and operator comma
       summary: 'Stopping at the end of the work day.',
       nextStep: 'Resume implementation and rerun review.',
       remainingItems: ['Re-run auth refresh tests', 'Confirm review lane status'],
-      recommendedCommand: 'npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-refund-fix',
-      commands: ['npm run ax -- topic-status --topic .shift-ax/topics/2026-04-09-refund-fix'],
+      recommendedCommand: 'shift-ax topic-status --topic .shift-ax/topics/2026-04-09-refund-fix',
+      commands: ['shift-ax topic-status --topic .shift-ax/topics/2026-04-09-refund-fix'],
     });
     const content = await readFile(result.output_path, 'utf8');
 
@@ -84,7 +84,7 @@ test('writeTopicHandoff writes a topic handoff with next step and operator comma
     assert.match(content, /Remaining Items/);
     assert.match(content, /Re-run auth refresh tests/);
     assert.match(content, /Recommended Command/);
-    assert.match(content, /ax\/2026-04-09-refund-fix/);
+    assert.match(content, /shift-ax topic-status/);
     assert.match(content, /topic-status/);
     assert.match(content, /changes_requested/);
   } finally {

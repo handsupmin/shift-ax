@@ -26,7 +26,7 @@ async function createGitRepo(): Promise<string> {
   return root;
 }
 
-test('ax sync-policy-context records completion and returns the workflow to approved', async () => {
+test('shift-ax sync-policy-context records completion and returns the workflow to approved', async () => {
   const repoRoot = await createGitRepo();
 
   try {
@@ -104,7 +104,7 @@ test('ax sync-policy-context records completion and returns the workflow to appr
         });
         child.on('exit', (code) => {
           if (code === 0) resolve(output);
-          else reject(new Error(error || `ax sync-policy-context exited ${code}`));
+          else reject(new Error(error || `shift-ax sync-policy-context exited ${code}`));
         });
       });
 

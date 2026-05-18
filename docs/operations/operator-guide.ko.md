@@ -13,25 +13,25 @@
 ### 1. 공유 context 온보딩
 
 ```bash
-npm run ax -- onboard-context --discover
+shift-ax onboard-context --discover
 ```
 
 이미 준비된 문서가 있다면 파일 기반 온보딩도 사용할 수 있습니다.
 
 ```bash
-npm run ax -- onboard-context --input ./onboarding.json
+shift-ax onboard-context --input ./onboarding.json
 ```
 
 ### 2. 저장소 상태 점검
 
 ```bash
-npm run ax -- doctor
+shift-ax doctor
 ```
 
 ### 3. 요청 시작
 
 ```bash
-npm run ax -- run-request --request "<request>"
+shift-ax run-request --request "<request>"
 ```
 
 이 명령은 topic, worktree, planning artifacts, human review gate를 만듭니다.
@@ -39,7 +39,7 @@ npm run ax -- run-request --request "<request>"
 ### 4. 사람 계획 승인 기록
 
 ```bash
-npm run ax -- approve-plan \
+shift-ax approve-plan \
   --topic .shift-ax/topics/<topic-slug> \
   --reviewer "<name>" \
   --decision approve
@@ -50,7 +50,7 @@ npm run ax -- approve-plan \
 검토된 계획에서 공유 정책 문서나 base-context 문서 수정이 필요하면 Shift AX는 구현 전에 멈춥니다.
 
 ```bash
-npm run ax -- sync-policy-context \
+shift-ax sync-policy-context \
   --topic .shift-ax/topics/<topic-slug> \
   --summary "구현 전에 공유 정책 문서를 갱신함" \
   --path docs/base-context/<doc>.md
@@ -59,7 +59,7 @@ npm run ax -- sync-policy-context \
 ### 6. 구현과 리뷰 재개
 
 ```bash
-npm run ax -- run-request \
+shift-ax run-request \
   --topic .shift-ax/topics/<topic-slug> \
   --resume \
   --verify-command "npm test" \
@@ -69,7 +69,7 @@ npm run ax -- run-request \
 ### 7. downstream feedback로 다시 구현해야 하면 reopen
 
 ```bash
-npm run ax -- react-feedback \
+shift-ax react-feedback \
   --topic .shift-ax/topics/<topic-slug> \
   --kind review-changes-requested \
   --summary "리뷰어가 rollback coverage를 추가 요청함"
@@ -80,7 +80,7 @@ npm run ax -- react-feedback \
 ### 단일 topic
 
 ```bash
-npm run ax -- topic-status --topic .shift-ax/topics/<topic-slug>
+shift-ax topic-status --topic .shift-ax/topics/<topic-slug>
 ```
 
 보여주는 것:
@@ -93,7 +93,7 @@ npm run ax -- topic-status --topic .shift-ax/topics/<topic-slug>
 ### 여러 topic
 
 ```bash
-npm run ax -- topics-status --limit 10
+shift-ax topics-status --limit 10
 ```
 
 별도 dashboard 없이 compact한 운영 뷰가 필요할 때 사용합니다.
@@ -107,7 +107,7 @@ npm run ax -- topics-status --limit 10
 ### Codex
 
 ```bash
-npm run ax -- launch-execution \
+shift-ax launch-execution \
   --platform codex \
   --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
@@ -116,7 +116,7 @@ npm run ax -- launch-execution \
 ### Claude Code
 
 ```bash
-npm run ax -- launch-execution \
+shift-ax launch-execution \
   --platform claude-code \
   --topic .shift-ax/topics/<topic-slug> \
   --task-id task-1
@@ -136,7 +136,7 @@ npm run ax -- launch-execution \
 
 대응:
 - 공유 문서 수정
-- `ax sync-policy-context` 실행
+- `shift-ax sync-policy-context` 실행
 
 ### `review requested more implementation work`
 리뷰 게이트가 실제 갭을 발견했다는 뜻입니다.
@@ -144,7 +144,7 @@ npm run ax -- launch-execution \
 대응:
 - 빠진 구현 보완
 - execution artifacts와 테스트를 같이 정리
-- 필요하면 resume 재실행 또는 `ax react-feedback` 사용
+- 필요하면 resume 재실행 또는 `shift-ax react-feedback` 사용
 
 ## 운영 규칙
 

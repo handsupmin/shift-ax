@@ -3,7 +3,7 @@
 import { buildEntityMemoryView } from '../core/memory/entity-memory.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-entity-memory --root DIR --entity NAME\n');
+  process.stderr.write('Usage: shift-ax entity-memory --root DIR --entity NAME\n');
 }
 
 function readArg(flag: string): string | undefined {

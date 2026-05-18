@@ -192,7 +192,7 @@ test('summarizeTopicStatus returns a compact view of workflow, review, execution
         '',
         '## Recommended Command',
         '',
-        '`npm run ax -- topic-status --topic .shift-ax/topics/2026-04-08-auth-refresh`',
+        '`shift-ax topic-status --topic .shift-ax/topics/2026-04-08-auth-refresh`',
         '',
       ].join('\n'),
       'utf8',

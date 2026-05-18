@@ -4,7 +4,7 @@ import { scaffoldPlatformBuild } from '../platform/scaffold.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-scaffold-build --platform <codex|claude-code> [--root DIR]\n',
+    'Usage: shift-ax scaffold-build --platform <codex|claude-code> [--root DIR]\n',
   );
 }
 

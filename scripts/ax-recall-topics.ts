@@ -3,7 +3,7 @@
 import { searchPastTopics } from '../core/memory/topic-recall.js';
 
 function usage(): void {
-  process.stderr.write('Usage: ax-recall-topics --query "<text>" [--root DIR] [--limit N]\n');
+  process.stderr.write('Usage: shift-ax recall-topics --query "<text>" [--root DIR] [--limit N]\n');
 }
 
 function readArg(flag: string): string | undefined {

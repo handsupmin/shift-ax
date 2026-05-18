@@ -4,7 +4,7 @@ import { recordPlanReviewDecision } from '../core/planning/plan-review.js';
 
 function usage(): void {
   process.stderr.write(
-    'Usage: ax-approve-plan --topic DIR --reviewer NAME --decision <approve|reject> [--notes "<text>"]\n',
+    'Usage: shift-ax approve-plan --topic DIR --reviewer NAME --decision <approve|reject> [--notes "<text>"]\n',
   );
 }
 

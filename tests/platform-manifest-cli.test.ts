@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 
-test('ax platform-manifest prints platform manifest for codex', async () => {
+test('shift-ax platform-manifest prints platform manifest for codex', async () => {
   const stdout = await new Promise<string>((resolve, reject) => {
     const child = spawn(
       process.execPath,
@@ -23,7 +23,7 @@ test('ax platform-manifest prints platform manifest for codex', async () => {
     });
     child.on('exit', (code) => {
       if (code === 0) resolve(output);
-      else reject(new Error(error || `ax platform-manifest exited ${code}`));
+      else reject(new Error(error || `shift-ax platform-manifest exited ${code}`));
     });
   });
 

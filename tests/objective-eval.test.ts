@@ -39,7 +39,7 @@ test('objective eval suite reports request-to-commit quality and token metrics',
   }
 });
 
-test('ax eval CLI emits machine-readable objective metrics', async () => {
+test('shift-ax eval CLI emits machine-readable objective metrics', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-objective-eval-cli-'));
 
   try {

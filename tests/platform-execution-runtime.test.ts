@@ -188,7 +188,7 @@ test('platform adapters expose execution launch plans for codex and claude-code'
   }
 });
 
-test('ax launch-execution --dry-run prints execution launch plans', async () => {
+test('shift-ax launch-execution --dry-run prints execution launch plans', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-launch-cli-'));
 
   try {
@@ -223,7 +223,7 @@ test('ax launch-execution --dry-run prints execution launch plans', async () => 
       });
       child.on('exit', (code) => {
         if (code === 0) resolve(output);
-        else reject(new Error(error || `ax launch-execution exited ${code}`));
+        else reject(new Error(error || `shift-ax launch-execution exited ${code}`));
       });
     });
 
@@ -243,7 +243,7 @@ test('ax launch-execution --dry-run prints execution launch plans', async () => 
   }
 });
 
-test('ax launch-execution refuses to run when resolved context is still unresolved', async () => {
+test('shift-ax launch-execution refuses to run when resolved context is still unresolved', async () => {
   const root = await mkdtemp(join(tmpdir(), 'shift-ax-launch-context-block-'));
 
   try {
