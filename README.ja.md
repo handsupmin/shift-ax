@@ -80,6 +80,7 @@ shift-ax --claude-code
 
 これで始められます。
 初回起動時には優先言語と full-auto のデフォルトを聞かれ、そのまま適切なランタイムフローに入ります。
+ランタイム skills はプロジェクトごとではなくグローバルにだけインストールされます。Codex は `~/.codex/skills` と `~/.codex/prompts`、Claude Code は `~/.claude/commands` と `~/.claude/hooks` を使います。Codex が新しく追加された Shift AX skill や prompt の承認を求めた場合は一度だけ承認してください。以降の repo は同じグローバルインストールを再利用します。古いバージョンが作ったプロジェクトローカルの Shift AX skill コピーは、コマンドが二重表示されないよう自動で整理されます。
 
 あとは一度オンボードし、再利用コンテキストを教えて、そこからリクエストを始めれば大丈夫です。
 
@@ -123,14 +124,14 @@ Shift AX は再利用知識を次に保存します。
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX は先にコンテキストを解決し、リクエスト専用の topic/worktree を作り、計画レビューで止まり、その後に実装 / 検証 / レビュー / コミットへ進みます。
+Shift AX は先にコンテキストを解決し、リクエスト専用の topic/worktree を作り、チャット内で計画を要約して `1/2/3` のレビューを受けます。承認後は実装 / 検証 / レビュー / コミットへ自動的に進みます。内部の approve/resume コマンドは通常のユーザー操作ではなく、復旧用です。
 
-### 後から再開 / レビュー / 状態確認する
+### 後からレビュー / 状態確認する
 
 よく使うランタイムコマンド:
 
-- **Codex:** `$doctor`, `$status`, `$topics`, `$resume`, `$review`, `$export-context`
-- **Claude Code:** `/doctor`, `/status`, `/topics`, `/resume`, `/review`, `/export-context`
+- **Codex:** `$doctor`, `$status`, `$topics`, `$review`, `$export-context`
+- **Claude Code:** `/doctor`, `/status`, `/topics`, `/review`, `/export-context`
 
 ### 必要なら CLI から直接回す
 
@@ -138,8 +139,7 @@ Shift AX は先にコンテキストを解決し、リクエスト専用の topi
 shift-ax onboard-context --discover
 shift-ax onboard-context --gctree-reference /path/to/reference
 shift-ax run-request --request "Build safer auth refresh flow"
-shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
-shift-ax run-request --topic .shift-ax/topics/<topic> --resume
+shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
 ---
@@ -244,7 +244,7 @@ Rules:
 - in Codex use `$onboard` and `$request ...`
 - in Claude Code use `/onboard` and `/request ...`
 - do not start implementation before plan approval
-- if shared policy/context docs must change first, update them before resume
+- if shared policy/context docs must change first, update them before implementation continues
 
 Suggested first commands:
 1. `shift-ax --codex`

@@ -7,7 +7,6 @@ export const SHIFT_AX_PRODUCT_SHELL_COMMANDS = [
   'doctor',
   'status',
   'topics',
-  'resume',
   'review',
 ] as const;
 

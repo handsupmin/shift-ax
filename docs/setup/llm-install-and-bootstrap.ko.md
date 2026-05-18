@@ -130,6 +130,15 @@ shift-ax doctor --root /path/to/repo
 
 하지만 필요 없다면 `npm link`는 생략한다.
 
+### 런타임 asset 설치 범위
+
+일반적인 `shift-ax --codex` / `shift-ax --claude-code` 런처는 Shift AX 런타임 명령을 각 target repo 안이 아니라 전역에 설치한다.
+
+- Codex: `~/.codex/skills/<command>/SKILL.md`, `~/.codex/prompts/shift-ax-bootstrap.md`
+- Claude Code: `~/.claude/commands/<command>.md`, `~/.claude/hooks/shift-ax-session-start.md`
+
+이렇게 해야 같은 사용자가 여러 repo를 오갈 때 `$request` / `$onboard`가 두 번 보이지 않는다. Codex가 새로 발견한 Shift AX skill 또는 prompt 승인을 요청하면 한 번만 승인하면 된다. Shift AX는 Codex trust prompt를 우회하지 않고, 전역 설치를 한 번만 쓰도록 하며 예전 버전이 만든 프로젝트 로컬 Shift AX 복사본은 자동 정리한다.
+
 ## 5. onboarding 경로 선택 규칙
 
 ### Path A — discovery-assisted onboarding
@@ -251,16 +260,12 @@ shift-ax run-request \
 
 - `.shift-ax/topics/<topic-slug>/`
 - resolved-context / brainstorm / spec / implementation-plan artifact 생성
-- workflow는 human plan review 게이트에서 멈춤
+- `plan-review-brief.md`가 생성되고 product-shell agent가 사용자에게 `1` 승인/시작, `2` 수정 요청, `3` 거절을 묻는다
+- `1` 이후에는 agent가 승인 기록과 resume을 내부적으로 처리한다. 사용자가 approve/resume 명령을 직접 입력하는 것이 일반 경로가 아니다
 
-### Step 2 — 계획 승인 기록
+### Step 2 — 수동 복구: 계획 승인 기록
 
-```bash
-shift-ax approve-plan \
-  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
-  --reviewer "Reviewer Name" \
-  --decision approve
-```
+product-shell 자동화가 실패했거나 operator가 workflow를 디버깅할 때만 직접 실행한다. 일반 사용자는 채팅에서 승인한다.
 
 ### Step 3 — 공유 정책 문서 선반영
 
@@ -273,7 +278,9 @@ shift-ax sync-policy-context \
   --path docs/base-context/refund-policy.md
 ```
 
-### Step 4 — verification과 함께 재개
+### Step 4 — 수동 복구: verification과 함께 재개
+
+채팅 승인 이후 product-shell agent가 이어서 진행하지 못했거나 operator가 의도적으로 CLI 복구 경로를 써야 할 때만 직접 실행한다.
 
 ```bash
 shift-ax run-request \

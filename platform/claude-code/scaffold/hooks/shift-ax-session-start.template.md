@@ -12,9 +12,10 @@ This build is expected to use SessionStart hook-driven context injection.
 - Unknown-term protocol: for unfamiliar terms, acronyms, repository nicknames, workflow labels, policy names, or domain words, run `shift-ax resolve-context --root "$PWD" --query "<term>"` first, try broader related queries second, add a missing dictionary entry when the concept exists in a linked doc but is not indexed, and only then grep or read code.
 - Treat `{{GLOBAL_CONTEXT_INDEX}}` as the single dictionary. It should expose search terms and aliases, not just broad page titles.
 - Use `shift-ax run-request` to create the request-scoped topic/worktree, run the planning interview, write brainstorming/spec/plan artifacts plus `execution-handoff.json`, and pause at the human planning-review gate.
-- Use `shift-ax approve-plan` after the human reviewer signs off.
+- After `shift-ax run-request`, summarize `planReviewBrief` or `<topic>/plan-review-brief.md`; ask only for `1` approve/start implementation, `2` request changes, or `3` reject. Do not end after only printing paths.
+- Treat `shift-ax approve-plan` and `shift-ax run-request --resume` as internal UX plumbing: after option `1`, run them yourself and continue to implementation. Do not ask the user to run them unless automation fails and manual recovery is needed.
 - If the reviewed plan requires shared policy or base-context doc changes, record them first with `shift-ax sync-policy-context --topic <dir> --summary "<what changed>" [--path <doc>]... [--entry "Label -> path"]...`.
-- Then resume with `shift-ax run-request --topic <dir> --resume` for automatic review and commit. Use `--no-auto-commit` only when a human explicitly wants the final commit step held back.
+- After approval and any required policy sync, continue internally through implementation, verification, review, and commit. Use manual resume flags only for recovery/debugging or when a human explicitly wants the final commit step held back.
 - If downstream review or CI fails after the topic looked ready, use `shift-ax react-feedback --topic <dir> --kind <review-changes-requested|ci-failed> --summary "<text>"` to reopen implementation with a file-backed reaction trail.
 - Use `shift-ax launch-execution --platform claude-code --topic <dir> [--task-id <id>] [--dry-run]` when you need the concrete Claude or tmux launch commands from `execution-handoff.json`.
 - Use `shift-ax topic-status --topic <dir>` when you need a compact summary of phase, review gate, execution state, and last failure.
@@ -28,6 +29,6 @@ This build is expected to use SessionStart hook-driven context injection.
 - Active imported worktree helpers currently include `getWorktreeRoot`, `createClaudeManagedWorktree`, and `removeClaudeManagedWorktree`.
 - Use `shift-ax review --run` before finalization and `shift-ax finalize-commit` only after the review gate allows commit.
 - Natural language is the primary user surface. Internal AX commands exist to support the flow, not replace the conversation.
-- In Shift AX Claude Code sessions, use `/onboard`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, `/resume <topic>`, `/review <topic>`, `/help` as the primary visible commands. `$...` aliases may mirror them when useful.
-- Native product-shell command files are installed under `.claude/commands/` for: `onboard`, `request`, `export-context`, `doctor`, `status`, `topics`, `resume`, and `review`.
+- In Shift AX Claude Code sessions, use `/onboard`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, `/review <topic>`, `/help` as the primary visible commands. `$...` aliases may mirror them when useful.
+- Native product-shell command files are installed globally under `~/.claude/commands/` for: `onboard`, `request`, `export-context`, `doctor`, `status`, `topics`, and `review`. Project-local Shift AX command copies are legacy cleanup targets.
 - Treat `$request <text>` as the explicit alias for starting a new request-to-commit flow inside the session.

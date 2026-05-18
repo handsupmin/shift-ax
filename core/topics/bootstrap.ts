@@ -19,6 +19,7 @@ export interface TopicBootstrapArtifacts {
   brainstorm: string;
   spec: string;
   plan_review: string;
+  plan_review_brief: string;
   policy_context_sync: string;
   implementation_plan: string;
   execution_handoff: string;
@@ -108,6 +109,8 @@ export async function bootstrapTopic({
   const specContent =
     '# Topic Spec\n\n## Goal\n\n> Shift AX placeholder: define the reviewed goal before implementation.\n';
   const planReviewContent = `${JSON.stringify({ version: 1, status: 'pending' }, null, 2)}\n`;
+  const planReviewBriefContent =
+    '# Plan Review Brief\n\n> Shift AX placeholder: generated after context resolution and planning artifacts are ready.\n';
   const policyContextSyncContent = `${JSON.stringify(
     {
       version: 1,
@@ -241,6 +244,7 @@ export async function bootstrapTopic({
     writeFile(join(topicDir, artifacts.brainstorm), brainstormContent, 'utf8'),
     writeFile(join(topicDir, artifacts.spec), specContent, 'utf8'),
     writeFile(join(topicDir, artifacts.plan_review), planReviewContent, 'utf8'),
+    writeFile(join(topicDir, artifacts.plan_review_brief), planReviewBriefContent, 'utf8'),
     writeFile(join(topicDir, artifacts.policy_context_sync), policyContextSyncContent, 'utf8'),
     writeFile(
       join(topicDir, artifacts.implementation_plan),

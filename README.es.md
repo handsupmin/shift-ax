@@ -80,6 +80,7 @@ shift-ax --claude-code
 
 Con eso ya puedes arrancar.
 En la primera ejecución, Shift AX te pregunta el idioma preferido y si quieres activar full-auto por defecto, y a partir de ahí te mete directamente en el flujo correcto.
+Las runtime skills se instalan globalmente, no por proyecto. Codex usa `~/.codex/skills` y `~/.codex/prompts`; Claude Code usa `~/.claude/commands` y `~/.claude/hooks`. Si Codex te pide aprobar las nuevas skills o prompts de Shift AX, apruébalas una vez; los demás repos reutilizarán esa misma instalación global. Shift AX también elimina las copias locales antiguas que él mismo generó para que los comandos no aparezcan duplicados.
 
 Después solo tienes que hacer onboarding una vez, enseñarle tu contexto reutilizable y empezar a lanzar requests.
 
@@ -123,14 +124,14 @@ Dentro del runtime:
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX resuelve primero el contexto, crea un topic/worktree específico para ese request, se detiene en la review del plan y luego continúa con implementación, verificación, review y commit.
+Shift AX resuelve primero el contexto, crea un topic/worktree específico para ese request, resume el plan en el chat y pide una revisión rápida con `1/2/3`. Después de la aprobación continúa con implementación, verificación, review y commit. Los comandos internos de approve/resume son herramientas de recuperación, no el camino normal del usuario.
 
-### Reanuda, revisa e inspecciona más tarde
+### Revisa e inspecciona más tarde
 
 Comandos habituales del runtime:
 
-- **Codex:** `$doctor`, `$status`, `$topics`, `$resume`, `$review`, `$export-context`
-- **Claude Code:** `/doctor`, `/status`, `/topics`, `/resume`, `/review`, `/export-context`
+- **Codex:** `$doctor`, `$status`, `$topics`, `$review`, `$export-context`
+- **Claude Code:** `/doctor`, `/status`, `/topics`, `/review`, `/export-context`
 
 ### Si hace falta, ejecuta el flujo desde CLI
 
@@ -138,8 +139,7 @@ Comandos habituales del runtime:
 shift-ax onboard-context --discover
 shift-ax onboard-context --gctree-reference /path/to/reference
 shift-ax run-request --request "Build safer auth refresh flow"
-shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
-shift-ax run-request --topic .shift-ax/topics/<topic> --resume
+shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
 ---
@@ -244,7 +244,7 @@ Rules:
 - in Codex use `$onboard` and `$request ...`
 - in Claude Code use `/onboard` and `/request ...`
 - do not start implementation before plan approval
-- if shared policy/context docs must change first, update them before resume
+- if shared policy/context docs must change first, update them before implementation continues
 
 Suggested first commands:
 1. `shift-ax --codex`

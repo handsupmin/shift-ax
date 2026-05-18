@@ -53,6 +53,11 @@ import {
   assessPlanningReadiness,
   assessTopicPlanningReadiness,
 } from './readiness-assessment.js';
+import {
+  buildPlanReviewBrief,
+  writePlanReviewBrief,
+  type ShiftAxPlanReviewBrief,
+} from './plan-review-brief.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -75,6 +80,7 @@ export interface StartRequestPipelineResult extends TopicBootstrapResult {
   resolvedContext: Awaited<ReturnType<typeof resolveRequestContext>>;
   worktree: TopicWorktreeCreateResult;
   workflow: ShiftAxWorkflowState;
+  planReviewBrief: ShiftAxPlanReviewBrief;
 }
 
 export interface ResumeRequestPipelineInput {
@@ -411,7 +417,7 @@ export async function startRequestPipeline({
       now,
     }),
   );
-  await writeExecutionHandoff(topic.topicDir, now);
+  const executionHandoff = await writeExecutionHandoff(topic.topicDir, now);
 
   const worktree = await createTopicWorktree({
     topicDir: topic.topicDir,
@@ -453,12 +459,25 @@ export async function startRequestPipeline({
     summary: 'Waiting for the human plan review.',
     now,
   });
+  const planReviewBrief = buildPlanReviewBrief({
+    topicDir: topic.topicDir,
+    request,
+    resolvedContext,
+    readinessAssessment,
+    specContent: finalSpecContent,
+    implementationPlanContent: finalImplementationPlanContent,
+    executionHandoff,
+    worktree,
+    now,
+  });
+  await writePlanReviewBrief(topic.topicDir, planReviewBrief);
 
   return {
     ...topic,
     resolvedContext,
     worktree,
     workflow,
+    planReviewBrief,
   };
 }
 

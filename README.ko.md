@@ -80,6 +80,7 @@ shift-ax --claude-code
 
 이 정도면 시작할 수 있습니다.
 첫 실행에서는 선호 언어와 full-auto 기본 사용 여부를 물어보고, 그에 맞는 런타임 흐름으로 바로 이어줍니다.
+런타임 skills는 프로젝트마다가 아니라 전역에만 설치됩니다. Codex는 `~/.codex/skills`와 `~/.codex/prompts`, Claude Code는 `~/.claude/commands`와 `~/.claude/hooks`를 사용합니다. Codex가 새로 설치된 Shift AX skill이나 prompt 승인을 요청하면 한 번만 승인하면 되고, 이후 다른 repo는 같은 전역 설치를 재사용합니다. 예전 버전이 만든 프로젝트 로컬 Shift AX skill 복사본은 중복 표시를 막기 위해 자동 정리합니다.
 
 그다음부터는 온보딩 한 번 하고, 재사용 가능한 컨텍스트를 가르친 뒤, 요청을 시작하면 됩니다.
 
@@ -123,14 +124,14 @@ Shift AX는 재사용 지식을 여기에 저장합니다.
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX는 먼저 컨텍스트를 해석하고, 요청 전용 topic/worktree를 만들고, 계획 리뷰에서 멈춘 뒤, 구현 / 검증 / 리뷰 / 커밋 흐름으로 다시 이어갑니다.
+Shift AX는 먼저 컨텍스트를 해석하고, 요청 전용 topic/worktree를 만들고, 채팅 안에서 계획을 요약해 `1/2/3` 리뷰를 받은 뒤, 승인되면 구현 / 검증 / 리뷰 / 커밋까지 이어갑니다. 내부 approve/resume 명령은 복구용 도구이지 일반 사용자 경로가 아닙니다.
 
-### 나중에 재개 / 리뷰 / 상태 확인하기
+### 나중에 리뷰 / 상태 확인하기
 
 자주 쓰는 런타임 명령:
 
-- **Codex:** `$doctor`, `$status`, `$topics`, `$resume`, `$review`, `$export-context`
-- **Claude Code:** `/doctor`, `/status`, `/topics`, `/resume`, `/review`, `/export-context`
+- **Codex:** `$doctor`, `$status`, `$topics`, `$review`, `$export-context`
+- **Claude Code:** `/doctor`, `/status`, `/topics`, `/review`, `/export-context`
 
 ### 필요하면 CLI로 직접 흐름 실행하기
 
@@ -138,8 +139,7 @@ Shift AX는 먼저 컨텍스트를 해석하고, 요청 전용 topic/worktree를
 shift-ax onboard-context --discover
 shift-ax onboard-context --gctree-reference /path/to/reference
 shift-ax run-request --request "Build safer auth refresh flow"
-shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
-shift-ax run-request --topic .shift-ax/topics/<topic> --resume
+shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
 ---
@@ -247,7 +247,7 @@ Rules:
 - in Codex use `$onboard` and `$request ...`
 - in Claude Code use `/onboard` and `/request ...`
 - do not start implementation before plan approval
-- if shared policy/context docs must change first, update them before resume
+- if shared policy/context docs must change first, update them before implementation continues
 
 Suggested first commands:
 1. `shift-ax --codex`

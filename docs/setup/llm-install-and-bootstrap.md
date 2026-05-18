@@ -124,6 +124,15 @@ After that, commands such as `shift-ax doctor --root /path/to/repo` should work.
 
 If `npm link` is unnecessary, skip it.
 
+### Runtime asset scope
+
+The normal `shift-ax --codex` / `shift-ax --claude-code` launcher installs Shift AX runtime commands globally, not inside every target repository.
+
+- Codex: `~/.codex/skills/<command>/SKILL.md` and `~/.codex/prompts/shift-ax-bootstrap.md`
+- Claude Code: `~/.claude/commands/<command>.md` and `~/.claude/hooks/shift-ax-session-start.md`
+
+This prevents duplicate `$request` / `$onboard` entries when the same user works across multiple repositories. If Codex asks to approve newly discovered Shift AX skills or prompts, approve them once. Shift AX does not bypass Codex trust prompts; it reduces the prompt to a one-time global install and cleans older project-local Shift AX copies that it generated.
+
 ## 5. Decide the onboarding path
 
 Use this decision rule:
@@ -247,16 +256,12 @@ Expected result:
 
 - a topic under `.shift-ax/topics/<topic-slug>/`
 - resolved-context, brainstorm, spec, and implementation-plan artifacts
-- workflow pauses at human plan review
+- `plan-review-brief.md` is generated and the product-shell agent asks the user for `1` approve/start, `2` request changes, or `3` reject
+- after `1`, the agent records approval and resumes internally; users should not normally type approve/resume commands
 
-### Step 2 — record plan approval
+### Step 2 — manual recovery: record plan approval
 
-```bash
-shift-ax approve-plan \
-  --topic /absolute/path/to/target-repo/.shift-ax/topics/<topic-slug> \
-  --reviewer "Reviewer Name" \
-  --decision approve
-```
+Only run this directly when the product-shell automation failed or an operator is debugging the workflow. In normal use, the user approves in chat.
 
 ### Step 3 — sync shared policy docs if required
 
@@ -269,7 +274,9 @@ shift-ax sync-policy-context \
   --path docs/base-context/refund-policy.md
 ```
 
-### Step 4 — resume with verification
+### Step 4 — manual recovery: resume with verification
+
+Only run this directly when the product-shell agent could not continue after chat approval or when an operator intentionally needs a CLI recovery path.
 
 ```bash
 shift-ax run-request \

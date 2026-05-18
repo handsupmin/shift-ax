@@ -80,6 +80,7 @@ shift-ax --claude-code
 
 这样就能开始了。
 首次运行时，Shift AX 会询问你偏好的语言，以及是否默认开启 full-auto，然后把你带进正确的运行时流程。
+运行时 skills 只安装到全局，而不是每个项目各装一份。Codex 使用 `~/.codex/skills` 和 `~/.codex/prompts`，Claude Code 使用 `~/.claude/commands` 和 `~/.claude/hooks`。如果 Codex 要求你批准新安装的 Shift AX skill 或 prompt，只需批准一次；之后其他 repo 会复用同一份全局安装。旧版本生成的项目本地 Shift AX skill 副本会被自动清理，避免命令显示两次。
 
 之后只需要完成一次 onboarding，把可复用上下文教给它，然后就可以开始处理请求。
 
@@ -123,14 +124,14 @@ Shift AX 会把可复用知识放在：
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX 会先解析上下文，创建请求专属 topic/worktree，在计划评审处停下来，然后再继续进入实现、验证、评审与提交流程。
+Shift AX 会先解析上下文，创建请求专属 topic/worktree，在聊天里总结计划并让用户用 `1/2/3` 完成评审。批准后，它会继续进入实现、验证、评审与提交流程。内部的 approve/resume 命令是恢复工具，不是常规用户路径。
 
-### 之后再恢复 / 评审 / 查看状态
+### 之后再评审 / 查看状态
 
 常用运行时命令：
 
-- **Codex:** `$doctor`, `$status`, `$topics`, `$resume`, `$review`, `$export-context`
-- **Claude Code:** `/doctor`, `/status`, `/topics`, `/resume`, `/review`, `/export-context`
+- **Codex:** `$doctor`, `$status`, `$topics`, `$review`, `$export-context`
+- **Claude Code:** `/doctor`, `/status`, `/topics`, `/review`, `/export-context`
 
 ### 需要时也可以直接用 CLI 跑完整流程
 
@@ -138,8 +139,7 @@ Shift AX 会先解析上下文，创建请求专属 topic/worktree，在计划�
 shift-ax onboard-context --discover
 shift-ax onboard-context --gctree-reference /path/to/reference
 shift-ax run-request --request "Build safer auth refresh flow"
-shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
-shift-ax run-request --topic .shift-ax/topics/<topic> --resume
+shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
 ---
@@ -244,7 +244,7 @@ Rules:
 - in Codex use `$onboard` and `$request ...`
 - in Claude Code use `/onboard` and `/request ...`
 - do not start implementation before plan approval
-- if shared policy/context docs must change first, update them before resume
+- if shared policy/context docs must change first, update them before implementation continues
 
 Suggested first commands:
 1. `shift-ax --codex`

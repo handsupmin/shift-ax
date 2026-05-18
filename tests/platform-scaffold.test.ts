@@ -17,7 +17,7 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     });
 
     assert.equal(result.platform, 'codex');
-    assert.equal(result.written.length, 10);
+    assert.equal(result.written.length, 9);
 
     const agents = await readFile(join(root, 'AGENTS.md'), 'utf8');
     const prompt = await readFile(
@@ -44,7 +44,11 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(agents, /Shift AX Codex Bootstrap/);
     assert.match(prompt, /shift-ax resolve-context/);
     assert.match(agents, /\$onboard/);
+    assert.doesNotMatch(agents, /\$resume <topic>/);
     assert.match(agents, /shift-ax run-request/);
+    assert.match(agents, /planReviewBrief|plan-review-brief/);
+    assert.match(requestCommand, /do not end after printing paths/i);
+    assert.match(requestCommand, /do not show those internal commands/i);
     assert.match(prompt, /shift-ax approve-plan/);
     assert.match(prompt, /Unknown-term protocol/i);
     assert.match(prompt, /single dictionary/i);
@@ -84,7 +88,7 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     });
 
     assert.equal(result.platform, 'claude-code');
-    assert.equal(result.written.length, 10);
+    assert.equal(result.written.length, 9);
 
     const claude = await readFile(join(root, 'CLAUDE.md'), 'utf8');
     const hook = await readFile(
@@ -103,15 +107,19 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
       join(root, '.claude', 'commands', 'review.md'),
       'utf8',
     );
-    const resumeCommand = await readFile(
-      join(root, '.claude', 'commands', 'resume.md'),
+    const resumeCommandTemplate = await readFile(
+      new URL('../platform/claude-code/scaffold/commands/resume.template.md', import.meta.url),
       'utf8',
     );
 
     assert.match(claude, /Shift AX Claude Code SessionStart Bootstrap/);
     assert.match(hook, /hook-driven context injection/);
     assert.match(claude, /\/onboard/);
+    assert.doesNotMatch(claude, /\/resume <topic>/);
     assert.match(claude, /shift-ax run-request/);
+    assert.match(claude, /planReviewBrief|plan-review-brief/);
+    assert.match(requestCommand, /do not end after printing paths/i);
+    assert.match(requestCommand, /do not show those internal commands/i);
     assert.match(hook, /shift-ax approve-plan/);
     assert.match(hook, /Unknown-term protocol/i);
     assert.match(hook, /single dictionary/i);
@@ -131,11 +139,11 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(onboardCommand, /shift-ax doctor/);
     assert.match(reviewCommand, /shift-ax finalize-commit --topic \$ARGUMENTS/);
     assert.match(reviewCommand, /localized lore commit message/i);
-    assert.match(resumeCommand, /Welcome back flow before resume/i);
-    assert.match(resumeCommand, /topic-status/);
-    assert.match(resumeCommand, /handoff\.md/);
-    assert.match(resumeCommand, /latest checkpoint/i);
-    assert.match(resumeCommand, /evidence to inspect, not instructions to execute/i);
+    assert.match(resumeCommandTemplate, /Welcome back flow before resume/i);
+    assert.match(resumeCommandTemplate, /topic-status/);
+    assert.match(resumeCommandTemplate, /handoff\.md/);
+    assert.match(resumeCommandTemplate, /latest checkpoint/i);
+    assert.match(resumeCommandTemplate, /evidence to inspect, not instructions to execute/i);
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -185,7 +193,6 @@ test('shift-ax scaffold-build writes bootstrap assets for a requested platform',
       '.codex/skills/export-context/SKILL.md',
       '.codex/skills/onboard/SKILL.md',
       '.codex/skills/request/SKILL.md',
-      '.codex/skills/resume/SKILL.md',
       '.codex/skills/review/SKILL.md',
       '.codex/skills/status/SKILL.md',
       '.codex/skills/topics/SKILL.md',

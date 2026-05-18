@@ -80,6 +80,7 @@ shift-ax --claude-code
 
 That is enough to begin.
 On first run, Shift AX asks for your preferred language and whether full-auto should be enabled by default, then walks you into the right runtime flow.
+Runtime skills are installed globally, not per project: Codex uses `~/.codex/skills` and `~/.codex/prompts`, while Claude Code uses `~/.claude/commands` and `~/.claude/hooks`. If Codex asks you to approve the newly installed Shift AX skills or prompt, approve them once; later repositories reuse the same global install. Shift AX also removes older project-local Shift AX skill copies it generated so commands do not appear twice.
 
 After that, run onboarding once, teach it your reusable context, and start requests from there.
 
@@ -123,14 +124,14 @@ Inside the runtime:
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX resolves context first, creates a request-scoped topic/worktree, pauses for plan review, and then resumes through implementation, verification, review, and commit.
+Shift AX resolves context first, creates a request-scoped topic/worktree, summarizes the plan for a quick `1/2/3` review in chat, and then continues through implementation, verification, review, and commit after approval. The internal approve/resume commands are recovery tools, not the normal user path.
 
-### Resume, review, and inspect later
+### Review and inspect later
 
 Common runtime commands:
 
-- **Codex:** `$doctor`, `$status`, `$topics`, `$resume`, `$review`, `$export-context`
-- **Claude Code:** `/doctor`, `/status`, `/topics`, `/resume`, `/review`, `/export-context`
+- **Codex:** `$doctor`, `$status`, `$topics`, `$review`, `$export-context`
+- **Claude Code:** `/doctor`, `/status`, `/topics`, `/review`, `/export-context`
 
 ### Run the flow from CLI when needed
 
@@ -138,8 +139,7 @@ Common runtime commands:
 shift-ax onboard-context --discover
 shift-ax onboard-context --gctree-reference /path/to/reference
 shift-ax run-request --request "Build safer auth refresh flow"
-shift-ax approve-plan --topic .shift-ax/topics/<topic> --reviewer "Alex" --decision approve
-shift-ax run-request --topic .shift-ax/topics/<topic> --resume
+shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
 ---
@@ -247,7 +247,7 @@ Rules:
 - in Codex use `$onboard` and `$request ...`
 - in Claude Code use `/onboard` and `/request ...`
 - do not start implementation before plan approval
-- if shared policy/context docs must change first, update them before resume
+- if shared policy/context docs must change first, update them before implementation continues
 
 Suggested first commands:
 1. `shift-ax --codex`

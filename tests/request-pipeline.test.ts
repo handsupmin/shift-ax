@@ -178,10 +178,26 @@ test('startRequestPipeline bootstraps worktree, resolves context, and pauses for
         await readFile(topicArtifactPath(result.topicDir, 'resolved_context'), 'utf8'),
       ) as { matches: Array<{ label: string }> };
       const workflow = await readWorkflowState(result.topicDir);
+      const planReviewBrief = await readFile(
+        topicArtifactPath(result.topicDir, 'plan_review_brief'),
+        'utf8',
+      );
 
       assert.equal(workflow.phase, 'awaiting_plan_review');
       assert.equal(resolved.matches[0]?.label, 'Auth policy');
       assert.equal(existsSync(result.worktree.worktree_path), true);
+      assert.equal(result.planReviewBrief.status, 'requires_human_review');
+      assert.match(result.planReviewBrief.goal, /auth refresh token rotation/i);
+      assert.match(result.planReviewBrief.review_prompt, /1 to approve/);
+      assert.deepEqual(
+        result.planReviewBrief.response_options.map((option) => option.value),
+        ['1', '2', '3'],
+      );
+      assert.match(result.planReviewBrief.response_options[0]?.assistant_behavior ?? '', /resume implementation automatically/i);
+      assert.match(planReviewBrief, /Required Human Response/);
+      assert.match(planReviewBrief, /Reply with 1 to approve/);
+      assert.doesNotMatch(planReviewBrief, /shift-ax approve-plan/);
+      assert.doesNotMatch(planReviewBrief, /shift-ax run-request --topic/);
     });
   } finally {
     await rm(repoRoot, { recursive: true, force: true });

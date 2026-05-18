@@ -165,8 +165,21 @@ test('CLI happy path covers onboard -> run-request -> approve-plan -> resume wit
         topicDir: string;
         workflow: { phase: string };
         worktree: { worktree_path: string };
+        planReviewBrief: {
+          status: string;
+          review_prompt: string;
+          response_options: Array<{ value: string; assistant_behavior: string }>;
+        };
       };
       assert.equal(startResult.workflow.phase, 'awaiting_plan_review');
+      assert.equal(startResult.planReviewBrief.status, 'requires_human_review');
+      assert.match(startResult.planReviewBrief.review_prompt, /1 to approve/);
+      assert.deepEqual(
+        startResult.planReviewBrief.response_options.map((option) => option.value),
+        ['1', '2', '3'],
+      );
+      assert.match(startResult.planReviewBrief.response_options[0]?.assistant_behavior ?? '', /resume implementation automatically/i);
+      assert.doesNotMatch(started.stdout, /approve_command|resume_command|shift-ax approve-plan/);
 
       const approved = await runAx([
         'approve-plan',

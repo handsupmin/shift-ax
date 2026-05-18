@@ -32,7 +32,8 @@ Reference the detailed plan in `docs/operations/pilot-plan.md` while running thi
 
 - [ ] Start 1 small request with `shift-ax run-request`
 - [ ] Review the generated brainstorm/spec/implementation plan
-- [ ] Record a real human plan approval with `shift-ax approve-plan`
+- [ ] Confirm the product-shell agent summarizes `plan-review-brief.md` and asks for `1` approve/start, `2` request changes, or `3` reject
+- [ ] Confirm approval/resume commands are handled internally unless manual recovery is needed
 - [ ] If shared docs must change, confirm `shift-ax sync-policy-context` is used before implementation
 - [ ] Resume with verification commands
 - [ ] Confirm `topic-status` shows the expected phase transitions

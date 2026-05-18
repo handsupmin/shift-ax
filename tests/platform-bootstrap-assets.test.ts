@@ -23,6 +23,8 @@ test('renderCodexAgentsBootstrap references global index and request-to-commit c
   assert.match(content, /single dictionary/i);
   assert.match(content, /\$onboard/);
   assert.match(content, /shift-ax run-request/);
+  assert.match(content, /planReviewBrief|plan-review-brief/);
+  assert.match(content, /1.+approve.+2.+request changes.+3.+reject/i);
   assert.match(content, /shift-ax approve-plan/);
   assert.match(content, /shift-ax finalize-commit/);
   assert.match(content, /shift-ax worktree-plan/);
@@ -35,6 +37,7 @@ test('renderCodexAgentsBootstrap references global index and request-to-commit c
   assert.match(content, /\$onboard/);
   assert.match(content, /visible product-shell commands/);
   assert.match(content, /\$request <text>/);
+  assert.doesNotMatch(content, /\$resume <topic>/);
 });
 
 test('renderCodexAgentsBootstrap localizes the preferred user language note', () => {
@@ -52,6 +55,8 @@ test('renderClaudeCodeSessionStartContext references global index and request-to
   assert.match(content, /single dictionary/i);
   assert.match(content, /\/onboard/);
   assert.match(content, /shift-ax run-request/);
+  assert.match(content, /planReviewBrief|plan-review-brief/);
+  assert.match(content, /1.+approve.+2.+request changes.+3.+reject/i);
   assert.match(content, /shift-ax approve-plan/);
   assert.match(content, /shift-ax finalize-commit/);
   assert.match(content, /shift-ax worktree-plan/);
@@ -64,6 +69,7 @@ test('renderClaudeCodeSessionStartContext references global index and request-to
   assert.match(content, /\/onboard/);
   assert.match(content, /primary visible commands/);
   assert.match(content, /\$request <text>/);
+  assert.doesNotMatch(content, /\/resume <topic>/);
 });
 
 test('renderClaudeCodeSessionStartContext localizes the preferred user language note', () => {

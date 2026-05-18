@@ -32,7 +32,8 @@ AX 경험이 많지 않은 팀도 Shift AX를 도입할 수 있게 만드는 체
 
 - [ ] 작은 요청 1개를 `shift-ax run-request`로 시작
 - [ ] 생성된 brainstorm/spec/implementation plan 검토
-- [ ] 실제 human approval를 `shift-ax approve-plan`으로 기록
+- [ ] product-shell agent가 `plan-review-brief.md`를 요약하고 `1` 승인/시작, `2` 수정 요청, `3` 거절만 묻는지 확인
+- [ ] 수동 복구가 필요한 경우를 제외하고 approval/resume 명령이 내부적으로 처리되는지 확인
 - [ ] 공유 문서 수정이 필요하면 `shift-ax sync-policy-context`가 실제로 사용되는지 확인
 - [ ] verification command와 함께 resume 실행
 - [ ] `topic-status`에서 phase 전이가 기대대로 보이는지 확인

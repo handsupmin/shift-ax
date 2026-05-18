@@ -38,12 +38,7 @@ This creates a topic, worktree, planning artifacts, and a human review gate.
 
 ### 4. Record human plan review
 
-```bash
-shift-ax approve-plan \
-  --topic .shift-ax/topics/<topic-slug> \
-  --reviewer "<name>" \
-  --decision approve
-```
+In the normal product-shell UX, the agent summarizes `plan-review-brief.md`, asks for `1` approve/start, `2` request changes, or `3` reject, then records approval and resumes internally. Use `shift-ax approve-plan` directly only for recovery or operator debugging.
 
 ### 5. If policy docs must change, update them first
 
@@ -56,7 +51,9 @@ shift-ax sync-policy-context \
   --path docs/base-context/<doc>.md
 ```
 
-### 6. Resume implementation and review
+### 6. Manual recovery: resume implementation and review
+
+Only run this directly when the product-shell agent failed to continue after chat approval or an operator intentionally needs to replay the CLI path.
 
 ```bash
 shift-ax run-request \

@@ -38,12 +38,7 @@ shift-ax run-request --request "<request>"
 
 ### 4. 사람 계획 승인 기록
 
-```bash
-shift-ax approve-plan \
-  --topic .shift-ax/topics/<topic-slug> \
-  --reviewer "<name>" \
-  --decision approve
-```
+일반 product-shell UX에서는 agent가 `plan-review-brief.md`를 요약하고 `1` 승인/시작, `2` 수정 요청, `3` 거절만 묻는다. 이후 승인 기록과 resume은 내부적으로 처리한다. `shift-ax approve-plan` 직접 실행은 복구 또는 operator 디버깅 때만 사용한다.
 
 ### 5. 정책 문서 변경이 필요하면 먼저 반영
 
@@ -56,7 +51,9 @@ shift-ax sync-policy-context \
   --path docs/base-context/<doc>.md
 ```
 
-### 6. 구현과 리뷰 재개
+### 6. 수동 복구: 구현과 리뷰 재개
+
+채팅 승인 이후 product-shell agent가 이어서 진행하지 못했거나 operator가 의도적으로 CLI 경로를 재실행해야 할 때만 직접 실행한다.
 
 ```bash
 shift-ax run-request \
