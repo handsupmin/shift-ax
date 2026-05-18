@@ -35,7 +35,7 @@ Current request-to-commit behavior:
 - `shift-ax --codex`, `shift-ax --claude-code`, or plain `shift-ax` now open a conversational platform shell. The reusable knowledge base lives under `~/.shift-ax/`, with `~/.shift-ax/index.md` as the main index.
 - Before runtime handoff, Shift AX asks for the preferred language once when `~/.shift-ax/settings.json` does not have one yet, then stores and reuses it globally.
 - On first setup it also asks whether full-auto mode should be enabled by default and stores that choice globally.
-- Startup checks npm `latest` in interactive shells and asks whether to update or skip that specific version when the installed package is behind.
+- Startup checks npm `latest` in interactive shells at most once every 24 hours and asks whether to update or skip that specific version when the installed package is behind.
 - When full-auto is active, Shift AX maps it to the runtime-specific unsafe automation flags:
   - Codex: `--yolo`
   - Claude Code: `--dangerously-skip-permissions`

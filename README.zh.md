@@ -81,7 +81,7 @@ shift-ax --claude-code
 
 这样就能开始了。
 首次运行时，Shift AX 会询问你偏好的语言，以及是否默认开启 full-auto，然后把你带进正确的运行时流程。
-如果本机安装版本落后于 npm `latest`，启动时会询问是否更新；如果选择跳过当前版本，该版本会写入 `~/.shift-ax/settings.json`，之后不会反复提示。
+启动时最多每 24 小时检查一次 npm `latest`。如果本机版本落后，会询问是否更新；如果选择跳过当前版本，该版本和上次检查时间会写入 `~/.shift-ax/settings.json`，之后不会反复提示。
 运行时 skills 只安装到全局，而不是每个项目各装一份。Codex 使用 `~/.codex/skills` 和 `~/.codex/prompts`，Claude Code 使用 `~/.claude/commands` 和 `~/.claude/hooks`。如果 Codex 要求你批准新安装的 Shift AX skill 或 prompt，只需批准一次；之后其他 repo 会复用同一份全局安装。旧版本生成的项目本地 Shift AX skill 副本会被自动清理，避免命令显示两次。
 
 之后只需要完成一次 onboarding，把可复用上下文教给它，然后就可以开始处理请求。

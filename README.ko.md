@@ -81,7 +81,7 @@ shift-ax --claude-code
 
 이 정도면 시작할 수 있습니다.
 첫 실행에서는 선호 언어와 full-auto 기본 사용 여부를 물어보고, 그에 맞는 런타임 흐름으로 바로 이어줍니다.
-설치된 버전이 npm `latest`보다 낮으면 시작 시 업데이트할지 묻고, `이번 버전은 스킵한다`를 고르면 해당 버전을 `~/.shift-ax/settings.json`에 저장해 다시 묻지 않습니다.
+시작 시 최대 24시간에 한 번 npm `latest`를 확인합니다. 설치된 버전이 낮으면 업데이트할지 묻고, `이번 버전은 스킵한다`를 고르면 해당 버전과 마지막 확인 시간을 `~/.shift-ax/settings.json`에 저장해 반복해서 묻지 않습니다.
 런타임 skills는 프로젝트마다가 아니라 전역에만 설치됩니다. Codex는 `~/.codex/skills`와 `~/.codex/prompts`, Claude Code는 `~/.claude/commands`와 `~/.claude/hooks`를 사용합니다. Codex가 새로 설치된 Shift AX skill이나 prompt 승인을 요청하면 한 번만 승인하면 되고, 이후 다른 repo는 같은 전역 설치를 재사용합니다. 예전 버전이 만든 프로젝트 로컬 Shift AX skill 복사본은 중복 표시를 막기 위해 자동 정리합니다.
 
 그다음부터는 온보딩 한 번 하고, 재사용 가능한 컨텍스트를 가르친 뒤, 요청을 시작하면 됩니다.

@@ -8,7 +8,10 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import { readProjectSettings } from '../core/settings/project-settings.js';
-import { shouldPromptForShiftAxUpdate } from '../core/update/self-update.js';
+import {
+  shouldFetchLatestShiftAxVersion,
+  shouldPromptForShiftAxUpdate,
+} from '../core/update/self-update.js';
 import { withTempGlobalHome } from './helpers/global-home.js';
 
 const REPO_ROOT = dirname(fileURLToPath(new URL('../package.json', import.meta.url)));
@@ -108,9 +111,84 @@ printf '%s\\n' "$@" > ${JSON.stringify(codexLog)}
       const codexArgs = await readFile(codexLog, 'utf8');
 
       assert.equal(settings?.skipped_update_version, '9.9.9');
+      assert.equal(settings?.last_seen_latest_version, '9.9.9');
+      assert.ok(settings?.last_update_check_at);
       assert.equal(settings?.default_full_auto, true);
       assert.match(codexArgs, /--yolo/);
       assert.equal(await pathExists(npmLog), false);
+    });
+  } finally {
+    await rm(sandbox, { recursive: true, force: true });
+  }
+});
+
+test('recent startup update cache avoids another npm latest lookup', async () => {
+  const sandbox = await mkdtemp(join(tmpdir(), 'shift-ax-update-cache-'));
+  const runtimeHome = join(sandbox, 'home');
+  const root = join(runtimeHome, 'sources', 'app');
+  const binDir = join(sandbox, 'bin');
+  const npmLog = join(sandbox, 'npm-called.args');
+  const codexLog = join(sandbox, 'codex.args');
+  const fakeNpm = join(binDir, 'npm');
+  const fakeCodex = join(binDir, 'codex');
+
+  await mkdir(root, { recursive: true });
+  await mkdir(runtimeHome, { recursive: true });
+  await writeExecutable(
+    fakeNpm,
+    `#!/bin/sh
+printf '%s\\n' "$@" > ${JSON.stringify(npmLog)}
+exit 66
+`,
+  );
+  await writeExecutable(
+    fakeCodex,
+    `#!/bin/sh
+printf '%s\\n' "$@" > ${JSON.stringify(codexLog)}
+`,
+  );
+
+  try {
+    await withTempGlobalHome('shift-ax-update-cache-home-', async (home) => {
+      const lastUpdateCheckAt = new Date().toISOString();
+      await writeFile(
+        join(home, 'settings.json'),
+        `${JSON.stringify(
+          {
+            version: 1,
+            updated_at: lastUpdateCheckAt,
+            locale: 'ko',
+            preferred_language: 'korean',
+            last_update_check_at: lastUpdateCheckAt,
+            last_seen_latest_version: '9.9.9',
+          },
+          null,
+          2,
+        )}\n`,
+        'utf8',
+      );
+
+      await runShiftAx({
+        args: ['--codex', '--root', root],
+        stdin: '2\n',
+        env: {
+          ...process.env,
+          HOME: runtimeHome,
+          SHIFT_AX_HOME: home,
+          PATH: `${binDir}:${process.env.PATH}`,
+          SHIFT_AX_FORCE_UPDATE_CHECK: '1',
+          SHIFT_AX_CURRENT_VERSION_OVERRIDE: '0.5.6',
+          SHIFT_AX_UPDATE_NPM_COMMAND: fakeNpm,
+        },
+      });
+
+      const settings = await readProjectSettings(root);
+      const codexArgs = await readFile(codexLog, 'utf8');
+
+      assert.equal(await pathExists(npmLog), false);
+      assert.equal(settings?.last_update_check_at, lastUpdateCheckAt);
+      assert.equal(settings?.last_seen_latest_version, '9.9.9');
+      assert.match(codexArgs, /--yolo/);
     });
   } finally {
     await rm(sandbox, { recursive: true, force: true });
@@ -229,5 +307,25 @@ test('update prompt logic ignores current and explicitly skipped latest versions
   assert.equal(shouldPromptForShiftAxUpdate({
     currentVersion: '1.0.0',
     latestVersion: '1.0.1',
+  }), true);
+});
+
+test('update check cache refreshes only after the interval expires', () => {
+  const now = new Date('2026-05-18T12:00:00.000Z');
+
+  assert.equal(shouldFetchLatestShiftAxVersion({
+    lastUpdateCheckAt: new Date('2026-05-18T11:30:00.000Z').toISOString(),
+    now,
+    intervalMs: 60 * 60 * 1000,
+  }), false);
+  assert.equal(shouldFetchLatestShiftAxVersion({
+    lastUpdateCheckAt: new Date('2026-05-18T10:30:00.000Z').toISOString(),
+    now,
+    intervalMs: 60 * 60 * 1000,
+  }), true);
+  assert.equal(shouldFetchLatestShiftAxVersion({
+    lastUpdateCheckAt: 'not-a-date',
+    now,
+    intervalMs: 60 * 60 * 1000,
   }), true);
 });

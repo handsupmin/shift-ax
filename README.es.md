@@ -81,7 +81,7 @@ shift-ax --claude-code
 
 Con eso ya puedes arrancar.
 En la primera ejecución, Shift AX te pregunta el idioma preferido y si quieres activar full-auto por defecto, y a partir de ahí te mete directamente en el flujo correcto.
-Si la versión instalada está por detrás de npm `latest`, al arrancar pregunta si quieres actualizar ahora o saltar esa versión; las versiones saltadas se guardan en `~/.shift-ax/settings.json`.
+Al arrancar, Shift AX comprueba npm `latest` como máximo una vez cada 24 horas. Si la versión instalada está por detrás, pregunta si quieres actualizar ahora o saltar esa versión; las versiones saltadas y la última hora de comprobación se guardan en `~/.shift-ax/settings.json`.
 Las runtime skills se instalan globalmente, no por proyecto. Codex usa `~/.codex/skills` y `~/.codex/prompts`; Claude Code usa `~/.claude/commands` y `~/.claude/hooks`. Si Codex te pide aprobar las nuevas skills o prompts de Shift AX, apruébalas una vez; los demás repos reutilizarán esa misma instalación global. Shift AX también elimina las copias locales antiguas que él mismo generó para que los comandos no aparezcan duplicados.
 
 Después solo tienes que hacer onboarding una vez, enseñarle tu contexto reutilizable y empezar a lanzar requests.

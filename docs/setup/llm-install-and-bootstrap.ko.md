@@ -110,13 +110,13 @@ shift-ax --claude-code --root /absolute/path/to/target-repo
 onboarding artifact가 없으면 Shift AX가:
 
 1. `~/.shift-ax/settings.json`에 언어가 없으면 먼저 선호 언어를 묻고
-2. 설치된 패키지가 npm `latest`보다 낮으면 지금 업데이트할지, 이번 버전을 스킵할지 묻고
+2. 최대 24시간에 한 번 npm `latest`를 확인하고, 설치된 패키지가 낮으면 지금 업데이트할지, 이번 버전을 스킵할지 묻고
 3. full-auto 기본 모드 설정이 없으면 그 여부도 먼저 묻고
 4. 맞는 플랫폼 세션을 열고
 5. Codex에서는 `$onboard`, Claude Code에서는 `/onboard` 를 실행하게 하고
 6. 재사용 가능한 지식을 `~/.shift-ax/` 아래에 기록한다
 
-`이번 버전은 스킵한다`를 고르면 해당 버전이 `~/.shift-ax/settings.json`에 저장되어 npm에 더 새 버전이 올라오기 전까지 같은 업데이트 질문이 다시 뜨지 않는다.
+`이번 버전은 스킵한다`를 고르면 해당 버전과 마지막 확인 시간이 `~/.shift-ax/settings.json`에 저장되어 npm에 더 새 버전이 올라오기 전까지 같은 업데이트 질문이 다시 뜨지 않는다. 최신 버전 확인은 24시간 동안 캐시되어 셸을 열 때마다 네트워크를 호출하지 않는다.
 
 ### 선택 경로: global CLI 노출
 

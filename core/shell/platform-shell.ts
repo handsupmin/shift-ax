@@ -19,7 +19,9 @@ import { getGlobalContextHome } from '../settings/global-context-home.js';
 import {
   fetchLatestShiftAxVersion,
   readInstalledShiftAxVersion,
+  readUpdateCheckIntervalMs,
   runShiftAxUpdate,
+  shouldFetchLatestShiftAxVersion,
   shouldPromptForShiftAxUpdate,
 } from '../update/self-update.js';
 
@@ -206,8 +208,57 @@ export async function maybePromptForShellUpdate({
 
   const currentVersion = readInstalledShiftAxVersion(env);
   const settings = await readProjectSettings(rootDir);
+  const checkedAt = new Date();
+  if (
+    env.SHIFT_AX_IGNORE_UPDATE_CACHE !== '1' &&
+    !shouldFetchLatestShiftAxVersion({
+      lastUpdateCheckAt: settings?.last_update_check_at,
+      now: checkedAt,
+      intervalMs: readUpdateCheckIntervalMs(env),
+    })
+  ) {
+    return 'not_needed';
+  }
+
   const latest = await fetchLatestShiftAxVersion({ env });
-  if (latest.status !== 'ok' || !latest.latestVersion) return 'unavailable';
+  if (latest.status !== 'ok' || !latest.latestVersion) {
+    await writeProjectSettings({
+      rootDir,
+      settings: {
+        ...(settings ?? {
+          version: 1 as const,
+          updated_at: checkedAt.toISOString(),
+          locale,
+          preferred_language: locale === 'ko' ? 'korean' : 'english',
+        }),
+        version: 1,
+        updated_at: checkedAt.toISOString(),
+        locale,
+        preferred_language: settings?.preferred_language ?? (locale === 'ko' ? 'korean' : 'english'),
+        last_update_check_at: checkedAt.toISOString(),
+      },
+    });
+    return 'unavailable';
+  }
+
+  const cachedSettings: ShiftAxProjectSettings = {
+    ...(settings ?? {
+      version: 1 as const,
+      updated_at: checkedAt.toISOString(),
+      locale,
+      preferred_language: locale === 'ko' ? 'korean' : 'english',
+    }),
+    version: 1,
+    updated_at: checkedAt.toISOString(),
+    locale,
+    preferred_language: settings?.preferred_language ?? (locale === 'ko' ? 'korean' : 'english'),
+    last_update_check_at: checkedAt.toISOString(),
+    last_seen_latest_version: latest.latestVersion,
+  };
+  await writeProjectSettings({
+    rootDir,
+    settings: cachedSettings,
+  });
 
   if (!shouldPromptForShiftAxUpdate({
     currentVersion,
@@ -235,16 +286,9 @@ export async function maybePromptForShellUpdate({
   await writeProjectSettings({
     rootDir,
     settings: {
-      ...(settings ?? {
-        version: 1 as const,
-        updated_at: new Date().toISOString(),
-        locale,
-        preferred_language: locale === 'ko' ? 'korean' : 'english',
-      }),
+      ...cachedSettings,
       version: 1,
       updated_at: new Date().toISOString(),
-      locale,
-      preferred_language: settings?.preferred_language ?? (locale === 'ko' ? 'korean' : 'english'),
       skipped_update_version: latest.latestVersion,
     },
   });

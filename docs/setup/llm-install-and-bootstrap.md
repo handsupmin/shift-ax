@@ -108,13 +108,13 @@ shift-ax --claude-code --root /absolute/path/to/target-repo
 If onboarding artifacts are missing, Shift AX will:
 
 1. ask for the preferred language first if `~/.shift-ax/settings.json` does not already store it
-2. check npm `latest` and ask whether to update now or skip that specific version when the installed package is behind
+2. check npm `latest` at most once every 24 hours and ask whether to update now or skip that specific version when the installed package is behind
 3. ask whether full-auto mode should be enabled by default if the setting is still missing
 4. open the matching platform session
 5. in Codex, let the user run `$onboard`; in Claude Code, let the user run `/onboard`
 6. write the reusable knowledge base to `~/.shift-ax/`
 
-Choosing “skip this version” records the skipped package version in `~/.shift-ax/settings.json`, so the same update prompt does not reappear until npm publishes a newer version.
+Choosing “skip this version” records the skipped package version and the last check time in `~/.shift-ax/settings.json`, so the same update prompt does not reappear until npm publishes a newer version. Fresh checks are cached for 24 hours to avoid repeated network calls on every shell launch.
 
 ### Optional: global CLI exposure
 

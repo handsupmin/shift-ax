@@ -8,6 +8,7 @@ import type { ShiftAxLocale } from '../settings/project-settings.js';
 import type { ShiftAxRuntimeAssetPlatform } from '../shell/platform-shell.js';
 
 const execFileAsync = promisify(execFile);
+export const DEFAULT_SHIFT_AX_UPDATE_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 export interface ShiftAxLatestVersionResult {
   status: 'ok' | 'unavailable';
@@ -19,6 +20,12 @@ export interface ShiftAxUpdateCheckInput {
   currentVersion: string;
   latestVersion?: string;
   skippedUpdateVersion?: string;
+}
+
+export interface ShiftAxUpdateCheckCacheInput {
+  lastUpdateCheckAt?: string;
+  now?: Date;
+  intervalMs?: number;
 }
 
 export interface ShiftAxUpdateRunResult {
@@ -104,6 +111,26 @@ export function shouldPromptForShiftAxUpdate({
     latestVersion !== currentVersion &&
     latestVersion !== skippedUpdateVersion,
   );
+}
+
+export function readUpdateCheckIntervalMs(env: NodeJS.ProcessEnv = process.env): number {
+  const raw = env.SHIFT_AX_UPDATE_CHECK_INTERVAL_MS?.trim();
+  if (!raw) return DEFAULT_SHIFT_AX_UPDATE_CHECK_INTERVAL_MS;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_SHIFT_AX_UPDATE_CHECK_INTERVAL_MS;
+}
+
+export function shouldFetchLatestShiftAxVersion({
+  lastUpdateCheckAt,
+  now = new Date(),
+  intervalMs = DEFAULT_SHIFT_AX_UPDATE_CHECK_INTERVAL_MS,
+}: ShiftAxUpdateCheckCacheInput): boolean {
+  if (!lastUpdateCheckAt) return true;
+  const checkedAtMs = Date.parse(lastUpdateCheckAt);
+  if (!Number.isFinite(checkedAtMs)) return true;
+  const ageMs = now.getTime() - checkedAtMs;
+  if (ageMs < 0) return true;
+  return ageMs >= intervalMs;
 }
 
 export async function runShiftAxUpdate({

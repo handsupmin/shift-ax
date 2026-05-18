@@ -13,6 +13,8 @@ export interface ShiftAxProjectSettings {
   default_full_auto?: boolean;
   preferred_platform?: ShiftAxPlatform;
   skipped_update_version?: string;
+  last_update_check_at?: string;
+  last_seen_latest_version?: string;
 }
 
 export function getProjectSettingsPath(rootDir: string): string {
@@ -43,6 +45,12 @@ export async function readProjectSettings(
       ...(raw.preferred_platform ? { preferred_platform: raw.preferred_platform } : {}),
       ...(typeof raw.skipped_update_version === 'string' && raw.skipped_update_version.trim()
         ? { skipped_update_version: raw.skipped_update_version.trim() }
+        : {}),
+      ...(typeof raw.last_update_check_at === 'string' && raw.last_update_check_at.trim()
+        ? { last_update_check_at: raw.last_update_check_at.trim() }
+        : {}),
+      ...(typeof raw.last_seen_latest_version === 'string' && raw.last_seen_latest_version.trim()
+        ? { last_seen_latest_version: raw.last_seen_latest_version.trim() }
         : {}),
     };
   } catch {
