@@ -69,6 +69,7 @@ Si consigues dejar bien aterrizados el diseño y los requisitos, Shift AX está 
 ```bash
 npm install -g shift-ax@latest
 shift-ax --version
+shift-ax update
 shift-ax --codex
 ```
 
@@ -80,6 +81,7 @@ shift-ax --claude-code
 
 Con eso ya puedes arrancar.
 En la primera ejecución, Shift AX te pregunta el idioma preferido y si quieres activar full-auto por defecto, y a partir de ahí te mete directamente en el flujo correcto.
+Si la versión instalada está por detrás de npm `latest`, al arrancar pregunta si quieres actualizar ahora o saltar esa versión; las versiones saltadas se guardan en `~/.shift-ax/settings.json`.
 Las runtime skills se instalan globalmente, no por proyecto. Codex usa `~/.codex/skills` y `~/.codex/prompts`; Claude Code usa `~/.claude/commands` y `~/.claude/hooks`. Si Codex te pide aprobar las nuevas skills o prompts de Shift AX, apruébalas una vez; los demás repos reutilizarán esa misma instalación global. Shift AX también elimina las copias locales antiguas que él mismo generó para que los comandos no aparezcan duplicados.
 
 Después solo tienes que hacer onboarding una vez, enseñarle tu contexto reutilizable y empezar a lanzar requests.
@@ -233,6 +235,8 @@ Goal:
 Rules:
 - use `shift-ax`, not `ax`, in user-facing commands
 - if Shift AX is not installed, run `npm install -g shift-ax@latest`
+- if Shift AX says npm latest is newer, choose update unless the user explicitly wants to skip that version
+- use `shift-ax update` to reinstall npm latest and refresh global runtime commands
 - if working from a source checkout instead of a global install, run:
   - `npm install`
   - `npm run build`

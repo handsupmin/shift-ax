@@ -54,6 +54,7 @@ test('platform adapters produce shift-ax command routes for core flows', () => {
 
   assert.deepEqual(codex.commandFor('bootstrap-topic'), ['shift-ax', 'bootstrap-topic']);
   assert.deepEqual(codex.commandFor('resolve-context'), ['shift-ax', 'resolve-context']);
+  assert.deepEqual(codex.commandFor('update'), ['shift-ax', 'update']);
   assert.deepEqual(codex.commandFor('review'), ['shift-ax', 'review']);
   assert.deepEqual(codex.commandFor('worktree-plan'), ['shift-ax', 'worktree-plan']);
   assert.deepEqual(codex.commandFor('worktree-create'), ['shift-ax', 'worktree-create']);
@@ -66,6 +67,7 @@ test('platform adapters produce shift-ax command routes for core flows', () => {
 
   assert.deepEqual(claude.commandFor('bootstrap-topic'), ['shift-ax', 'bootstrap-topic']);
   assert.deepEqual(claude.commandFor('resolve-context'), ['shift-ax', 'resolve-context']);
+  assert.deepEqual(claude.commandFor('update'), ['shift-ax', 'update']);
   assert.deepEqual(claude.commandFor('review'), ['shift-ax', 'review']);
   assert.deepEqual(claude.commandFor('worktree-plan'), ['shift-ax', 'worktree-plan']);
   assert.deepEqual(claude.commandFor('worktree-create'), ['shift-ax', 'worktree-create']);

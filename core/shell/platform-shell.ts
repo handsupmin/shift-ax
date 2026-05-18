@@ -16,6 +16,12 @@ import {
 } from '../settings/project-settings.js';
 import type { ShiftAxPlatform } from '../../adapters/contracts.js';
 import { getGlobalContextHome } from '../settings/global-context-home.js';
+import {
+  fetchLatestShiftAxVersion,
+  readInstalledShiftAxVersion,
+  runShiftAxUpdate,
+  shouldPromptForShiftAxUpdate,
+} from '../update/self-update.js';
 
 const LEGACY_PRODUCT_SHELL_COMMANDS = [
   'onboard',
@@ -33,6 +39,8 @@ const SHELL_COPY = {
     chooseLanguage: 'Choose language:\n1. English (default)\n2. Korean\n> ',
     chooseFullAuto:
       'Enable full-auto mode by default?\n1. No (default)\n2. Yes\n> ',
+    chooseUpdate: (current: string, latest: string) =>
+      `A new Shift AX version is available. Current: ${current}, latest: ${latest}.\n1. Update now\n2. Skip this version\n> `,
     localeRule:
       'Preferred user language: English. Respond in English unless the user explicitly asks to switch.',
   },
@@ -40,6 +48,8 @@ const SHELL_COPY = {
     chooseLanguage: '언어를 선택하세요:\n1. English (default)\n2. Korean\n> ',
     chooseFullAuto:
       '기본으로 full-auto 모드를 켤까요?\n1. 아니오 (기본값)\n2. 예\n> ',
+    chooseUpdate: (current: string, latest: string) =>
+      `새 Shift AX 버전이 있습니다. 현재: ${current}, latest: ${latest}.\n1. 업데이트한다\n2. 이번 버전은 스킵한다\n> `,
     localeRule:
       '선호 사용자 언어: 한국어. 사용자가 명시적으로 바꾸라고 하지 않으면 한국어로 응답하세요.',
   },
@@ -182,6 +192,65 @@ export async function persistShellSettings({
   });
 }
 
+export async function maybePromptForShellUpdate({
+  rootDir,
+  locale,
+  env = process.env,
+}: {
+  rootDir: string;
+  locale: ShiftAxLocale;
+  env?: NodeJS.ProcessEnv;
+}): Promise<'not_needed' | 'updated' | 'skipped' | 'unavailable'> {
+  if (env.SHIFT_AX_SKIP_UPDATE_CHECK === '1') return 'not_needed';
+  if (!stdin.isTTY && env.SHIFT_AX_FORCE_UPDATE_CHECK !== '1') return 'not_needed';
+
+  const currentVersion = readInstalledShiftAxVersion(env);
+  const settings = await readProjectSettings(rootDir);
+  const latest = await fetchLatestShiftAxVersion({ env });
+  if (latest.status !== 'ok' || !latest.latestVersion) return 'unavailable';
+
+  if (!shouldPromptForShiftAxUpdate({
+    currentVersion,
+    latestVersion: latest.latestVersion,
+    skippedUpdateVersion: settings?.skipped_update_version,
+  })) {
+    return 'not_needed';
+  }
+
+  const answer = await promptChoice({
+    question: SHELL_COPY[locale].chooseUpdate(currentVersion, latest.latestVersion),
+    fallback: '2',
+  });
+
+  if (answer === '1') {
+    await runShiftAxUpdate({
+      rootDir,
+      platform: 'both',
+      locale,
+      env,
+    });
+    return 'updated';
+  }
+
+  await writeProjectSettings({
+    rootDir,
+    settings: {
+      ...(settings ?? {
+        version: 1 as const,
+        updated_at: new Date().toISOString(),
+        locale,
+        preferred_language: locale === 'ko' ? 'korean' : 'english',
+      }),
+      version: 1,
+      updated_at: new Date().toISOString(),
+      locale,
+      preferred_language: settings?.preferred_language ?? (locale === 'ko' ? 'korean' : 'english'),
+      skipped_update_version: latest.latestVersion,
+    },
+  });
+  return 'skipped';
+}
+
 export async function launchPlatformShell({
   rootDir,
   platform,
@@ -194,7 +263,7 @@ export async function launchPlatformShell({
   initialPrompt?: string;
 }): Promise<number> {
   const locale = (await readProjectSettings(rootDir))?.locale ?? 'en';
-  await ensurePlatformShellAssets({ platform, rootDir, locale });
+  await refreshPlatformRuntimeAssets({ platform, rootDir, locale });
 
   const args =
     platform === 'codex'
@@ -212,7 +281,24 @@ export async function launchPlatformShell({
   });
 }
 
-async function ensurePlatformShellAssets({
+export type ShiftAxRuntimeAssetPlatform = ShiftAxPlatform | 'both';
+
+export async function refreshPlatformRuntimeAssets({
+  platform,
+  rootDir,
+  locale,
+}: {
+  platform: ShiftAxRuntimeAssetPlatform;
+  rootDir: string;
+  locale: ShiftAxLocale;
+}): Promise<void> {
+  const platforms: ShiftAxPlatform[] = platform === 'both' ? ['codex', 'claude-code'] : [platform];
+  for (const item of platforms) {
+    await ensureSinglePlatformRuntimeAssets({ platform: item, rootDir, locale });
+  }
+}
+
+async function ensureSinglePlatformRuntimeAssets({
   platform,
   rootDir,
   locale,

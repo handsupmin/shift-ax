@@ -69,6 +69,7 @@ Shift AX 的目标，就是把这一层变简单。
 ```bash
 npm install -g shift-ax@latest
 shift-ax --version
+shift-ax update
 shift-ax --codex
 ```
 
@@ -80,6 +81,7 @@ shift-ax --claude-code
 
 这样就能开始了。
 首次运行时，Shift AX 会询问你偏好的语言，以及是否默认开启 full-auto，然后把你带进正确的运行时流程。
+如果本机安装版本落后于 npm `latest`，启动时会询问是否更新；如果选择跳过当前版本，该版本会写入 `~/.shift-ax/settings.json`，之后不会反复提示。
 运行时 skills 只安装到全局，而不是每个项目各装一份。Codex 使用 `~/.codex/skills` 和 `~/.codex/prompts`，Claude Code 使用 `~/.claude/commands` 和 `~/.claude/hooks`。如果 Codex 要求你批准新安装的 Shift AX skill 或 prompt，只需批准一次；之后其他 repo 会复用同一份全局安装。旧版本生成的项目本地 Shift AX skill 副本会被自动清理，避免命令显示两次。
 
 之后只需要完成一次 onboarding，把可复用上下文教给它，然后就可以开始处理请求。
@@ -233,6 +235,8 @@ Goal:
 Rules:
 - use `shift-ax`, not `ax`, in user-facing commands
 - if Shift AX is not installed, run `npm install -g shift-ax@latest`
+- if Shift AX says npm latest is newer, choose update unless the user explicitly wants to skip that version
+- use `shift-ax update` to reinstall npm latest and refresh global runtime commands
 - if working from a source checkout instead of a global install, run:
   - `npm install`
   - `npm run build`

@@ -69,6 +69,7 @@ If you can get the design and requirements into good shape, Shift AX is built to
 ```bash
 npm install -g shift-ax@latest
 shift-ax --version
+shift-ax update
 shift-ax --codex
 ```
 
@@ -80,6 +81,7 @@ shift-ax --claude-code
 
 That is enough to begin.
 On first run, Shift AX asks for your preferred language and whether full-auto should be enabled by default, then walks you into the right runtime flow.
+When the installed package is behind npm `latest`, startup asks whether to update now or skip that specific version; skipped versions are remembered in `~/.shift-ax/settings.json`.
 Runtime skills are installed globally, not per project: Codex uses `~/.codex/skills` and `~/.codex/prompts`, while Claude Code uses `~/.claude/commands` and `~/.claude/hooks`. If Codex asks you to approve the newly installed Shift AX skills or prompt, approve them once; later repositories reuse the same global install. Shift AX also removes older project-local Shift AX skill copies it generated so commands do not appear twice.
 
 After that, run onboarding once, teach it your reusable context, and start requests from there.
@@ -132,6 +134,14 @@ Common runtime commands:
 
 - **Codex:** `$doctor`, `$status`, `$topics`, `$review`, `$export-context`
 - **Claude Code:** `/doctor`, `/status`, `/topics`, `/review`, `/export-context`
+
+### Update the global install
+
+```bash
+shift-ax update
+```
+
+This reinstalls `shift-ax@latest` from npm and refreshes the global Codex/Claude runtime commands. It does not create per-project skill copies.
 
 ### Run the flow from CLI when needed
 
@@ -236,6 +246,8 @@ Goal:
 Rules:
 - use `shift-ax`, not `ax`, in user-facing commands
 - if Shift AX is not installed, run `npm install -g shift-ax@latest`
+- if Shift AX says npm latest is newer, choose update unless the user explicitly wants to skip that version
+- use `shift-ax update` to reinstall npm latest and refresh global runtime commands
 - if working from a source checkout instead of a global install, run:
   - `npm install`
   - `npm run build`

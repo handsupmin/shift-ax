@@ -6,6 +6,8 @@ Currently implemented:
 
 - `ax.ts`
 - `ax-shell.ts`
+- `ax-update.ts`
+- `ax-refresh-runtime.ts`
 - `install-global.sh`
 - `ax-bootstrap-topic.ts`
 - `ax-resolve-context.ts`
@@ -33,6 +35,7 @@ Current request-to-commit behavior:
 - `shift-ax --codex`, `shift-ax --claude-code`, or plain `shift-ax` now open a conversational platform shell. The reusable knowledge base lives under `~/.shift-ax/`, with `~/.shift-ax/index.md` as the main index.
 - Before runtime handoff, Shift AX asks for the preferred language once when `~/.shift-ax/settings.json` does not have one yet, then stores and reuses it globally.
 - On first setup it also asks whether full-auto mode should be enabled by default and stores that choice globally.
+- Startup checks npm `latest` in interactive shells and asks whether to update or skip that specific version when the installed package is behind.
 - When full-auto is active, Shift AX maps it to the runtime-specific unsafe automation flags:
   - Codex: `--yolo`
   - Claude Code: `--dangerously-skip-permissions`
@@ -40,6 +43,7 @@ Current request-to-commit behavior:
 - Inside Codex, the visible product-shell commands should be `$onboard`, `$request <text>`, `$export-context`, `$doctor`, `$status`, `$topics`, and `$review <topic>`.
 - Inside Claude Code, the visible product-shell commands should be `/onboard`, `/request <text>`, `/export-context`, `/doctor`, `/status`, `/topics`, and `/review <topic>`.
 - The default shell launcher installs these runtime commands globally (`~/.codex/*` or `~/.claude/*`), not per target repository, and removes Shift AX generated project-local copies from older releases to prevent duplicate command entries.
+- `shift-ax update` reinstalls `shift-ax@latest` from npm and then runs `shift-ax refresh-runtime` so the global Codex/Claude runtime commands match the latest package.
 - `shift-ax onboard-context` still exists for explicit scripted or manual onboarding, but the preferred first-run UX is now in-shell onboarding through the platform wrapper.
 - `scripts/install-global.sh` is the one-command installer used by the public README and setup docs for global npm installation.
 - `shift-ax onboard-context` now supports a guided interactive interview by default and still accepts `--input <file>` for scripted onboarding. It writes or migrates knowledge into `~/.shift-ax/`, regenerates `~/.shift-ax/index.md`, and persists the shared engineering profile.

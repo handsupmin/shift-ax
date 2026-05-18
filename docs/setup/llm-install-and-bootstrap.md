@@ -45,6 +45,7 @@ Preferred install:
 
 ```bash
 npm install -g shift-ax@latest
+shift-ax update
 ```
 
 One-command install:
@@ -66,6 +67,7 @@ shift-ax doctor
 Expected result:
 
 - install succeeds
+- `shift-ax update` can reinstall npm latest and refresh global runtime assets
 - tests pass
 - build succeeds
 - doctor reports `overall_status: "ok"` for the Shift AX repo
@@ -106,10 +108,13 @@ shift-ax --claude-code --root /absolute/path/to/target-repo
 If onboarding artifacts are missing, Shift AX will:
 
 1. ask for the preferred language first if `~/.shift-ax/settings.json` does not already store it
-2. ask whether full-auto mode should be enabled by default if the setting is still missing
-3. open the matching platform session
-4. in Codex, let the user run `$onboard`; in Claude Code, let the user run `/onboard`
-5. write the reusable knowledge base to `~/.shift-ax/`
+2. check npm `latest` and ask whether to update now or skip that specific version when the installed package is behind
+3. ask whether full-auto mode should be enabled by default if the setting is still missing
+4. open the matching platform session
+5. in Codex, let the user run `$onboard`; in Claude Code, let the user run `/onboard`
+6. write the reusable knowledge base to `~/.shift-ax/`
+
+Choosing “skip this version” records the skipped package version in `~/.shift-ax/settings.json`, so the same update prompt does not reappear until npm publishes a newer version.
 
 ### Optional: global CLI exposure
 
@@ -132,6 +137,14 @@ The normal `shift-ax --codex` / `shift-ax --claude-code` launcher installs Shift
 - Claude Code: `~/.claude/commands/<command>.md` and `~/.claude/hooks/shift-ax-session-start.md`
 
 This prevents duplicate `$request` / `$onboard` entries when the same user works across multiple repositories. If Codex asks to approve newly discovered Shift AX skills or prompts, approve them once. Shift AX does not bypass Codex trust prompts; it reduces the prompt to a one-time global install and cleans older project-local Shift AX copies that it generated.
+
+To refresh an existing installation, run:
+
+```bash
+shift-ax update
+```
+
+The command reinstalls `shift-ax@latest` from npm, then runs global runtime scaffolding again for Codex and Claude Code.
 
 ## 5. Decide the onboarding path
 

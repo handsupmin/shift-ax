@@ -12,6 +12,7 @@ export interface ShiftAxProjectSettings {
   preferred_language?: 'english' | 'korean';
   default_full_auto?: boolean;
   preferred_platform?: ShiftAxPlatform;
+  skipped_update_version?: string;
 }
 
 export function getProjectSettingsPath(rootDir: string): string {
@@ -40,6 +41,9 @@ export async function readProjectSettings(
       preferred_language: raw.preferred_language ?? (locale === 'ko' ? 'korean' : 'english'),
       ...(typeof raw.default_full_auto === 'boolean' ? { default_full_auto: raw.default_full_auto } : {}),
       ...(raw.preferred_platform ? { preferred_platform: raw.preferred_platform } : {}),
+      ...(typeof raw.skipped_update_version === 'string' && raw.skipped_update_version.trim()
+        ? { skipped_update_version: raw.skipped_update_version.trim() }
+        : {}),
     };
   } catch {
     return null;

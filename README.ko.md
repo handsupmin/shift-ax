@@ -69,6 +69,7 @@ Shift AX는 이 레이어를 쉽게 만들기 위해 존재합니다.
 ```bash
 npm install -g shift-ax@latest
 shift-ax --version
+shift-ax update
 shift-ax --codex
 ```
 
@@ -80,6 +81,7 @@ shift-ax --claude-code
 
 이 정도면 시작할 수 있습니다.
 첫 실행에서는 선호 언어와 full-auto 기본 사용 여부를 물어보고, 그에 맞는 런타임 흐름으로 바로 이어줍니다.
+설치된 버전이 npm `latest`보다 낮으면 시작 시 업데이트할지 묻고, `이번 버전은 스킵한다`를 고르면 해당 버전을 `~/.shift-ax/settings.json`에 저장해 다시 묻지 않습니다.
 런타임 skills는 프로젝트마다가 아니라 전역에만 설치됩니다. Codex는 `~/.codex/skills`와 `~/.codex/prompts`, Claude Code는 `~/.claude/commands`와 `~/.claude/hooks`를 사용합니다. Codex가 새로 설치된 Shift AX skill이나 prompt 승인을 요청하면 한 번만 승인하면 되고, 이후 다른 repo는 같은 전역 설치를 재사용합니다. 예전 버전이 만든 프로젝트 로컬 Shift AX skill 복사본은 중복 표시를 막기 위해 자동 정리합니다.
 
 그다음부터는 온보딩 한 번 하고, 재사용 가능한 컨텍스트를 가르친 뒤, 요청을 시작하면 됩니다.
@@ -132,6 +134,14 @@ Shift AX는 먼저 컨텍스트를 해석하고, 요청 전용 topic/worktree를
 
 - **Codex:** `$doctor`, `$status`, `$topics`, `$review`, `$export-context`
 - **Claude Code:** `/doctor`, `/status`, `/topics`, `/review`, `/export-context`
+
+### 전역 설치 업데이트하기
+
+```bash
+shift-ax update
+```
+
+npm에서 `shift-ax@latest`를 다시 설치하고 Codex/Claude 런타임 명령을 전역 위치에 다시 스캐폴딩합니다. 프로젝트별 skill 복사본은 만들지 않습니다.
 
 ### 필요하면 CLI로 직접 흐름 실행하기
 
@@ -236,6 +246,8 @@ Goal:
 Rules:
 - use `shift-ax`, not `ax`, in user-facing commands
 - if Shift AX is not installed, run `npm install -g shift-ax@latest`
+- if Shift AX says npm latest is newer, choose update unless the user explicitly wants to skip that version
+- use `shift-ax update` to reinstall npm latest and refresh global runtime commands
 - if working from a source checkout instead of a global install, run:
   - `npm install`
   - `npm run build`

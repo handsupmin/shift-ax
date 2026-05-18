@@ -21,6 +21,7 @@ import { getClaudeCodeTmuxRuntime } from '../../platform/claude-code/tmux.js';
 const CORE_COMMANDS: ShiftAxCoreCommand[] = [
   'bootstrap-topic',
   'resolve-context',
+  'update',
   'review',
   'worktree-plan',
   'worktree-create',
@@ -71,6 +72,7 @@ export const claudeCodeAdapter: ShiftAxPlatformAdapter = {
       `Before planning or implementation, load the base-context index at ${defaultBaseContextIndex(platformRoot)} and route the request through Shift AX core flow.`,
       'If the base-context index is missing, interview the team and persist it with `shift-ax onboard-context` (interactive) or `shift-ax onboard-context --input <file>` before starting request work.',
       'Use `shift-ax doctor` for a compact repo/runtime health report when the setup or launcher state is unclear.',
+      'Use `shift-ax update` when the installed package or global runtime commands should be refreshed from npm latest.',
       'Use `shift-ax run-request` to bootstrap the request-scoped topic/worktree, resolve context, run the planning interview, write `execution-handoff.json`, and pause at the human planning-review gate.',
       'After `shift-ax run-request`, summarize `planReviewBrief` or `<topic>/plan-review-brief.md`, ask only for 1 approve/start implementation, 2 request changes, or 3 reject, then run approval/resume commands internally. Surface those commands only when automation fails and manual recovery is needed.',
       'If the approved plan requires shared domain or policy document updates, complete them first and record that gate with `shift-ax sync-policy-context --topic <dir> --summary "<what changed>" [--path <doc>]... [--entry "Label -> path"]...` before resuming implementation.',

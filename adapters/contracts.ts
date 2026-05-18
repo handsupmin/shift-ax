@@ -14,6 +14,7 @@ export type ShiftAxIntegrationMode = 'agents-md-bootstrap' | 'hook-bootstrap';
 export type ShiftAxCoreCommand =
   | 'bootstrap-topic'
   | 'resolve-context'
+  | 'update'
   | 'review'
   | 'worktree-plan'
   | 'worktree-create'

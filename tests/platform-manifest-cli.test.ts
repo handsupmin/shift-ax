@@ -71,6 +71,7 @@ test('shift-ax platform-manifest prints platform manifest for codex', async () =
   assert.equal(manifest.natural_language_first, true);
   assert.equal(manifest.worktree_support, 'available');
   assert.ok(manifest.core_commands.includes('onboard-context'));
+  assert.ok(manifest.core_commands.includes('update'));
   assert.ok(manifest.core_commands.includes('run-request'));
   assert.ok(manifest.core_commands.includes('approve-plan'));
   assert.ok(manifest.core_commands.includes('finalize-commit'));

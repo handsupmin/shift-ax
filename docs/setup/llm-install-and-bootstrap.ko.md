@@ -47,6 +47,7 @@
 
 ```bash
 npm install -g shift-ax@latest
+shift-ax update
 ```
 
 원커맨드 설치:
@@ -68,6 +69,7 @@ shift-ax doctor
 기대 결과:
 
 - install 성공
+- `shift-ax update`가 npm latest 재설치와 전역 runtime asset 갱신을 수행할 수 있음
 - tests pass
 - build 성공
 - doctor가 Shift AX repo 기준 `overall_status: "ok"`
@@ -108,10 +110,13 @@ shift-ax --claude-code --root /absolute/path/to/target-repo
 onboarding artifact가 없으면 Shift AX가:
 
 1. `~/.shift-ax/settings.json`에 언어가 없으면 먼저 선호 언어를 묻고
-2. full-auto 기본 모드 설정이 없으면 그 여부도 먼저 묻고
-3. 맞는 플랫폼 세션을 열고
-4. Codex에서는 `$onboard`, Claude Code에서는 `/onboard` 를 실행하게 하고
-5. 재사용 가능한 지식을 `~/.shift-ax/` 아래에 기록한다
+2. 설치된 패키지가 npm `latest`보다 낮으면 지금 업데이트할지, 이번 버전을 스킵할지 묻고
+3. full-auto 기본 모드 설정이 없으면 그 여부도 먼저 묻고
+4. 맞는 플랫폼 세션을 열고
+5. Codex에서는 `$onboard`, Claude Code에서는 `/onboard` 를 실행하게 하고
+6. 재사용 가능한 지식을 `~/.shift-ax/` 아래에 기록한다
+
+`이번 버전은 스킵한다`를 고르면 해당 버전이 `~/.shift-ax/settings.json`에 저장되어 npm에 더 새 버전이 올라오기 전까지 같은 업데이트 질문이 다시 뜨지 않는다.
 
 ### 선택 경로: global CLI 노출
 
@@ -138,6 +143,14 @@ shift-ax doctor --root /path/to/repo
 - Claude Code: `~/.claude/commands/<command>.md`, `~/.claude/hooks/shift-ax-session-start.md`
 
 이렇게 해야 같은 사용자가 여러 repo를 오갈 때 `$request` / `$onboard`가 두 번 보이지 않는다. Codex가 새로 발견한 Shift AX skill 또는 prompt 승인을 요청하면 한 번만 승인하면 된다. Shift AX는 Codex trust prompt를 우회하지 않고, 전역 설치를 한 번만 쓰도록 하며 예전 버전이 만든 프로젝트 로컬 Shift AX 복사본은 자동 정리한다.
+
+기존 설치를 새로 고치려면:
+
+```bash
+shift-ax update
+```
+
+이 명령은 npm에서 `shift-ax@latest`를 다시 설치한 뒤 Codex와 Claude Code 전역 runtime scaffold를 다시 수행한다.
 
 ## 5. onboarding 경로 선택 규칙
 

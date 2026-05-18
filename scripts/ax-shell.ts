@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import {
   isProjectOnboarded,
   launchPlatformShell,
+  maybePromptForShellUpdate,
   resolveShellDefaultFullAuto,
   resolveShellLocale,
   persistShellSettings,
@@ -95,6 +96,10 @@ const platform =
   requestedPlatform ??
   existingSettings?.preferred_platform ??
   'codex';
+await maybePromptForShellUpdate({
+  rootDir,
+  locale,
+});
 const defaultFullAuto = await resolveShellDefaultFullAuto({
   rootDir,
   locale,
