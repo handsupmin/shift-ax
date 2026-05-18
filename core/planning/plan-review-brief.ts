@@ -24,6 +24,7 @@ export interface ShiftAxPlanReviewBrief {
   acceptance_criteria: string[];
   likely_files_touched: string[];
   verification_commands: string[];
+  risks_and_attention: string[];
   execution_tasks: Array<{
     id: string;
     summary: string;
@@ -122,6 +123,19 @@ export function buildPlanReviewBrief({
       extractMarkdownBullets(readPlanSection(planSections, 'Verification Commands')),
       'No verification command was recorded; do not approve yet.',
     ),
+    risks_and_attention: fallbackItems(
+      extractMarkdownBullets(
+        readPlanSection(
+          planSections,
+          'Risks / Needs Attention',
+          'Risk / Needs Attention',
+          'Risks And Mitigations',
+          'Risks',
+          'Checkpoints',
+        ),
+      ),
+      'No risky surfaces were recorded; request plan changes before approval if the work touches data, migrations, workers, permissions, destructive operations, deployment, rollback, or verification scope.',
+    ),
     execution_tasks: executionHandoff.tasks.map((task) => ({
       id: task.id,
       summary: task.source_text,
@@ -193,6 +207,10 @@ export function renderPlanReviewBriefMarkdown(brief: ShiftAxPlanReviewBrief): st
     '## Verification Commands',
     '',
     ...brief.verification_commands.map((item) => `- ${item}`),
+    '',
+    '## Risks / Needs Attention',
+    '',
+    ...brief.risks_and_attention.map((item) => `- ${item}`),
     '',
     '## Execution Tasks',
     '',

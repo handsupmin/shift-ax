@@ -101,9 +101,29 @@ async function promptInteractivePlanning(
     implementationAreas: (await ask('Likely implementation areas: ')).trim(),
     longRunningWork: (await ask('Any long-running or cross-cutting work: ')).trim(),
     policyUpdates: (await ask('Global knowledge updates to add or refine before implementation: ')).trim(),
+    risks: (await ask('Risks / needs attention: ')).trim(),
   };
 
   rl?.close();
+
+  const missingCoreAnswers = [
+    ['outcome', answers.outcome],
+    ['verification', answers.verification],
+    ['implementation areas', answers.implementationAreas],
+  ]
+    .filter(([, value]) => !String(value).trim())
+    .map(([label]) => label);
+
+  if (missingCoreAnswers.length > 0) {
+    const mode = stdin.isTTY ? 'interactive planning interview' : 'non-interactive planning input';
+    throw new Error(
+      [
+        `${mode} did not provide enough planning detail: missing ${missingCoreAnswers.join(', ')}.`,
+        'Provide concrete answers for the planning interview, or pass --brainstorm-file, --spec-file, and --plan-file generated from inspected request/context evidence.',
+        'Product-shell agents must not run a bare non-interactive request that would create placeholder planning artifacts.',
+      ].join(' '),
+    );
+  }
 
   return buildPlanningArtifactsFromInterview({
     request,

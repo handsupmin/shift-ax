@@ -144,6 +144,8 @@ shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
+Product shell の自動化では、エージェントがリクエスト内のファイルとリポジトリ構造を先に確認し、具体的な brainstorm/spec/plan ファイルを作ってから `run-request` に渡します。非対話 planning 入力が空の場合は失敗させ、placeholder の計画が誤って承認されないようにします。
+
 ---
 
 ## しっくりくる理由

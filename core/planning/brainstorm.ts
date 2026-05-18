@@ -11,6 +11,7 @@ export interface ShiftAxPlanningInterviewAnswers {
   implementationAreas: string;
   longRunningWork: string;
   policyUpdates: string;
+  risks: string;
 }
 
 export interface ShiftAxPlanningArtifactsInput {
@@ -60,6 +61,13 @@ export function buildPlanningArtifactsFromInterview({
   const implementationAreas = bulletize(answers.implementationAreas);
   const longRunningWork = bulletize(answers.longRunningWork);
   const policyUpdates = bulletize(answers.policyUpdates);
+  const risks = bulletize(answers.risks);
+  const riskNotes =
+    risks.length > 0
+      ? risks
+      : [
+          '- Review data, migrations, workers, queues, permissions, destructive operations, deployment, rollback, and verification impact before approval.',
+        ];
 
   const brainstormContent = [
     '# Brainstorm',
@@ -100,6 +108,10 @@ export function buildPlanningArtifactsFromInterview({
     '',
     ...longRunningWork,
     '',
+    '## Risks / Needs Attention',
+    '',
+    ...riskNotes,
+    '',
   ].join('\n');
 
   const specContent = [
@@ -128,6 +140,10 @@ export function buildPlanningArtifactsFromInterview({
     '## Global Knowledge Updates',
     '',
     ...(policyUpdates.length > 0 ? policyUpdates : ['- None yet.']),
+    '',
+    '## Risks / Needs Attention',
+    '',
+    ...riskNotes,
     '',
   ].join('\n');
 
@@ -161,6 +177,10 @@ export function buildPlanningArtifactsFromInterview({
     '- Confirm the reviewed constraints and out-of-scope boundaries still hold before editing.',
     '- Stop the line on unexpected failures, reproduce them first, then add or update a regression test before continuing.',
     '- Capture changed files, untouched areas, and tests run before the review gate.',
+    '',
+    '## Risks / Needs Attention',
+    '',
+    ...riskNotes,
     '',
     '## Execution Tasks',
     '',

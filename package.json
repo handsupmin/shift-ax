@@ -1,6 +1,6 @@
 {
   "name": "shift-ax",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Agentic software delivery platform for teams that are not AX experts yet",
   "type": "module",
   "private": false,

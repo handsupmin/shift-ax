@@ -108,6 +108,7 @@ test('shift-ax run-request interviews for planning details and writes structured
           'Auth refresh service, token store, and session middleware.',
           'Token store migration analysis is the only long-running slice.',
           '',
+          'Protect token invalidation, rollback, and auth-policy side effects.',
         ].join('\n'),
         env,
       );
@@ -134,6 +135,8 @@ test('shift-ax run-request interviews for planning details and writes structured
       assert.match(plan, /## Acceptance Criteria/i);
       assert.match(plan, /## Verification Commands/i);
       assert.match(plan, /## Likely Files Touched/i);
+      assert.match(plan, /## Risks \/ Needs Attention/i);
+      assert.match(plan, /Protect token invalidation/);
       assert.match(plan, /## Execution Tasks/i);
       assert.match(plan, /## Anti-Rationalization Guardrails/i);
       assert.match(plan, /TDD/i);
@@ -142,6 +145,63 @@ test('shift-ax run-request interviews for planning details and writes structured
       assert.match(handoff, /"execution_mode": "tmux"/);
       assert.match(handoff, /"execution_mode": "subagent"/);
       assert.match(handoff, /"warnings": \[/);
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('shift-ax run-request rejects empty non-interactive planning answers', async () => {
+  const root = await createGitRepo();
+
+  try {
+    await withTempGlobalHome('shift-ax-interview-cli-home-', async (home) => {
+      const onboardingPath = join(root, 'onboarding.json');
+      await writeFile(
+        onboardingPath,
+        JSON.stringify(
+          {
+            primaryRoleSummary: 'I maintain auth APIs.',
+            workTypes: [
+              {
+                name: 'API development',
+                repositories: [
+                  {
+                    repository: 'sample-repo',
+                    repositoryPath: root,
+                    purpose: 'Fixture repo',
+                    directories: ['src', 'tests'],
+                    workflow: 'Update auth code and tests together.',
+                  },
+                ],
+              },
+            ],
+            domainLanguage: [{ term: 'Auth policy', definition: 'Fixture auth policy term.' }],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      const env = { ...process.env, SHIFT_AX_HOME: home };
+      const onboard = await runAxInteractive(
+        ['onboard-context', '--root', root, '--input', onboardingPath],
+        '',
+        env,
+      );
+      assert.equal(onboard.code, 0, onboard.stderr);
+
+      const started = await runAxInteractive(
+        ['run-request', '--root', root, '--request', 'Build safer auth refresh flow'],
+        '',
+        env,
+      );
+
+      assert.equal(started.code, 1);
+      assert.match(started.stderr, /did not provide enough planning detail/i);
+      assert.match(started.stderr, /--brainstorm-file, --spec-file, and --plan-file/i);
+      assert.match(started.stderr, /must not run a bare non-interactive request/i);
     });
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -162,7 +222,15 @@ test('shift-ax run-request fails fast when the global index points to an unresol
 
       const started = await runAxInteractive(
         ['run-request', '--root', root, '--request', 'Update auth policy flow'],
-        '',
+        [
+          'Update the auth policy flow safely.',
+          'Auth policy applies.',
+          'Do not change billing.',
+          'Run auth policy tests.',
+          'src/auth-policy.ts; tests/auth-policy.test.ts',
+          '',
+          '',
+        ].join('\n'),
         { ...process.env, SHIFT_AX_HOME: home },
       );
 

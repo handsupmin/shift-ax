@@ -144,6 +144,8 @@ shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
+在 product-shell 自动化中，agent 会先检查请求中提到的文件和仓库结构，再生成具体的 brainstorm/spec/plan 文件并传给 `run-request`。空的非交互式 planning 输入会被拒绝，避免占位计划被误批准。
+
 ---
 
 ## 为什么它用起来会很顺手

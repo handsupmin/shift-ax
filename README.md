@@ -152,6 +152,8 @@ shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
+In product-shell automation, agents inspect named request files and repo structure before bootstrapping, then pass concrete brainstorm/spec/plan files into `run-request`. Empty non-interactive planning input is rejected so placeholder plans cannot be approved accidentally.
+
 ---
 
 ## Why it feels natural

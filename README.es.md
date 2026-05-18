@@ -144,6 +144,8 @@ shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
+En la automatización del product shell, los agentes inspeccionan primero los archivos mencionados en la solicitud y la estructura del repositorio, luego generan archivos concretos de brainstorm/spec/plan y los pasan a `run-request`. Una entrada de planning no interactiva vacía se rechaza para evitar aprobar planes placeholder por accidente.
+
 ---
 
 ## Por qué se siente natural

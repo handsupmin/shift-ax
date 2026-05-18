@@ -70,6 +70,10 @@ function reviewablePlan(): string {
     '',
     '- Keep the scope limited to auth refresh.',
     '',
+    '## Risks / Needs Attention',
+    '',
+    '- Token invalidation and rollback paths need focused review.',
+    '',
     '## Execution Tasks',
     '',
     '1. Add tests for auth refresh rotation behavior using TDD.',
@@ -195,6 +199,8 @@ test('startRequestPipeline bootstraps worktree, resolves context, and pauses for
       );
       assert.match(result.planReviewBrief.response_options[0]?.assistant_behavior ?? '', /resume implementation automatically/i);
       assert.match(planReviewBrief, /Required Human Response/);
+      assert.match(planReviewBrief, /Risks \/ Needs Attention/);
+      assert.match(planReviewBrief, /Token invalidation and rollback paths/);
       assert.match(planReviewBrief, /Reply with 1 to approve/);
       assert.doesNotMatch(planReviewBrief, /shift-ax approve-plan/);
       assert.doesNotMatch(planReviewBrief, /shift-ax run-request --topic/);

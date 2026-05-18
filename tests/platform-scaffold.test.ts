@@ -49,7 +49,11 @@ test('scaffoldPlatformBuild writes codex bootstrap assets to target root', async
     assert.match(agents, /planReviewBrief|plan-review-brief/);
     assert.match(requestCommand, /do not end after printing paths/i);
     assert.match(requestCommand, /do not show those internal commands/i);
+    assert.match(requestCommand, /--brainstorm-file/);
+    assert.match(requestCommand, /No acceptance criteria/);
+    assert.match(requestCommand, /risky \/ needs attention/i);
     assert.match(prompt, /shift-ax approve-plan/);
+    assert.match(prompt, /--brainstorm-file/);
     assert.match(prompt, /Unknown-term protocol/i);
     assert.match(prompt, /single dictionary/i);
     assert.match(prompt, /shift-ax launch-execution/);
@@ -120,7 +124,11 @@ test('scaffoldPlatformBuild writes claude-code bootstrap assets to target root',
     assert.match(claude, /planReviewBrief|plan-review-brief/);
     assert.match(requestCommand, /do not end after printing paths/i);
     assert.match(requestCommand, /do not show those internal commands/i);
+    assert.match(requestCommand, /--brainstorm-file/);
+    assert.match(requestCommand, /No acceptance criteria/);
+    assert.match(requestCommand, /risky \/ needs attention/i);
     assert.match(hook, /shift-ax approve-plan/);
+    assert.match(hook, /--brainstorm-file/);
     assert.match(hook, /Unknown-term protocol/i);
     assert.match(hook, /single dictionary/i);
     assert.match(hook, /shift-ax launch-execution/);

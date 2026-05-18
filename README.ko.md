@@ -152,6 +152,8 @@ shift-ax run-request --request "Build safer auth refresh flow"
 shift-ax topic-status --topic .shift-ax/topics/<topic>
 ```
 
+제품 셸 자동화에서는 에이전트가 먼저 요청에 나온 파일과 레포 구조를 읽고, 구체적인 brainstorm/spec/plan 파일을 만든 뒤 `run-request`에 넘깁니다. 비대화형 planning 입력이 비어 있으면 실패시켜 placeholder 계획이 실수로 승인되지 않게 합니다.
+
 ---
 
 ## 왜 자연스럽게 느껴질까요?
