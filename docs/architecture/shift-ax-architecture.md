@@ -268,6 +268,7 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
 - review lanes are explicit:
   - domain-policy
   - onboarding-compliance
+  - repository-review-gate
   - planning-readiness
   - spec-conformance
   - prd-conformance
@@ -276,6 +277,7 @@ Shift AX does not try to rebrand one existing system. It selectively borrows ide
   - conversation-trace
   - independent-review
 - verification evidence is written into topic artifacts
+- repository-review-gate requires onboarded repo-specific architecture, process, convention, and side-effect checks
 - independent review requires changed files plus completed execution and passing verification evidence
 - commit finalization is blocked until gates pass
 - final commit messages follow a structured Lore protocol

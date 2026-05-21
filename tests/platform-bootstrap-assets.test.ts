@@ -24,7 +24,8 @@ test('renderCodexAgentsBootstrap references global index and request-to-commit c
   assert.match(content, /\$onboard/);
   assert.match(content, /shift-ax run-request/);
   assert.match(content, /planReviewBrief|plan-review-brief/);
-  assert.match(content, /1.+approve.+2.+request changes.+3.+reject/i);
+  assert.match(content, /localized chat approval packet/i);
+  assert.match(content, /ask only for `1`, `2`, or `3` using the user's language/i);
   assert.match(content, /shift-ax approve-plan/);
   assert.match(content, /shift-ax finalize-commit/);
   assert.match(content, /shift-ax worktree-plan/);
@@ -56,7 +57,8 @@ test('renderClaudeCodeSessionStartContext references global index and request-to
   assert.match(content, /\/onboard/);
   assert.match(content, /shift-ax run-request/);
   assert.match(content, /planReviewBrief|plan-review-brief/);
-  assert.match(content, /1.+approve.+2.+request changes.+3.+reject/i);
+  assert.match(content, /localized chat approval packet/i);
+  assert.match(content, /ask only for `1`, `2`, or `3` using the user's language/i);
   assert.match(content, /shift-ax approve-plan/);
   assert.match(content, /shift-ax finalize-commit/);
   assert.match(content, /shift-ax worktree-plan/);

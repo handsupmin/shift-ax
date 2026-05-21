@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -128,6 +129,76 @@ test('onboardProjectContext treats settings-only global home as not yet onboarde
 
       assert.match(index, /Harness development -> work-types\/harness-development.md/);
       assert.deepEqual(preservedSettings, settings);
+    });
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('onboardProjectContext infers mandatory repo review gates from merged PR history', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'shift-ax-onboarding-pr-gates-'));
+
+  try {
+    execFileSync('git', ['init', '--initial-branch=main'], { cwd: root, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.name', 'Shift AX Test'], { cwd: root, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'shift-ax@example.com'], { cwd: root, stdio: 'pipe' });
+    await writeFile(join(root, 'README.md'), '# repo\n', 'utf8');
+    execFileSync('git', ['add', 'README.md'], { cwd: root, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'init'], { cwd: root, stdio: 'pipe' });
+    execFileSync('git', ['checkout', '-b', 'feature/queue-worker'], { cwd: root, stdio: 'pipe' });
+    await mkdir(join(root, 'src'), { recursive: true });
+    await mkdir(join(root, 'tests'), { recursive: true });
+    await writeFile(join(root, 'src', 'queue-worker.service.ts'), 'export const worker = true;\n', 'utf8');
+    await writeFile(join(root, 'tests', 'queue-worker.test.ts'), 'export const covered = true;\n', 'utf8');
+    execFileSync('git', ['add', 'src/queue-worker.service.ts', 'tests/queue-worker.test.ts'], { cwd: root, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'Add queue worker service tests'], { cwd: root, stdio: 'pipe' });
+    execFileSync('git', ['checkout', 'main'], { cwd: root, stdio: 'pipe' });
+    execFileSync(
+      'git',
+      ['merge', '--no-ff', 'feature/queue-worker', '-m', 'Merge pull request #12 from team/feature/queue-worker'],
+      { cwd: root, stdio: 'pipe' },
+    );
+
+    await withTempGlobalHome('shift-ax-onboarding-pr-gates-home-', async (home) => {
+      const result = await onboardProjectContext({
+        rootDir: root,
+        primaryRoleSummary: 'I maintain worker APIs.',
+        workTypes: [
+          {
+            name: 'Worker development',
+            summary: 'Implement service, worker, queue, and tests together.',
+            repositories: [
+              {
+                repository: 'worker-api',
+                repositoryPath: root,
+                purpose: 'Worker API',
+                directories: ['src', 'tests'],
+                workflow: 'Update service and worker queue code with tests, then run npm test.',
+                hiddenConventions: ['Keep service and worker responsibilities separate.'],
+              },
+            ],
+          },
+        ],
+      });
+
+      const gate = result.profile.repository_review_gates?.[0];
+      const procedureDoc = await readFile(
+        join(home, 'procedures', 'worker-development--worker-api.md'),
+        'utf8',
+      );
+
+      assert.ok(gate);
+      assert.equal(gate.repository, 'worker-api');
+      assert.match(gate.evidence.join('\n'), /Merge pull request #12/);
+      assert.match(gate.architecture.join('\n'), /architecture|layer|merged PR/i);
+      assert.match(gate.working_process.join('\n'), /verification|merged PR|npm test/i);
+      assert.match(gate.conventions.join('\n'), /service and worker responsibilities/i);
+      assert.match(gate.side_effects.join('\n'), /queue|worker|side/i);
+      assert.match(procedureDoc, /Mandatory Repo Review Gate/);
+      assert.match(procedureDoc, /### Architecture/);
+      assert.match(procedureDoc, /### Working Process/);
+      assert.match(procedureDoc, /### Conventions/);
+      assert.match(procedureDoc, /### Side Effects/);
     });
   } finally {
     await rm(root, { recursive: true, force: true });

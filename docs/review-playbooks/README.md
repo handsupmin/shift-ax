@@ -4,6 +4,7 @@ Use these lane playbooks during review. They are compact checklists, not extra w
 
 - `domain-policy.md`
 - `onboarding-compliance.md`
+- `repository-review-gate.md`
 - `planning-readiness.md`
 - `spec-conformance.md`
 - `prd-conformance.md`

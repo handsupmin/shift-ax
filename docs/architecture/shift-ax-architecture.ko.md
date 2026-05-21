@@ -263,6 +263,7 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
 - review lane을 명시적으로 분리한다
   - domain-policy
   - onboarding-compliance
+  - repository-review-gate
   - planning-readiness
   - spec-conformance
   - prd-conformance
@@ -271,6 +272,7 @@ Shift AX는 특정 시스템을 그대로 포장한 것이 아니라, 외부 시
   - conversation-trace
   - independent-review
 - verification evidence를 artifact로 남긴다
+- repository-review-gate는 온보딩된 레포별 architecture, process, convention, side-effect 체크를 요구한다
 - independent review는 변경 파일, completed execution, passing verification evidence를 요구한다
 - gate가 통과되기 전까지 commit finalization을 막는다
 - final commit message는 Lore protocol을 따른다

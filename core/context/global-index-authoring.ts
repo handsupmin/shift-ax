@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 
 import { getGlobalContextHome } from '../settings/global-context-home.js';
+import type { ShiftAxRepositoryReviewGate } from '../policies/project-profile.js';
 
 export interface ShiftAxGlobalDomainLanguageInput {
   term: string;
@@ -18,6 +19,7 @@ export interface ShiftAxGlobalRepositoryProcedureInput {
   inferredNotes?: string[];
   confirmationNotes?: string;
   volatility?: 'stable' | 'volatile';
+  reviewGate?: ShiftAxRepositoryReviewGate;
 }
 
 export interface ShiftAxGlobalWorkTypeInput {
@@ -75,6 +77,27 @@ async function writeMarkdown(path: string, content: string): Promise<void> {
   await writeFile(path, `${content.trimEnd()}\n`, 'utf8');
 }
 
+function pushReviewGate(lines: string[], reviewGate?: ShiftAxRepositoryReviewGate): void {
+  if (!reviewGate) return;
+
+  lines.push('## Mandatory Repo Review Gate', '');
+  lines.push('Every review for this repository must pass these repo-specific checks before commit.', '');
+
+  const categories: Array<[string, string[]]> = [
+    ['Architecture', reviewGate.architecture],
+    ['Working Process', reviewGate.working_process],
+    ['Conventions', reviewGate.conventions],
+    ['Side Effects', reviewGate.side_effects],
+    ['Evidence Sources', reviewGate.evidence],
+  ];
+
+  for (const [label, items] of categories) {
+    lines.push(`### ${label}`, '');
+    lines.push(...(items.length > 0 ? items.map((item) => `- ${item}`) : ['- No check was recorded.']));
+    lines.push('');
+  }
+}
+
 function renderProcedurePage({
   workType,
   repository,
@@ -124,6 +147,8 @@ function renderProcedurePage({
     lines.push('## Confirmation Notes', '', repository.confirmationNotes.trim(), '');
   }
 
+  pushReviewGate(lines, repository.reviewGate);
+
   lines.push(
     '## Volatility',
     '',
@@ -163,6 +188,8 @@ function renderRepositoryPage({
   if (repository.purpose?.trim()) {
     lines.push('## Purpose', '', repository.purpose.trim(), '');
   }
+
+  pushReviewGate(lines, repository.reviewGate);
 
   lines.push(
     '## Notes',
@@ -324,7 +351,11 @@ export async function authorGlobalKnowledgeBase({
         dictionaryEntriesFor({
           label: `${workType.name} — ${repository.repository}`,
           path: procedureRelativePath,
-          aliases: [],
+          aliases: [
+            `${repository.repository} review gate`,
+            `${repository.repository} working process`,
+            `${repository.repository} conventions`,
+          ],
         }),
       );
 
@@ -356,6 +387,7 @@ export async function authorGlobalKnowledgeBase({
           path: repoRelativePath,
           aliases: [
             ...toAliasCandidates(repository.repository),
+            `${repository.repository} review gate`,
           ],
         }),
       );

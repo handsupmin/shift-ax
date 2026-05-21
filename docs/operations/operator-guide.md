@@ -38,7 +38,7 @@ This creates a topic, worktree, planning artifacts, and a human review gate.
 
 ### 4. Record human plan review
 
-In the normal product-shell UX, the agent summarizes `plan-review-brief.md`, asks for `1` approve/start, `2` request changes, or `3` reject, then records approval and resumes internally. Use `shift-ax approve-plan` directly only for recovery or operator debugging.
+In the normal product-shell UX, the agent presents the detailed localized approval packet from `plan-review-brief.md`, asks only for `1`, `2`, or `3`, then records approval and resumes internally. Use `shift-ax approve-plan` directly only for recovery or operator debugging.
 
 ### 5. If policy docs must change, update them first
 

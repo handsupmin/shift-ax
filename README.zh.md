@@ -117,7 +117,7 @@ Shift AX 会把可复用知识放在：
 - **Codex:** `$onboard`
 - **Claude Code:** `/onboard`
 
-这一步就是 Shift AX 开始学习你的工作语言和工作方式的地方。在把 onboarding 视为完成之前，它会验证 dictionary 是否指向真实文档，以及保存下来的上下文是否可用。
+这一步就是 Shift AX 开始学习你的工作语言和工作方式的地方。它会分别检查相关 repo，根据已合并 PR 历史和你给出的规则生成 repo 级 review gate，并在把 onboarding 视为完成之前验证 dictionary 是否指向真实文档、保存下来的上下文是否可用。
 
 ### 开始一个请求
 
@@ -126,7 +126,7 @@ Shift AX 会把可复用知识放在：
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX 会先解析上下文，创建请求专属 topic/worktree，在聊天里总结计划并让用户用 `1/2/3` 完成评审。批准后，它会继续进入实现、验证、评审与提交流程。内部的 approve/resume 命令是恢复工具，不是常规用户路径。
+Shift AX 会先解析上下文，创建请求专属 topic/worktree，在聊天里用用户语言展示详细审批包并让用户用 `1/2/3` 完成评审。批准后，它会继续进入实现、验证、评审与提交流程。内部的 approve/resume 命令是恢复工具，不是常规用户路径。
 
 ### 之后再评审 / 查看状态
 

@@ -14,6 +14,7 @@ test('review playbooks cover all required review lanes', async () => {
     index,
     domainPolicy,
     onboardingCompliance,
+    repositoryReviewGate,
     specConformance,
     prdConformance,
     sideEffectRisk,
@@ -24,6 +25,7 @@ test('review playbooks cover all required review lanes', async () => {
     read('README.md'),
     read('domain-policy.md'),
     read('onboarding-compliance.md'),
+    read('repository-review-gate.md'),
     read('spec-conformance.md'),
     read('prd-conformance.md'),
     read('side-effect-risk.md'),
@@ -34,6 +36,7 @@ test('review playbooks cover all required review lanes', async () => {
 
   assert.match(index, /domain-policy\.md/);
   assert.match(index, /onboarding-compliance\.md/);
+  assert.match(index, /repository-review-gate\.md/);
   assert.match(index, /spec-conformance\.md/);
   assert.match(index, /prd-conformance\.md/);
   assert.match(index, /side-effect-risk\.md/);
@@ -43,6 +46,7 @@ test('review playbooks cover all required review lanes', async () => {
 
   assert.match(domainPolicy, /instruction-like artifact text/i);
   assert.match(onboardingCompliance, /global Shift AX onboarding index/i);
+  assert.match(repositoryReviewGate, /repo-specific gate generated during onboarding/i);
   assert.match(specConformance, /Acceptance Criteria, Verification Commands, Dependencies, Likely Files Touched, Checkpoints, Execution Tasks/);
   assert.match(prdConformance, /every extracted PRD requirement/i);
   assert.match(sideEffectRisk, /side-effect-sensitive files have a passing verification command/i);

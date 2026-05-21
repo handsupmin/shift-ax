@@ -15,6 +15,16 @@ export interface ShiftAxProjectContextDoc {
   path: string;
 }
 
+export interface ShiftAxRepositoryReviewGate {
+  repository: string;
+  repository_path?: string;
+  architecture: string[];
+  working_process: string[];
+  conventions: string[];
+  side_effects: string[];
+  evidence: string[];
+}
+
 export interface ShiftAxOnboardingContextProfile {
   primary_role_summary: string;
   work_types: string[];
@@ -29,6 +39,7 @@ export interface ShiftAxProjectProfile {
   context_docs: ShiftAxProjectContextDoc[];
   onboarding_context?: ShiftAxOnboardingContextProfile;
   engineering_defaults: ShiftAxEngineeringDefaults;
+  repository_review_gates?: ShiftAxRepositoryReviewGate[];
 }
 
 export function defaultEngineeringDefaults(): ShiftAxEngineeringDefaults {

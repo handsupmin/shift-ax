@@ -38,6 +38,7 @@ export interface AggregateReviewsResult {
 export const REQUIRED_REVIEW_LANES = [
   'domain-policy',
   'onboarding-compliance',
+  'repository-review-gate',
   'planning-readiness',
   'spec-conformance',
   'prd-conformance',

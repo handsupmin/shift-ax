@@ -8,12 +8,14 @@ import {
   type ShiftAxGlobalWorkTypeInput,
 } from './global-index-authoring.js';
 import { discoverBaseContextEntries } from './discovery.js';
+import { inferRepositoryReviewGate } from './review-gate-discovery.js';
 import {
   defaultEngineeringDefaults,
   type ShiftAxEngineeringDefaults,
   type ShiftAxOnboardingContextProfile,
   type ShiftAxProjectContextDoc,
   type ShiftAxProjectProfile,
+  type ShiftAxRepositoryReviewGate,
   writeProjectProfile,
 } from '../policies/project-profile.js';
 import { getGlobalContextHome } from '../settings/global-context-home.js';
@@ -34,6 +36,7 @@ export interface ShiftAxGlobalOnboardingRepositoryInput {
   inferredNotes?: string[];
   confirmationNotes?: string;
   volatility?: 'stable' | 'volatile';
+  reviewGate?: ShiftAxRepositoryReviewGate;
 }
 
 export interface ShiftAxGlobalOnboardingWorkTypeInput {
@@ -166,17 +169,58 @@ function normalizeOnboardingContext({
   );
 }
 
+async function enrichWorkTypesWithReviewGates(
+  workTypes: ShiftAxGlobalOnboardingWorkTypeInput[],
+): Promise<ShiftAxGlobalOnboardingWorkTypeInput[]> {
+  return Promise.all(
+    workTypes.map(async (workType) => ({
+      ...workType,
+      repositories: await Promise.all(
+        workType.repositories.map(async (repository) => ({
+          ...repository,
+          reviewGate:
+            repository.reviewGate ??
+            (await inferRepositoryReviewGate({
+              repository: repository.repository,
+              repositoryPath: repository.repositoryPath,
+              workflow: repository.workflow,
+              hiddenConventions: repository.hiddenConventions,
+            })),
+        })),
+      ),
+    })),
+  );
+}
+
+function collectRepositoryReviewGates(
+  workTypes: ShiftAxGlobalOnboardingWorkTypeInput[],
+): ShiftAxRepositoryReviewGate[] {
+  const byRepository = new Map<string, ShiftAxRepositoryReviewGate>();
+  for (const workType of workTypes) {
+    for (const repository of workType.repositories) {
+      if (!repository.reviewGate) continue;
+      const key = (repository.reviewGate.repository_path || repository.reviewGate.repository).toLowerCase();
+      if (!byRepository.has(key)) {
+        byRepository.set(key, repository.reviewGate);
+      }
+    }
+  }
+  return [...byRepository.values()];
+}
+
 export async function persistProjectContextProfile({
   rootDir,
   entries,
   onboardingContext,
   engineeringDefaults,
+  repositoryReviewGates = [],
   now,
 }: {
   rootDir: string;
   entries: ShiftAxProjectContextDoc[];
   onboardingContext?: ShiftAxOnboardingContextProfile;
   engineeringDefaults: ShiftAxEngineeringDefaults;
+  repositoryReviewGates?: ShiftAxRepositoryReviewGate[];
   now: Date;
 }): Promise<{
   index: {
@@ -194,6 +238,7 @@ export async function persistProjectContextProfile({
     context_docs: entries,
     ...(onboardingContext ? { onboarding_context: onboardingContext } : {}),
     engineering_defaults: engineeringDefaults,
+    ...(repositoryReviewGates.length > 0 ? { repository_review_gates: repositoryReviewGates } : {}),
   };
 
   await writeProjectProfile(rootDir, profile);
@@ -239,12 +284,15 @@ export async function onboardProjectContext({
     throw new Error('workTypes are required');
   }
 
+  const enrichedWorkTypes = await enrichWorkTypesWithReviewGates(derivedWorkTypes);
+  const repositoryReviewGates = collectRepositoryReviewGates(enrichedWorkTypes);
+
   const home = getGlobalContextHome();
   const candidatePaths = [
     home.indexPath,
     home.profilePath,
     join(home.root, 'role', 'primary-role.md'),
-    ...derivedWorkTypes.flatMap((workType) => [
+    ...enrichedWorkTypes.flatMap((workType) => [
       join(home.workTypesDir, `${slugify(workType.name)}.md`),
       ...workType.repositories.map((repository) =>
         join(home.reposDir, `${slugify(repository.repository || basename(repository.repositoryPath || 'repo'))}.md`),
@@ -266,7 +314,7 @@ export async function onboardProjectContext({
 
   const index = await authorGlobalKnowledgeBase({
     primaryRoleSummary: derivedPrimaryRoleSummary,
-    workTypes: derivedWorkTypes,
+    workTypes: enrichedWorkTypes,
     domainLanguage: derivedDomainLanguage,
   });
 
@@ -275,11 +323,12 @@ export async function onboardProjectContext({
     entries: index.contextDocs,
     onboardingContext: normalizeOnboardingContext({
       primaryRoleSummary: derivedPrimaryRoleSummary,
-      workTypes: derivedWorkTypes,
+      workTypes: enrichedWorkTypes,
       domainLanguage: derivedDomainLanguage,
       onboardingContext,
     }),
     engineeringDefaults,
+    repositoryReviewGates,
     now: new Date(),
   });
 

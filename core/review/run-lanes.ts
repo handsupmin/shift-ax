@@ -1,10 +1,10 @@
 import { execFileSync } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename as pathBasename, join, resolve } from 'node:path';
 
 import type { ReviewVerdict } from './aggregate-reviews.js';
 import { runIndependentReviewGate } from './independent-review.js';
-import { readProjectProfile } from '../policies/project-profile.js';
+import { readProjectProfile, type ShiftAxRepositoryReviewGate } from '../policies/project-profile.js';
 import {
   extractExecutionTaskLines,
   extractMarkdownBullets,
@@ -189,13 +189,36 @@ function extractPrdRequirements({
 }
 
 function extractContextRuleLines(content: string): string[] {
-  return extractReviewableLines(content)
+  const withoutDedicatedRepoGate = stripMarkdownSection(content, 'Mandatory Repo Review Gate');
+  return extractReviewableLines(withoutDedicatedRepoGate)
     .filter((line) =>
       /\b(must|shall|required|never|always|avoid|follow|verify|tdd|architecture|boundary|convention|commit|review|build|lint|type[- ]?check)\b|\btests?\b.*\b(together|before|after|with)\b|\b(test|verify)\b.*\b(before|after|commit|release)\b|반드시|금지|항상|따르|준수|검증|테스트|컨벤션|규칙|리뷰|커밋|아키텍처|경계|빌드|린트/i.test(
         line,
       ),
     )
     .slice(0, 12);
+}
+
+function stripMarkdownSection(content: string, heading: string): string {
+  const lines = String(content || '').split(/\r?\n/);
+  const kept: string[] = [];
+  let skipping = false;
+  const headingPattern = new RegExp(`^##\\s+${heading.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*$`, 'i');
+
+  for (const line of lines) {
+    if (headingPattern.test(line.trim())) {
+      skipping = true;
+      continue;
+    }
+    if (skipping && /^##\s+/.test(line)) {
+      skipping = false;
+    }
+    if (!skipping) {
+      kept.push(line);
+    }
+  }
+
+  return kept.join('\n');
 }
 
 function basenameWithoutExtension(path: string): string {
@@ -492,7 +515,7 @@ async function readProjectProfileForTopic(topicDir: string) {
   try {
     return await readProjectProfile(getRootDirFromTopicDir(topicDir));
   } catch {
-    return readProjectProfile(topicDir);
+    return null;
   }
 }
 
@@ -641,7 +664,15 @@ async function runOnboardingComplianceLane(topicDir: string): Promise<ReviewVerd
     };
   }
 
+  const specSections = parseMarkdownSections(spec);
+  const planSections = parseMarkdownSections(plan);
+  const brainstormSections = parseMarkdownSections(brainstorm);
   const planningCorpus = [spec, plan, brainstorm].join('\n');
+  const outOfScopeCorpus = [
+    readPlanSection(specSections, 'Out of Scope'),
+    readPlanSection(brainstormSections, 'Out of Scope'),
+    readPlanSection(planSections, 'Checkpoints'),
+  ].join('\n');
   const issues = matches.flatMap((match) => {
     const label = match.label ?? '';
     const path = match.path ?? '';
@@ -651,8 +682,14 @@ async function runOnboardingComplianceLane(topicDir: string): Promise<ReviewVerd
     const nameMentioned = nameReferences.some((reference) =>
       hasMeaningfulEvidence(planningCorpus, reference) || planningCorpus.toLowerCase().includes(reference.toLowerCase()),
     );
+    const contextMarkedOutOfScope = nameReferences.some((reference) =>
+      hasMeaningfulEvidence(outOfScopeCorpus, reference) ||
+      outOfScopeCorpus.toLowerCase().includes(reference.toLowerCase()),
+    );
     const ruleLines = extractContextRuleLines(match.content ?? '');
-    const missingRules = ruleLines.filter((rule) => !hasMeaningfulEvidence(planningCorpus, rule));
+    const missingRules = contextMarkedOutOfScope
+      ? []
+      : ruleLines.filter((rule) => !hasMeaningfulEvidence(planningCorpus, rule));
 
     return [
       ...(nameMentioned || hasContextContent
@@ -688,6 +725,172 @@ async function runOnboardingComplianceLane(topicDir: string): Promise<ReviewVerd
       (sum, match) => sum + extractContextRuleLines(match.content ?? '').length,
       0,
     ),
+  };
+}
+
+function normalizeAbsoluteReviewPath(path: string): string {
+  return resolve(path).replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
+}
+
+function reviewGateMatchesRoot(gate: ShiftAxRepositoryReviewGate, rootDir: string): boolean {
+  const rootBase = pathBasename(rootDir).toLowerCase();
+  if (gate.repository_path && normalizeAbsoluteReviewPath(gate.repository_path) === normalizeAbsoluteReviewPath(rootDir)) {
+    return true;
+  }
+  if ((gate.repository || '').toLowerCase() === rootBase) {
+    return true;
+  }
+  if (gate.repository_path && pathBasename(gate.repository_path).toLowerCase() === rootBase) {
+    return true;
+  }
+  return false;
+}
+
+function hasGateCategoryEvidence({
+  corpus,
+  gateText,
+  fallbackPattern,
+}: {
+  corpus: string;
+  gateText: string;
+  fallbackPattern: RegExp;
+}): boolean {
+  return hasMeaningfulEvidence(corpus, gateText) || fallbackPattern.test(corpus);
+}
+
+async function runRepositoryReviewGateLane(topicDir: string): Promise<ReviewVerdict> {
+  let rootDir: string;
+  try {
+    rootDir = getRootDirFromTopicDir(topicDir);
+  } catch {
+    return verdictBase(
+      'repository-review-gate',
+      'approved',
+      'Standalone review fixture is not inside .shift-ax/topics; repo-specific gate enforcement applies to real onboarded topics.',
+    );
+  }
+
+  const profile = await readProjectProfileForTopic(topicDir);
+  if (!profile) {
+    return verdictBase(
+      'repository-review-gate',
+      'approved',
+      'No onboarding profile is available for this standalone review fixture; repo-specific gate enforcement applies after onboarding creates repository_review_gates.',
+    );
+  }
+
+  const configuredGates = profile?.repository_review_gates ?? [];
+  if (configuredGates.length === 0) {
+    return verdictBase(
+      'repository-review-gate',
+      'changes_requested',
+      'No repo-specific review gates were found in the onboarding profile.',
+      [
+        {
+          severity: 'high',
+          message: 'Run onboarding again so Shift AX can infer mandatory repo review gates from merged PR history and onboarding rules.',
+        },
+      ],
+    );
+  }
+
+  const gates =
+    configuredGates.filter((gate) => reviewGateMatchesRoot(gate, rootDir)) ||
+    [];
+  const selectedGates = gates.length > 0 ? gates : configuredGates.length === 1 ? configuredGates : [];
+
+  if (selectedGates.length === 0) {
+    return verdictBase(
+      'repository-review-gate',
+      'changes_requested',
+      'Onboarding has repo review gates, but none match the current repository.',
+      configuredGates.map((gate) => ({
+        severity: 'high' as const,
+        message: `Repo gate does not match current root ${rootDir}: ${gate.repository_path || gate.repository}`,
+      })),
+    );
+  }
+
+  const [spec, plan, brainstorm, resolvedContext] = await Promise.all([
+    readMaybe(join(topicDir, 'spec.md')),
+    readMaybe(join(topicDir, 'implementation-plan.md')),
+    readMaybe(join(topicDir, 'brainstorm.md')),
+    readMaybe(join(topicDir, 'resolved-context.json')),
+  ]);
+  const corpus = [spec, plan, brainstorm, resolvedContext].join('\n');
+  const issues: NonNullable<ReviewVerdict['issues']> = [];
+
+  for (const gate of selectedGates) {
+    const categories: Array<{
+      label: keyof Pick<
+        ShiftAxRepositoryReviewGate,
+        'architecture' | 'working_process' | 'conventions' | 'side_effects'
+      >;
+      items: string[];
+      fallbackPattern: RegExp;
+    }> = [
+      {
+        label: 'architecture',
+        items: gate.architecture,
+        fallbackPattern: /\b(architecture|architectural|boundary|boundaries|layer|module|service|controller|domain|schema|worker|queue)\b|아키텍처|경계|레이어|서비스|컨트롤러|워커|큐/i,
+      },
+      {
+        label: 'working_process',
+        items: gate.working_process,
+        fallbackPattern: /\b(verification|verify|test|lint|type[- ]?check|build|migration|review|commit|evidence)\b|검증|테스트|리뷰|커밋|빌드|린트/i,
+      },
+      {
+        label: 'conventions',
+        items: gate.conventions,
+        fallbackPattern: /\b(convention|conventions|guardrail|guardrails|naming|generated|dto|schema|prisma|controller|service|test placement|native)\b|컨벤션|규칙|가드레일|생성|네이밍/i,
+      },
+      {
+        label: 'side_effects',
+        items: gate.side_effects,
+        fallbackPattern: /\b(side[- ]?effect|risk|rollback|deploy|migration|schema|queue|worker|cache|auth|permission|external|idempot|data integrity)\b|사이드|리스크|위험|롤백|배포|마이그레이션|스키마|큐|워커|권한/i,
+      },
+    ];
+
+    for (const category of categories) {
+      if (category.items.length === 0) {
+        issues.push({
+          severity: 'high',
+          message: `Repo review gate for ${gate.repository} has no ${category.label} checks.`,
+        });
+        continue;
+      }
+      if (
+        !hasGateCategoryEvidence({
+          corpus,
+          gateText: category.items.join('\n'),
+          fallbackPattern: category.fallbackPattern,
+        })
+      ) {
+        issues.push({
+          severity: 'high',
+          message: `Plan artifacts do not show evidence that the ${gate.repository} ${category.label} review gate was considered.`,
+        });
+      }
+    }
+  }
+
+  if (issues.length > 0) {
+    return verdictBase(
+      'repository-review-gate',
+      'changes_requested',
+      'Repo-specific onboarding review gate did not pass for the current request.',
+      issues,
+    );
+  }
+
+  return {
+    ...verdictBase(
+      'repository-review-gate',
+      'approved',
+      'Repo-specific onboarding review gate categories are configured and reflected in the planning artifacts.',
+    ),
+    repository_gate_count: selectedGates.length,
+    checked_repositories: selectedGates.map((gate) => gate.repository),
   };
 }
 
@@ -1324,6 +1527,7 @@ export async function runReviewLanes({
   const upstreamVerdicts = await Promise.all([
     runDomainPolicyLane(topicDir),
     runOnboardingComplianceLane(topicDir),
+    runRepositoryReviewGateLane(topicDir),
     runPlanningReadinessLane(topicDir),
     runSpecConformanceLane(topicDir),
     runPrdConformanceLane(topicDir),

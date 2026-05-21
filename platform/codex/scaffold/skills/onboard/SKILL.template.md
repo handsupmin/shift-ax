@@ -18,6 +18,7 @@ Rules:
 - use the user's last answer to decide the next question
 - when the user mentions a repository, path, or file, inspect it before asking for corrections
 - infer likely repository role, architecture/layer boundaries, hidden conventions, and working files from real repo evidence
+- inspect merged PR history for every related repository and infer mandatory repo-specific review gates across architecture, working process, conventions, and side-effect risk
 - present your hypothesis before asking the user to type more
 - keep digging until uncertainty is low enough that you can say the role/work/repo/glossary picture is confirmed
 - prefer structured 1/2/3 confirmation choices over open-ended validation questions
@@ -29,8 +30,9 @@ Cover these knowledge areas gradually:
 2. work types
 3. related repositories for each work type
 4. per-repository working methods
-5. company/domain language
-6. hidden coding conventions and architecture intent
+5. per-repository review gates inferred from merged PR history and onboarding rules
+6. company/domain language
+7. hidden coding conventions and architecture intent
 
 For each repository, show a confirmation checkpoint like this before moving on:
 
@@ -62,6 +64,7 @@ Keep the top-level knowledge base in `~/.shift-ax/` with:
 - `index.md` as the single dictionary: labels are search terms, aliases, repository names, workflow names, and domain terms
 - linked work type pages
 - linked repository/procedure pages
+- mandatory repo review gate sections in each repository/procedure page
 - linked domain-language pages
 
 Before saying onboarding is complete:

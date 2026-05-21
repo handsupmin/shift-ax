@@ -117,7 +117,7 @@ Inside the runtime:
 - **Codex:** `$onboard`
 - **Claude Code:** `/onboard`
 
-This is where Shift AX starts learning how your work actually sounds and flows. Onboarding verifies that the dictionary links to real docs and that the saved context is usable before treating onboarding as complete.
+This is where Shift AX starts learning how your work actually sounds and flows. Onboarding inspects each related repository, uses merged PR history plus your rules to create repo-specific review gates, and verifies that the dictionary links to usable docs before treating onboarding as complete.
 
 ### Start a request
 
@@ -126,7 +126,7 @@ Inside the runtime:
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX resolves context first, creates a request-scoped topic/worktree, summarizes the plan for a quick `1/2/3` review in chat, and then continues through implementation, verification, review, and commit after approval. The internal approve/resume commands are recovery tools, not the normal user path.
+Shift AX resolves context first, creates a request-scoped topic/worktree, presents a detailed localized approval packet for a quick `1/2/3` review in chat, and then continues through implementation, verification, review, and commit after approval. The internal approve/resume commands are recovery tools, not the normal user path.
 
 ### Review and inspect later
 

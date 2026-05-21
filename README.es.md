@@ -117,7 +117,7 @@ Dentro del runtime:
 - **Codex:** `$onboard`
 - **Claude Code:** `/onboard`
 
-Aquí es donde Shift AX empieza a aprender cómo suena y cómo fluye tu trabajo real. Antes de considerar terminado el onboarding, verifica que el diccionario apunte a documentos reales y que el contexto guardado sea usable.
+Aquí es donde Shift AX empieza a aprender cómo suena y cómo fluye tu trabajo real. Inspecciona cada repo relacionado, crea review gates por repo a partir del historial de PRs mergeadas y tus reglas, y antes de considerar terminado el onboarding verifica que el diccionario apunte a documentos reales y que el contexto guardado sea usable.
 
 ### Inicia un request
 
@@ -126,7 +126,7 @@ Dentro del runtime:
 - **Codex:** `$request <text>`
 - **Claude Code:** `/request <text>`
 
-Shift AX resuelve primero el contexto, crea un topic/worktree específico para ese request, resume el plan en el chat y pide una revisión rápida con `1/2/3`. Después de la aprobación continúa con implementación, verificación, review y commit. Los comandos internos de approve/resume son herramientas de recuperación, no el camino normal del usuario.
+Shift AX resuelve primero el contexto, crea un topic/worktree específico para ese request, muestra en el chat un paquete de aprobación detallado en el idioma del usuario y pide una revisión rápida con `1/2/3`. Después de la aprobación continúa con implementación, verificación, review y commit. Los comandos internos de approve/resume son herramientas de recuperación, no el camino normal del usuario.
 
 ### Revisa e inspecciona más tarde
 
